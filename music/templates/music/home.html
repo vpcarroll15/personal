@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Music</title>
+</head>
+<body>
+{% if recent_music %}
+    {% with recent_music|first as album_of_the_month %}
+        <h1>Album of the Month!</h1>
+        <p>(not necessarily updated monthly)</p>
+        <h2>
+            <a href="{% url 'music:music_detailed' album_of_the_month.id %}">
+            {{ album_of_the_month.name }}
+            </a>
+        </h2>
+        <h3>{{ album_of_the_month.musician.name }}</h3>
+    {% endwith %}
+{% endif %}
+<h3>More music that I have liked recently</h3>
+<table>
+    <tr>
+        <th>Artist</th>
+        <th>Album or Track</th>
+        <th>Rating (0-3)</th>
+    </tr>
+    {% for music in recent_music %}
+    <tr>
+        <td>{{ music.musician.name }}</td>
+        <td>
+            <a href="{% url 'music:music_detailed' music.id %}">
+                {{ music.name }}
+            </a>
+        </td>
+        <td>{{ music.rating }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</body>
+</html>
