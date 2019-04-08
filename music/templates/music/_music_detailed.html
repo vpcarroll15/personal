@@ -1,6 +1,11 @@
 <h1>{{ album.name }}</h1>
 <h2>{{ album.musician.name }}</h2>
 <h3><a href="{% url 'music:ratings' %}">My rating: {{ album.rating }}/3</a></h3>
+{% if review %}
+<div>{{ review }}</div>
+{% else %}
+<p>No review found for this album.</p>
+{% endif %}
 <h3>Tags</h3>
 <ul>
     {% for tag in tags %}
