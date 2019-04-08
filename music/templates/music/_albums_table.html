@@ -1,0 +1,22 @@
+{% if albums %}
+<table>
+    <tr>
+        <th>Artist</th>
+        <th>Album or Track</th>
+        <th>Rating (0-3)</th>
+    </tr>
+    {% for album in albums %}
+    <tr>
+        <td>{{ album.musician.name }}</td>
+        <td>
+            <a href="{% url 'music:music_detailed' album.id %}">
+                {{ album.name }}
+            </a>
+        </td>
+        <td>{{ album.rating }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<h3>No music found</h3>
+{% endif %}

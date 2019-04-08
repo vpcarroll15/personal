@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Paul's Music{% endblock %}</title>
+</head>
+<body>
+<form action="{% url 'music:search' %}">
+    Prefix search by artist, album name, or tag:
+    <input type="text" name="search_term">
+</form>
+{% block content %}{% endblock %}
+</body>
+</html>
