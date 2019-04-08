@@ -6,9 +6,10 @@
 </head>
 <body>
 <form action="{% url 'music:search' %}">
-    Prefix search by artist, album name, or tag:
+    Search by prefix of artist, album name, or tag:
     <input type="text" name="search_term">
 </form>
+<a href="{% url 'music:home' %}">Music homepage</a>
 {% block content %}{% endblock %}
 </body>
 </html>

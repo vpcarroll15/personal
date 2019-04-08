@@ -30,12 +30,17 @@ def search(request):
     """Searches for a particular search term in our set of musicians, music, and tags."""
     search_term = request.GET['search_term']
 
-    # TODO: Make this case-insensitive.
     music = Music.objects.filter(
-        Q(name__startswith=search_term) |
-        Q(musician__name__startswith=search_term) |
-        Q(musician__tags__name__startswith=search_term)
+        Q(name__istartswith=search_term) |
+        Q(musician__name__istartswith=search_term) |
+        Q(musician__tags__name__istartswith=search_term)
     )
 
     context = {'albums': music }
     return render(request, 'music/search.html', context)
+
+
+def ratings(request):
+    """Displays the page that explains my rating philosophy."""
+    context = {}
+    return render(request, 'music/ratings.html', context)
