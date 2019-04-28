@@ -1,5 +1,9 @@
 *sqlite3
-settings.py
 *pyc
 .idea/
 *swp
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

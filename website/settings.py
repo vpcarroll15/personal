@@ -13,19 +13,19 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 
 # Settings that I expect to set...
-PRODUCTION = False
+PRODUCTION = True
 # end
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ['SECRET_KEY']
 
-if PRODUCTION:
+if False:
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = False
 
     # https://docs.djangoproject.com/en/2.2/ref/settings/#std:setting-ALLOWED_HOSTS
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.paulcarroll.site']
+    ALLOWED_HOSTS = ['.paulcarroll.site', 'website-env.mph7myk2wh.us-west-2.elasticbeanstalk.com']
 
     # https://docs.djangoproject.com/en/2.2/ref/middleware/#x-xss-protection-1-mode-block
     SECURE_BROWSER_XSS_FILTER = True
@@ -55,7 +55,7 @@ if PRODUCTION:
     MANAGERS = [('Paul', 'vpcarroll15@' + 'gmail.com')]
 else:
     DEBUG = True
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -103,14 +103,24 @@ WSGI_APPLICATION = 'website.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if PRODUCTION:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ['RDS_DB_NAME'],
+            'USER': os.environ['RDS_USERNAME'],
+            'PASSWORD': os.environ['RDS_PASSWORD'],
+            'HOST': os.environ['RDS_HOSTNAME'],
+            'PORT': os.environ['RDS_PORT'],
+        }
     }
-}
-
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -136,7 +146,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'US/Pacific'
 
 USE_I18N = True
 
