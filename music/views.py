@@ -26,7 +26,7 @@ def get_review(music):
                                   convert_name_to_directory_format(music.musician.name),
                                   convert_name_to_directory_format(music.name) + '.md')
     try:
-        with open(path_to_review) as review_file:
+        with open(path_to_review, encoding='utf-8') as review_file:
             review_as_markdown = review_file.read()
     except IOError:
         return None
