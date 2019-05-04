@@ -13,19 +13,19 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 
 # Settings that I expect to set...
-PRODUCTION = False
+PRODUCTION = True
 # end
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ['SECRET_KEY']
 
-if False:
+if PRODUCTION:
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = False
 
     # https://docs.djangoproject.com/en/2.2/ref/settings/#std:setting-ALLOWED_HOSTS
-    ALLOWED_HOSTS = ['.paulcarroll.site', 'website-env.mph7myk2wh.us-west-2.elasticbeanstalk.com']
+    ALLOWED_HOSTS = ['.paulcarroll.site']
 
     # https://docs.djangoproject.com/en/2.2/ref/middleware/#x-xss-protection-1-mode-block
     SECURE_BROWSER_XSS_FILTER = True
