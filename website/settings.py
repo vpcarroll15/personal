@@ -39,15 +39,15 @@ if PRODUCTION:
     # https://docs.djangoproject.com/en/2.2/ref/settings/
     CSRF_COOKIE_SECURE = True
 
-    # TODO: Make this longer once we believe that https works...
     # https://docs.djangoproject.com/en/2.2/ref/settings/#std:setting-SECURE_HSTS_SECONDS
-    # SECURE_HSTS_SECONDS = 60
+    SECURE_HSTS_SECONDS = 60
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
     # https://django-secure.readthedocs.io/en/latest/settings.html#secure-content-type-nosniff
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
     SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_HSTS_PRELOAD = True
 
     # obfuscation!
