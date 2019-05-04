@@ -40,7 +40,7 @@ if PRODUCTION:
     CSRF_COOKIE_SECURE = True
 
     # https://docs.djangoproject.com/en/2.2/ref/settings/#std:setting-SECURE_HSTS_SECONDS
-    SECURE_HSTS_SECONDS = 60
+    SECURE_HSTS_SECONDS = 60 * 60
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
     # https://django-secure.readthedocs.io/en/latest/settings.html#secure-content-type-nosniff
