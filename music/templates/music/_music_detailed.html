@@ -1,14 +1,24 @@
-<h1>{{ album.name }}</h1>
-<h2>{{ album.musician.name }}</h2>
-<h3><a href="{% url 'music:ratings' %}">My rating: {{ album.rating }}/3</a></h3>
-{% if review %}
-<div>{{ review }}</div>
-{% else %}
-<p>No review found for this album.</p>
-{% endif %}
-<h3>Tags</h3>
-<ul>
-    {% for tag in tags %}
-    <li>{{ tag.name }}</li>
-    {% endfor %}
-</ul>
+<div class="featured-album">
+    <span>
+        <h1>{{ album.name }}</h1>
+        <h2>{{ album.musician.name }}</h2>
+        <h3><a href="{% url 'music:ratings' %}">Score: {{ album.rating }}/3</a></h3>
+    </span>
+    <span>
+        <ul>
+            {% for tag in tags %}
+            <li>{{ tag.name }}</li>
+            {% endfor %}
+        </ul>
+    </span>
+</div>
+
+<div class="review">
+    {% if album.image_src %}
+        {% load static %}
+        <img src="{% static album.image_src %}" alt="" style="width:35%; float: left; margin: 30px;">
+    {% endif %}
+    <div class="review-text">
+        {{ album.review }}
+    </div>
+</div>

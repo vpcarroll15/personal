@@ -2,8 +2,8 @@
 <table>
     <tr>
         <th>Artist</th>
-        <th>Album or Track</th>
-        <th><a href="{% url 'music:ratings' %}">Rating (1-3)</a></th>
+        <th>Album</th>
+        <th><a href="{% url 'music:ratings' %}">Score</a></th>
     </tr>
     {% for album in albums %}
     <tr>

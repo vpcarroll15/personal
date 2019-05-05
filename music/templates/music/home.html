@@ -1,10 +1,18 @@
 {% extends "boilerplate.html" %}
 {% block content %}
-{% if album %}
-    <h1>Album of the Month!</h1>
-    <p>(not necessarily updated monthly)</p>
-    {% include "_music_detailed.html" %}
-{% endif %}
-<h3>More music that I have liked recently</h3>
-{% include "_albums_table.html" %}
+<div class="row">
+    <div class="column">
+        {% if album %}
+            <div class="album-of-the-month">
+                <h1>Album of the Month</h1>
+                <p>(not necessarily updated monthly)</p>
+            </div>
+            {% include "_music_detailed.html" %}
+        {% endif %}
+    </div>
+    <div class="column">
+        <h3>More music I've liked recently</h3>
+        {% include "_albums_table.html" %}
+    </div>
+</div>
 {% endblock %}
