@@ -13,7 +13,11 @@
             <span>
                 <ul>
                     {% for tag in tags %}
-                    <li>{{ tag.name }}</li>
+                    <li>
+                        <a href="{% url 'music:search' %}?search_term={{ tag.name }}">
+                            {{ tag.name }}
+                        </a>
+                    </li>
                     {% endfor %}
                 </ul>
             </span>
