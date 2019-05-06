@@ -41,7 +41,7 @@ def search(request):
         Q(name__istartswith=search_term) |
         Q(musician__name__istartswith=search_term) |
         Q(musician__tags__name__iexact=search_term)
-    ).select_related('musician').prefetch_related('musician__tags')
+    ).select_related('musician').prefetch_related('musician__tags').distinct()
 
     context = {'albums': music, 'search_term': search_term}
     return render(request, 'music/search.html', context)
