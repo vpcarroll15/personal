@@ -10,6 +10,7 @@ from website.settings import BASE_DIR
 
 def convert_name_to_directory_format(name):
     """Returns human-readable names to a format that is friendlier for Unix directories."""
+    name = "".join([x for x in name if x.isalnum()])
     name = name.lower()
     return name.replace(" ", "_")
 
