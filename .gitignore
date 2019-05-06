@@ -2,7 +2,6 @@
 *pyc
 .idea/
 *swp
-static/
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
