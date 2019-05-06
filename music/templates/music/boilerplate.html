@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <title>{% block title %}Paul's Music{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static "music/css/styles.css" %}">
 </head>
 <body>
 <div>
-    <form action="{% url 'music:search' %}" class="inline">
-        Find more reviews:
-        <input type="text" name="search_term">
-    </form>
-    <a href="{% url 'music:home' %}">Music homepage</a>
+    <div class="toolbar">
+        <form action="{% url 'music:search' %}" class="toolbar-form">
+            Find more reviews:
+            <input type="text" name="search_term" class="toolbar-input">
+        </form>
+        <a href="{% url 'music:home' %}">Music homepage</a>
+    </div>
     {% block content %}{% endblock %}
 </div>
 </body>

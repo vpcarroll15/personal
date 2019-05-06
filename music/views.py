@@ -10,14 +10,14 @@ def update_context_with_album(context, album):
 
 def home(request):
     """Renders the homepage for the music app."""
-    recent_music = (Music.objects.order_by('-created_at')
+    recent_music = (Music.objects.order_by('-reviewed_at')
                     .select_related('musician')
                     .prefetch_related('musician__tags'))[:10]
     context = {'albums': recent_music}
 
-    recommended_albums = Music.objects.filter(rating__gte=2)
+    recommended_albums = Music.objects.filter(album_of_the_month=True)
     if recommended_albums:
-        album_of_the_month = recommended_albums.order_by('-created_at')[0]
+        album_of_the_month = recommended_albums.order_by('-reviewed_at')[0]
         update_context_with_album(context, album_of_the_month)
 
     return render(request, 'music/home.html', context)
@@ -40,10 +40,10 @@ def search(request):
     music = Music.objects.filter(
         Q(name__istartswith=search_term) |
         Q(musician__name__istartswith=search_term) |
-        Q(musician__tags__name=search_term)
+        Q(musician__tags__name__iexact=search_term)
     ).select_related('musician').prefetch_related('musician__tags')
 
-    context = {'albums': music}
+    context = {'albums': music, 'search_term': search_term}
     return render(request, 'music/search.html', context)
 
 

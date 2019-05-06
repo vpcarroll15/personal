@@ -1,19 +1,25 @@
 {% if albums %}
-<table>
+<table class="checkered-blue">
     <tr>
         <th>Artist</th>
         <th>Album</th>
         <th><a href="{% url 'music:ratings' %}">Score</a></th>
+        <th>Release Date</th>
     </tr>
     {% for album in albums %}
     <tr>
-        <td>{{ album.musician.name }}</td>
+        <td>
+            <a href="{% url 'music:search' %}?search_term={{ album.musician.name }}">
+                {{ album.musician.name }}
+            </a>
+        </td>
         <td>
             <a href="{% url 'music:music_detailed' album.id %}">
                 {{ album.name }}
             </a>
         </td>
         <td>{{ album.rating }}</td>
+        <td>{{ album.album_released_date | date:"m/Y" }}</td>
     </tr>
     {% endfor %}
 </table>

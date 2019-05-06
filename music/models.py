@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from django.db import models
 from django.utils.safestring import mark_safe
@@ -33,10 +34,14 @@ class Music(models.Model):
     updated_at = models.DateTimeField(db_index=True,
                                       auto_now=True,  # Updates each time save() is called
                                       )
+    album_released_date = models.DateTimeField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(default=datetime.now)
 
     name = models.CharField(max_length=200)
     musician = models.ForeignKey(Musician, on_delete=models.CASCADE)
     rating = models.SmallIntegerField()
+
+    album_of_the_month = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.musician) + ": " + str(self.name)
