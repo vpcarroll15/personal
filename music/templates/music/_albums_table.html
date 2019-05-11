@@ -1,27 +1,36 @@
 {% if albums %}
-<table class="checkered-blue">
-    <tr>
-        <th>Artist</th>
-        <th>Album</th>
-        <th><a href="{% url 'music:ratings' %}">Score</a></th>
-        <th>Release Date</th>
-    </tr>
-    {% for album in albums %}
-    <tr>
-        <td>
-            <a href="{% url 'music:search' %}?search_term={{ album.musician.name }}">
-                {{ album.musician.name }}
-            </a>
-        </td>
-        <td>
-            <a href="{% url 'music:music_detailed' album.id %}">
-                {{ album.name }}
-            </a>
-        </td>
-        <td>{{ album.rating }}</td>
-        <td>{{ album.album_released_date | date:"m/Y" }}</td>
-    </tr>
-    {% endfor %}
+<script>
+$(document).ready( function () {
+    $('#sortable-table').DataTable();
+} );
+</script>
+<table id="sortable-table" class="checkered-blue">
+    <thead>
+        <tr>
+            <th>Artist</th>
+            <th>Album</th>
+            <th><a href="{% url 'music:ratings' %}">Score</a></th>
+            <th>Release Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for album in albums %}
+        <tr>
+            <td>
+                <a href="{% url 'music:search' %}?search_term={{ album.musician.name }}">
+                    {{ album.musician.name }}
+                </a>
+            </td>
+            <td>
+                <a href="{% url 'music:music_detailed' album.id %}">
+                    {{ album.name }}
+                </a>
+            </td>
+            <td>{{ album.rating }}</td>
+            <td>{{ album.album_released_date | date:"m/Y" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 {% else %}
 <h3>No music found</h3>
