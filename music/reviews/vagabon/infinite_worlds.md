@@ -1,0 +1,1 @@
+Rock/folk. An extremely short album (EP?) with female vocals, guitar, the usual stuff. Odd, emotional vocals. Occasional outbursts from the guitar give great energy. Try “Fear and Force” or “Cold Apartment.”

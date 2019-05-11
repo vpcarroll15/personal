@@ -1,0 +1,1 @@
+Metal. Yes, this is two albums from the same band (2016 and 2017), but I found them at the same time so I’m putting them in together. Moonlover is the superior one: “Golden Number” is one of the greatest metal tracks I have ever heard. Starmourner doesn’t quite live up to its predecessor’s standard but still has some really funny, weird tracks. Try “Seraphic.”
