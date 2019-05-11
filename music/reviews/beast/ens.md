@@ -1,0 +1,3 @@
+This album wins the award for the most difficult to find on Spotify. There are several artists named Beast: a metal band, several rappers, and this guy, Koen Holtkamp, probably the least beastlike of them all and the least well-known. The album name Ens is no help either: Spotify treats it as a string fragment. But, if you can find this album, you should listen to at least the first two tracks: delicate, spindly pieces of music which remind me of the weird artifacts in Dumbledore’s office. You can skip the second half of the album: it falls off a bit.
+
+I am listening to Volume 1 and Volume 2 now, which I hear are more consistent! Perhaps they will appear on the main list next year.

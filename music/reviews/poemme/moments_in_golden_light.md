@@ -1,0 +1,3 @@
+A peaceful ambient album with a surprising number of listens on Spotify. Has it been discovered by the meditation community?
+
+After years of listening to this kind of music, I still have a difficult time putting into words why I like some entries in this genre and don’t like others, since there is so little that happens on any particular track. Some albums like Atomos (an all-time favorite from 2014: listen to it now if you haven’t already) conjure an incredible sense of drama; Moments in Golden Light doesn’t. It reminds me more of And Their Refinement of the Decline, with its high production value and drowsy atmosphere. Check this out if you enjoyed that.
