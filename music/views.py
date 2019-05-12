@@ -13,7 +13,7 @@ def home(request):
     recent_music = (Music.objects.order_by('-reviewed_at')
                     .select_related('musician')
                     .prefetch_related('musician__tags'))[:10]
-    context = {'albums': recent_music}
+    context = {'albums': recent_music, 'truncate': True}
 
     recommended_albums = Music.objects.filter(album_of_the_month=True)
     if recommended_albums:

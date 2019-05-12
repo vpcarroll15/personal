@@ -37,6 +37,17 @@
         <img src="{% static album.image_src %}" alt="" style="width:32%; float: left; margin: 30px;">
     {% endif %}
     <div class="review-text">
-        {{ album.review }}
+        {% if truncate %}
+            {{ album.review | truncatechars_html:500 }}
+            {% if album.review|length > 500 %}
+                <strong><p>
+                    Click
+                    <a href="{% url 'music:music_detailed' album.id %}">here</a>
+                    for the full review.
+                </p></strong>
+            {% endif %}
+        {% else %}
+            {{ album.review }}
+        {% endif %}
     </div>
 </div>
