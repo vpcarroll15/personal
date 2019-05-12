@@ -46,6 +46,11 @@ tr:nth-child(odd) td:nth-child(even)
   border-radius: 5px;
 }
 
+.featured-tags {
+  display: inline;
+  padding-right: 5px;
+}
+
 .toolbar-form {
   display: inline;
   padding-left: 10px;

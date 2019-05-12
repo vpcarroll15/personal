@@ -18,7 +18,19 @@
             Find more reviews:
             <input type="text" name="search_term" class="toolbar-input">
         </form>
-        <a href="{% url 'music:home' %}">Music homepage</a>
+        <ul class="featured-tags" style="padding-inline-start: 10px;">
+            <li class="featured-tags">
+                <a href="{% url 'music:search' %}?search_term=ambient">ambient</a>
+            </li>
+            <li class="featured-tags">
+                <a href="{% url 'music:search' %}?search_term=metal">metal</a>
+            </li>
+            <li class="featured-tags">
+                <a href="{% url 'music:search' %}?search_term=rock">rock</a>
+            </li>
+        </ul>
+        <a href="{% url 'music:home' %}" style="padding-inline-start: 20px;">Music homepage</a>
+        <a href="https://github.com/paul-cobalt/personal/tree/master/music" style="float: right; padding-right: 10px;">Source code</a>
     </div>
     {% block content %}{% endblock %}
 </div>
