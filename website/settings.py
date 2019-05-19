@@ -22,7 +22,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 if PRODUCTION:
     # SECURITY WARNING: don't run with debug turned on in production!
-    DEBUG = True
+    DEBUG = False
 
     # https://docs.djangoproject.com/en/2.2/ref/settings/#std:setting-ALLOWED_HOSTS
     ALLOWED_HOSTS = ['.paulcarroll.site']
