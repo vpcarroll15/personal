@@ -8,4 +8,5 @@ urlpatterns = [
     path('music/<int:music_id>', views.music, name="music_detailed"),
     path('search', views.search, name="search"),
     path('ratings', views.ratings, name="ratings"),
+    path('rss', views.rss, name="rss"),
 ]

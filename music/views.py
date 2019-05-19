@@ -1,6 +1,10 @@
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
+from django.http import HttpResponse
+from feedgen.feed import FeedGenerator
+
 from .models import Music
+from .constants import URL_ROOT, MY_NAME, MY_EMAIL
 
 
 def update_context_with_album(context, album):
@@ -8,11 +12,15 @@ def update_context_with_album(context, album):
     context['tags'] = album.musician.tags.all()
 
 
+def get_recent_music(quantity=10):
+    return (Music.objects.order_by('-reviewed_at')
+                 .select_related('musician')
+                 .prefetch_related('musician__tags'))[:quantity]
+
+
 def home(request):
     """Renders the homepage for the music app."""
-    recent_music = (Music.objects.order_by('-reviewed_at')
-                    .select_related('musician')
-                    .prefetch_related('musician__tags'))[:10]
+    recent_music = get_recent_music()
     context = {'albums': recent_music, 'truncate': True}
 
     recommended_albums = Music.objects.filter(album_of_the_month=True)
@@ -51,3 +59,39 @@ def ratings(request):
     """Displays the page that explains my ratings philosophy."""
     context = {}
     return render(request, 'music/ratings.html', context)
+
+
+def rss(_):
+    """Returns the XML content of my RSS feed for the music part of the website.
+
+    NOTE: We are doing no caching here at all right now, because this function is very fast and the website has
+    no traffic. If this situation changes, then I should cache it so that I don't build this object from scratch every
+    time."""
+    generator = FeedGenerator()
+
+    # Add basic metadata.
+    generator.title("Paul's Music Feed")
+    generator.author(name=MY_NAME, email=MY_EMAIL)
+    generator.contributor(name=MY_NAME, email=MY_EMAIL)
+    # RSS requires that we point to our own feed here. Not sure why.
+    generator.link(href=(URL_ROOT + 'rss'), rel='self')
+    favicon_path = URL_ROOT + "static/favicon.png"
+    generator.icon(favicon_path)
+    generator.logo(favicon_path)
+    generator.subtitle("A feed for anyone who wants to know what albums I'm liking.")
+    generator.language("en")
+
+    albums = get_recent_music(quantity=30)
+    for album in albums:
+        entry = generator.add_entry()
+        entry.title(album.name)
+        path_to_album = URL_ROOT + "music/music/{}".format(album.id)
+        entry.guid(path_to_album, permalink=True)
+        entry.description(album.description())
+        entry.updated(album.reviewed_at)
+        entry.published(album.reviewed_at)
+        entry.author(name=MY_NAME, email=MY_EMAIL)
+        entry.link(href=path_to_album, rel='alternate')
+        entry.category(term='score__{}'.format(album.rating))
+
+    return HttpResponse(generator.rss_str())

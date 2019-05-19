@@ -48,6 +48,13 @@ class Music(models.Model):
         return str(self.musician) + ": " + str(self.name)
 
     def review(self):
+        review_as_markdown = self.review_txt()
+        review_as_html = markdown2.markdown(review_as_markdown)
+        # We mark this as safe because we want Django to render it as HTML. This is obviously safe since I am going to
+        # be the one writing the markdown. :)
+        return mark_safe(review_as_html)
+
+    def review_txt(self):
         path_to_review = os.path.join(BASE_DIR,
                                       'music/reviews/',
                                       convert_name_to_directory_format(self.musician.name),
@@ -57,11 +64,20 @@ class Music(models.Model):
                 review_as_markdown = review_file.read()
         except IOError:
             return None
+        return review_as_markdown
 
-        review_as_html = markdown2.markdown(review_as_markdown)
-        # We mark this as safe because we want Django to render it as HTML. This is obviously safe since I am going to
-        # be the one writing the markdown. :)
-        return mark_safe(review_as_html)
+    def description(self):
+        # Our description of the album is the list of tags plus a shortened version of the review.
+        tags = self.musician.tags.all()
+        tag_names = [tag.name for tag in tags]
+        tags_string = '(' + ', '.join(tag_names) + ')'
+
+        review = self.review_txt()
+        if len(review) <= 500:
+            review_clipped = review
+        else:
+            review_clipped = review[:500] + "..."
+        return tags_string + ' ' + review_clipped
 
     def image_src(self):
         path = os.path.join('music', 'images', convert_name_to_directory_format(self.musician.name),
