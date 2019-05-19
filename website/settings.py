@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 
 # Settings that I expect to set...
-PRODUCTION = False
+PRODUCTION = True
 # end
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -22,7 +22,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 if PRODUCTION:
     # SECURITY WARNING: don't run with debug turned on in production!
-    DEBUG = False
+    DEBUG = True
 
     # https://docs.djangoproject.com/en/2.2/ref/settings/#std:setting-ALLOWED_HOSTS
     ALLOWED_HOSTS = ['.paulcarroll.site']
