@@ -70,13 +70,18 @@ class Music(models.Model):
         # Our description of the album is the list of tags plus a shortened version of the review.
         tags = self.musician.tags.all()
         tag_names = [tag.name for tag in tags]
-        tags_string = '(' + ', '.join(tag_names) + ')'
+        if len(tag_names):
+            tags_string = '(' + ', '.join(tag_names) + ')'
+        else:
+            tags_string = '[no tags]'
 
         review = self.review_txt()
-        if len(review) <= 500:
-            review_clipped = review
+        if review:
+            review_clipped = review[:500]
+            if len(review) != len(review_clipped):
+                review_clipped += "..."
         else:
-            review_clipped = review[:500] + "..."
+            review_clipped = '[no review]'
         return tags_string + ' ' + review_clipped
 
     def image_src(self):
