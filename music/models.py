@@ -44,6 +44,8 @@ class Music(models.Model):
 
     album_of_the_month = models.BooleanField(default=False)
 
+    src = models.CharField(max_length=300, null=True, blank=True)
+
     def __str__(self):
         return str(self.musician) + ": " + str(self.name)
 

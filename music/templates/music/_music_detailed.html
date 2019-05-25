@@ -26,6 +26,9 @@
             <div style="padding-top: 20px;">
                 <p>Released: {{ album.album_released_date | date:"n/j/Y" }}</p>
                 <p>Reviewed: {{ album.reviewed_at | date:"n/j/Y" }}</p>
+                {% if album.src %}
+                    <p><a href="{{ album.src }}">Link to sample</a></p>
+                {% endif %}
             </div>
         </div>
     </div>
