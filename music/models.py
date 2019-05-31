@@ -51,6 +51,8 @@ class Music(models.Model):
 
     def review(self):
         review_as_markdown = self.review_txt()
+        if not review_as_markdown:
+            return None
         review_as_html = markdown2.markdown(review_as_markdown)
         # We mark this as safe because we want Django to render it as HTML. This is obviously safe since I am going to
         # be the one writing the markdown. :)
