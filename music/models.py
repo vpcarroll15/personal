@@ -3,9 +3,8 @@ from datetime import datetime
 
 from django.db import models
 from django.utils.safestring import mark_safe
+from django.conf import settings
 import markdown2
-
-from website.settings import BASE_DIR
 
 
 def convert_name_to_directory_format(name):
@@ -59,7 +58,7 @@ class Music(models.Model):
         return mark_safe(review_as_html)
 
     def review_txt(self):
-        path_to_review = os.path.join(BASE_DIR,
+        path_to_review = os.path.join(settings.BASE_DIR,
                                       'music/reviews/',
                                       convert_name_to_directory_format(self.musician.name),
                                       convert_name_to_directory_format(self.name) + '.md')
@@ -91,7 +90,7 @@ class Music(models.Model):
     def image_src(self):
         path = os.path.join('music', 'images', convert_name_to_directory_format(self.musician.name),
                             convert_name_to_directory_format(self.name) + '.jpg')
-        if os.path.exists(os.path.join(BASE_DIR, 'music/static', path)):
+        if os.path.exists(os.path.join(settings.BASE_DIR, 'music/static', path)):
             return path
         else:
             return None
