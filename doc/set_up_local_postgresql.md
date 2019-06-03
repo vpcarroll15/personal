@@ -24,3 +24,11 @@ settings file from this project.
 ./manage.py migrate
 ./manage.py createsuperuser
 ```
+
+If you want to fill your local database with the same data that is hanging out on production, then:
+
+```
+./manage.py dumpdata --database prod > /tmp/websitecontents.json
+./manage.py loaddata /tmp/websitecontents.json --database local
+
+```
