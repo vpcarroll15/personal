@@ -46,6 +46,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'website.wsgi.application'
 
+os.environ.setdefault('LOCAL_DB_PASSWORD', 'notthepassword')
 DATABASES = {
     'prod': {
         'ENGINE': 'django.db.backends.postgresql',
