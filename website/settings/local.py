@@ -1,4 +1,4 @@
-from website.settings.base import *
+from .base import *
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']
