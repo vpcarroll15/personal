@@ -13,6 +13,7 @@ CREATE USER paul WITH PASSWORD <LOCAL_DB_PASSWORD>;
 ALTER ROLE paul SET client_encoding TO 'utf8';
 ALTER ROLE paul SET default_transaction_isolation TO 'read committed';
 ALTER ROLE paul SET timezone TO 'UTC';
+ALTER ROLE paul CREATEDB;
 GRANT ALL PRIVILEGES ON DATABASE mywebsite TO paul;
 \q
 ```
