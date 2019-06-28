@@ -7,6 +7,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 # Application definition
 INSTALLED_APPS = [
     'music.apps.MusicConfig',
+    'aboutme.apps.AboutmeConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
