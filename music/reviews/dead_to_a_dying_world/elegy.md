@@ -1,3 +1,6 @@
+EDIT: I am bumping this up to a 2! I'm still listening to it, and the second half of "Of Moss and Stone" is pretty
+extraordinary.
+
 I vacillated for a while between giving this album and a 1 or a 2. I really do think that this is interesting,
 powerful music, and large sections of this album held my attention. But ultimately, I can't say that I loved
 _Elegy_. Loving this album would be like loving a sea urchin... easier to admire than to cuddle with, and a bit too
