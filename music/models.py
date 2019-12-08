@@ -14,6 +14,16 @@ def convert_name_to_directory_format(name):
     return name.replace(" ", "_")
 
 
+def convert_markdown_and_mark_safe(text):
+    """Given some input markdown, converts it to HTML and marks it as safe to render."""
+    if text is None:
+        return None
+    review_as_html = markdown2.markdown(text)
+    # We mark this as safe because we want Django to render it as HTML. This is obviously safe since I am going to
+    # be the one writing the markdown. :)
+    return mark_safe(review_as_html)
+
+
 class Musician(models.Model):
     """Represents one musician or band."""
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -38,6 +48,7 @@ class Music(models.Model):
     reviewed_at = models.DateTimeField(default=datetime.now)
 
     name = models.CharField(max_length=200)
+    very_short_description = models.CharField(max_length=500, null=True, blank=True)
     musician = models.ForeignKey(Musician, on_delete=models.CASCADE)
     rating = models.SmallIntegerField()
 
@@ -49,13 +60,7 @@ class Music(models.Model):
         return str(self.musician) + ": " + str(self.name)
 
     def review(self):
-        review_as_markdown = self.review_txt()
-        if not review_as_markdown:
-            return None
-        review_as_html = markdown2.markdown(review_as_markdown)
-        # We mark this as safe because we want Django to render it as HTML. This is obviously safe since I am going to
-        # be the one writing the markdown. :)
-        return mark_safe(review_as_html)
+        return convert_markdown_and_mark_safe(self.review_txt())
 
     def review_txt(self):
         path_to_review = os.path.join(settings.BASE_DIR,
@@ -102,3 +107,29 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class BestOf(models.Model):
+    """Data about albums spanning a particular period of time."""
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+    name = models.CharField(max_length=100)
+    include_on_home_page = models.BooleanField(default=True)
+
+    def description_txt(self):
+        path_to_description = os.path.join(settings.BASE_DIR,
+                                           'music/best_of/',
+                                           convert_name_to_directory_format(self.name) + '.md')
+        try:
+            with open(path_to_description, encoding='utf-8') as description_file:
+                description_as_markdown = description_file.read()
+        except IOError:
+            return None
+        return description_as_markdown
+
+    def description(self):
+        return convert_markdown_and_mark_safe(self.description_txt())
+
+    def __str__(self):
+        return "{}: {} until {}".format(self.name, self.start_date.isoformat(), self.end_date.isoformat())

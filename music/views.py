@@ -1,9 +1,11 @@
+from collections import defaultdict
+
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
 from django.http import HttpResponse
 from feedgen.feed import FeedGenerator
 
-from .models import Music
+from .models import Music, BestOf
 from .constants import URL_ROOT, MY_NAME, MY_EMAIL
 
 
@@ -12,10 +14,12 @@ def update_context_with_album(context, album):
     context['tags'] = album.musician.tags.all()
 
 
+def apply_common_preselects_music(music_queryset):
+    return music_queryset.select_related('musician').prefetch_related('musician__tags').distinct()
+
+
 def get_recent_music(quantity=10):
-    return (Music.objects.order_by('-reviewed_at')
-                 .select_related('musician')
-                 .prefetch_related('musician__tags'))[:quantity]
+    return apply_common_preselects_music(Music.objects.order_by('-reviewed_at'))[:quantity]
 
 
 def home(request):
@@ -23,7 +27,7 @@ def home(request):
     recent_music = get_recent_music()
     context = {'albums': recent_music, 'truncate': True}
 
-    recommended_albums = Music.objects.filter(album_of_the_month=True)
+    recommended_albums = apply_common_preselects_music(Music.objects.filter(album_of_the_month=True))
     if recommended_albums:
         album_of_the_month = recommended_albums.order_by('-reviewed_at')[0]
         update_context_with_album(context, album_of_the_month)
@@ -45,11 +49,11 @@ def search(request):
     """Searches for a particular search term in our set of musicians, music, and tags."""
     search_term = request.GET['search_term']
 
-    music = Music.objects.filter(
+    music = apply_common_preselects_music(Music.objects.filter(
         Q(name__istartswith=search_term) |
         Q(musician__name__istartswith=search_term) |
         Q(musician__tags__name__iexact=search_term)
-    ).select_related('musician').prefetch_related('musician__tags').distinct()
+    ))
 
     context = {'albums': music, 'search_term': search_term}
     return render(request, 'music/search.html', context)
@@ -95,3 +99,23 @@ def rss(_):
         entry.category(term='score__{}'.format(album.rating))
 
     return HttpResponse(generator.rss_str())
+
+
+def best_of(request):
+    """Searches for a particular search term in our set of musicians, music, and tags."""
+    name = request.GET['name']
+
+    best_of = get_object_or_404(BestOf, name=name)
+    relevant_albums = apply_common_preselects_music(
+        Music.objects.filter(reviewed_at__gt=best_of.start_date, reviewed_at__lt=best_of.end_date)
+    )
+    albums_by_score = defaultdict(list)
+    # Partition by rating.
+    for album in relevant_albums:
+        albums_by_score[album.rating].append(album)
+    # Sort according to review date.
+    for value in albums_by_score.values():
+        value.sort(key=lambda x: x.reviewed_at)
+
+    context = {'best_of': best_of, 'best_albums': albums_by_score[3], 'great_albums': albums_by_score[2], 'good_albums': albums_by_score[1]}
+    return render(request, 'music/best_of.html', context)

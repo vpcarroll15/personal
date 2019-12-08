@@ -1,0 +1,15 @@
+<ul>
+    {% for album in albums %}
+    <li>
+        {{ album.musician.name }} /
+        <a href="{% url 'music:music_detailed' album.id %}">
+            <i>{{ album.name }}</i>
+        </a>
+        {% if album.very_short_description %}
+        <p>
+            {{ album.very_short_description }}
+        </p>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
