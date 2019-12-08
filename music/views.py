@@ -117,5 +117,10 @@ def best_of(request, name):
     for value in albums_by_score.values():
         value.sort(key=lambda x: x.reviewed_at)
 
-    context = {'best_of': best_of, 'best_albums': albums_by_score[3], 'great_albums': albums_by_score[2], 'good_albums': albums_by_score[1]}
+    context = {
+        'best_of': best_of,
+        'best_albums': albums_by_score[3],
+        'great_albums': albums_by_score[2],
+        'good_albums': albums_by_score[1],
+    }
     return render(request, 'music/best_of.html', context)
