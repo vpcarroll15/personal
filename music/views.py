@@ -105,7 +105,9 @@ def best_of(request, name):
     """Searches for a particular search term in our set of musicians, music, and tags."""
     best_of = get_object_or_404(BestOf, name=name)
     relevant_albums = apply_common_preselects_music(
-        Music.objects.filter(reviewed_at__gt=best_of.start_date, reviewed_at__lt=best_of.end_date)
+        Music.objects.filter(reviewed_at__gt=best_of.start_date,
+                             reviewed_at__lt=best_of.end_date,
+                             exclude_from_best_of_list=False)
     )
     albums_by_score = defaultdict(list)
     # Partition by rating.

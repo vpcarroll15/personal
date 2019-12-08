@@ -53,6 +53,7 @@ class Music(models.Model):
     rating = models.SmallIntegerField()
 
     album_of_the_month = models.BooleanField(default=False)
+    exclude_from_best_of_list = models.BooleanField(default=False)
 
     src = models.CharField(max_length=300, null=True, blank=True)
 
