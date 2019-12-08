@@ -1,16 +1,20 @@
 {% extends "boilerplate.html" %}
 {% block content %}
-<div class="best_albums_view">
+<div class="best_of">
     <div class="row">
-        <div class="column">
-            <h1>Best of {{ best_of.name }}</h1>
-            <p>{{ best_of.description }}</p>
-        </div>
-        <div class="column">
+        <h1>Best of {{ best_of.name }}</h1>
+        <p>{{ best_of.description }}</p>
+    </div>
+    <div class="row">
+        <div class="column-thirds">
             <h2>Best albums</h2>
             {% include "_albums_list.html" with albums=best_albums %}
+        </div>
+        <div class="column-thirds">
             <h2>Great albums</h2>
             {% include "_albums_list.html" with albums=great_albums %}
+        </div>
+        <div class="column-thirds">
             <h2>Good albums</h2>
             {% include "_albums_list.html" with albums=good_albums %}
         </div>
