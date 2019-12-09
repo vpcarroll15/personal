@@ -1,25 +1,25 @@
 {% extends "boilerplate.html" %}
 {% block content %}
-<div class="best_of">
-    <div class="row">
+<div>
+    <div class="best-of">
         <h1>Best of {{ best_of.name }}</h1>
         <p>{{ best_of.description }}</p>
         <p>Uncheck any category of music that you aren't interested in.</p>
         {% for tag in all_tags %}
-        <input class="hide_with_checkboxes" type="checkbox" name="{{ tag.classname }}" value="{{ tag.name }}" checked>
+        <input class="hide-with-checkboxes" type="checkbox" name="{{ tag.classname }}" value="{{ tag.name }}" checked>
             {{tag.name}}
         {% endfor %}
     </div>
-    <div class="row">
-        <div class="column-thirds">
+    <div>
+        <div class="column-thirds best-albums">
             <h2>Best albums</h2>
             {% include "_albums_list.html" with albums=best_albums %}
         </div>
-        <div class="column-thirds">
+        <div class="column-thirds great-albums">
             <h2>Great albums</h2>
             {% include "_albums_list.html" with albums=great_albums %}
         </div>
-        <div class="column-thirds">
+        <div class="column-thirds good-albums">
             <h2>Good albums</h2>
             {% include "_albums_list.html" with albums=good_albums %}
         </div>

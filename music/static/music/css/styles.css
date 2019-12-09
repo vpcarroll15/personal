@@ -70,7 +70,7 @@ tr:nth-child(odd) td:nth-child(even)
 
 .column-thirds {
   float: left;
-  width: 33%;
+  width: 32.7%;
   padding-right: 10px;
 }
 
@@ -99,6 +99,29 @@ tr:nth-child(odd) td:nth-child(even)
 .review {
   background-color: #ecefd5;
   overflow: hidden;
+}
+
+.best-albums {
+  background-color:	#9ACD32;
+  padding: 20px;
+  margin: 5px;
+}
+
+.great-albums {
+  background-color: #7ed4fc;
+  padding: 20px;
+  margin: 5px;
+}
+
+.good-albums {
+  background-color: #FFFF33;
+  padding: 20px;
+  margin: 5px;
+}
+
+.best-of {
+  background-color: #ecefd5;
+  padding: 20px;
 }
 
 .review-text {
