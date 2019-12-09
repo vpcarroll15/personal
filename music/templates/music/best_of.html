@@ -2,11 +2,9 @@
 {% block content %}
 {% load static %}
 <div>
-    <div>
-        <div class="best-of">
-            <h1>Best of {{ best_of.name }}</h1>
-            <div>{{ best_of.description }}</div>
-        </div>
+    <div class="best-of">
+        <h1>Best of {{ best_of.name }}</h1>
+        <p>(albums not necessarily produced in 2019)</p>
     </div>
     <div>
         {% for album in albums_with_photos %}
@@ -15,6 +13,7 @@
         </span>
         {% endfor %}
     </div>
+    <div class="best-of-description">{{ best_of.description }}</div>
     <div>
         <div class="best-of-control-panel">
             <p>Uncheck any category of music that you aren't interested in.</p>

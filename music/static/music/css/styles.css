@@ -123,8 +123,14 @@ tr:nth-child(odd) td:nth-child(even)
 }
 
 .best-of {
-  background-color:	#9ACD32;
   padding: 20px;
+  background-color: #FFFF33;
+}
+
+.best-of-description {
+  padding: 20px;
+  background-color:	#9ACD32;
+  clear: both;
 }
 
 .best-of-image {
@@ -139,7 +145,6 @@ tr:nth-child(odd) td:nth-child(even)
   padding: 10px;
   float: left;
   width: 10%;
-  clear: both;
 }
 
 .review-text {
