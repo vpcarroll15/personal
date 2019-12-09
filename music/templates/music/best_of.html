@@ -8,9 +8,9 @@
         </div>
         <div class="best-of-control-panel">
             <p>Uncheck any category of music that you aren't interested in.</p>
-            {% for tag in all_tags %}
+            {% for tag, quantity in tags_with_quantity %}
             <input class="hide-with-checkboxes" type="checkbox" name="{{ tag.classname }}" value="{{ tag.name }}" checked>
-                {{tag.name}}
+                {{tag.name}} ({{quantity}} album{{quantity | pluralize}})
             {% endfor %}
         </div>
     </div>

@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
@@ -116,15 +116,21 @@ def best_of(request, name):
     # Sort according to review date.
     for value in albums_by_score.values():
         value.sort(key=lambda x: x.reviewed_at)
-    all_tags = set()
+
+    tag_counter = Counter()
     for album in relevant_albums:
-        all_tags.update(album.musician.tags.all())
+        for tag in album.musician.tags.all():
+            tag_counter[tag] += 1
+
+    tags_by_popularity = list(tag_counter.keys())
+    tags_by_popularity.sort(key=lambda x: tag_counter[x], reverse=True)
+    corresponding_values = [tag_counter[tag] for tag in tags_by_popularity]
 
     context = {
         'best_of': best_of,
         'best_albums': albums_by_score[3],
         'great_albums': albums_by_score[2],
         'good_albums': albums_by_score[1],
-        'all_tags': all_tags,
+        'tags_with_quantity': zip(tags_by_popularity, corresponding_values),
     }
     return render(request, 'music/best_of.html', context)
