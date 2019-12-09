@@ -70,7 +70,7 @@ tr:nth-child(odd) td:nth-child(even)
 
 .column-thirds {
   float: left;
-  width: 32.7%;
+  width: 27%;
   padding-right: 10px;
 }
 
@@ -125,8 +125,12 @@ tr:nth-child(odd) td:nth-child(even)
 }
 
 .best-of-control-panel {
+  margin-top: 10px;
+  margin-right: 15px;
   background-color: #ecefd5;
-  padding: 20px;
+  padding: 10px;
+  float: left;
+  width: 10%;
 }
 
 .review-text {
