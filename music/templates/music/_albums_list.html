@@ -1,6 +1,6 @@
 <ul>
     {% for album in albums %}
-    <li>
+    <li class="managed_by_checkboxes {{ album.classes | join:' '}}">
         {{ album.musician.name }} /
         <a href="{% url 'music:music_detailed' album.id %}">
             <i>{{ album.name }}</i>

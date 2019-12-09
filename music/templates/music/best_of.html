@@ -4,6 +4,11 @@
     <div class="row">
         <h1>Best of {{ best_of.name }}</h1>
         <p>{{ best_of.description }}</p>
+        <p>Uncheck any category of music that you aren't interested in.</p>
+        {% for tag in all_tags %}
+        <input class="hide_with_checkboxes" type="checkbox" name="{{ tag.classname }}" value="{{ tag.name }}" checked>
+            {{tag.name}}
+        {% endfor %}
     </div>
     <div class="row">
         <div class="column-thirds">

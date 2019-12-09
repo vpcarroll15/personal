@@ -101,6 +101,9 @@ class Music(models.Model):
         else:
             return None
 
+    def classes(self):
+        return [tag.classname() for tag in self.musician.tags.all()]
+
 
 class Tag(models.Model):
     """Encapsulates a tag that can be applied to musicians to classify their work."""
@@ -108,6 +111,9 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
+    def classname(self):
+        return self.name.replace(" ", "")
 
 
 class BestOf(models.Model):
