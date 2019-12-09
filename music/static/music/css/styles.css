@@ -102,24 +102,29 @@ tr:nth-child(odd) td:nth-child(even)
 }
 
 .best-albums {
-  background-color:	#9ACD32;
+  background-color:	#FFD700;
   padding: 20px;
   margin: 5px;
 }
 
 .great-albums {
-  background-color: #7ed4fc;
+  background-color: #C0C0C0;
   padding: 20px;
   margin: 5px;
 }
 
 .good-albums {
-  background-color: #FFFF33;
+  background-color: #B8860B;
   padding: 20px;
   margin: 5px;
 }
 
 .best-of {
+  background-color:	#9ACD32;
+  padding: 20px;
+}
+
+.best-of-control-panel {
   background-color: #ecefd5;
   padding: 20px;
 }
