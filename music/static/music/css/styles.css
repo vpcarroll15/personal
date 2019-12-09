@@ -105,23 +105,31 @@ tr:nth-child(odd) td:nth-child(even)
   background-color:	#FFD700;
   padding: 20px;
   margin: 5px;
+  margin-top: 10px;
 }
 
 .great-albums {
   background-color: #C0C0C0;
   padding: 20px;
   margin: 5px;
+  margin-top: 10px;
 }
 
 .good-albums {
   background-color: #B8860B;
   padding: 20px;
   margin: 5px;
+  margin-top: 10px;
 }
 
 .best-of {
   background-color:	#9ACD32;
   padding: 20px;
+}
+
+.best-of-image {
+  float: left;
+  max-width: 10%;
 }
 
 .best-of-control-panel {
@@ -131,6 +139,7 @@ tr:nth-child(odd) td:nth-child(even)
   padding: 10px;
   float: left;
   width: 10%;
+  clear: both;
 }
 
 .review-text {

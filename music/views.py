@@ -116,6 +116,8 @@ def best_of(request, name):
     # Sort according to review date.
     for value in albums_by_score.values():
         value.sort(key=lambda x: x.reviewed_at)
+    albums_with_photos = albums_by_score[3] + albums_by_score[2] + albums_by_score[1]
+    albums_with_photos = [album for album in albums_with_photos if album.image_src()]
 
     tag_counter = Counter()
     for album in relevant_albums:
@@ -132,5 +134,6 @@ def best_of(request, name):
         'great_albums': albums_by_score[2],
         'good_albums': albums_by_score[1],
         'tags_with_quantity': zip(tags_by_popularity, corresponding_values),
+        'albums_with_photos': albums_with_photos[:10],
     }
     return render(request, 'music/best_of.html', context)
