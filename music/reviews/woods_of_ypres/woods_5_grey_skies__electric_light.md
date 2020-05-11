@@ -28,7 +28,8 @@ I can't give this album my highest honors, because I care so much about instrume
 flat for me, especially in the back half of the album. Woods of Ypres cared more about the vocals, I think, which
 is fair enough. I will be returning to this album in the future.
 
-
+UPDATE: I'm upgrading this album to a 3 because it is so damn memorable. Months later, I still find myself thinking
+about it a lot. Some albums create an entire world that we can enter, and this is one of them.
 
 
 
