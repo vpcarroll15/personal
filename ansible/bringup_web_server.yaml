@@ -18,6 +18,9 @@
           - python3-dev
           - nginx
           - curl
+          - libpq-dev
+          - postgresql
+          - postgresql-contrib
 
     - name: Clone repo
       git:
@@ -30,7 +33,7 @@
       pip:
         name: virtualenv
 
-    - name: Install virtualenv
-      become: yes
+    - name: Install Django, gunicorn, other requirements
       pip:
-        name: virtualenv
+        requirements: /home/{{ username }}/source/requirements.txt
+        virtualenv: /home/{{ username }}/venv

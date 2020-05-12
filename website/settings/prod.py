@@ -4,7 +4,7 @@ from .base import *
 DEBUG = False
 
 # https://docs.djangoproject.com/en/2.2/ref/settings/#std:setting-ALLOWED_HOSTS
-ALLOWED_HOSTS = ['.paulcarroll.site']
+ALLOWED_HOSTS = ['.paulcarroll.site', 'localhost', '44.230.244.94']
 
 # https://docs.djangoproject.com/en/2.2/ref/middleware/#x-xss-protection-1-mode-block
 SECURE_BROWSER_XSS_FILTER = True
