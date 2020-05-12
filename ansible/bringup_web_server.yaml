@@ -1,0 +1,36 @@
+---
+- hosts: all
+  vars:
+    username: ubuntu
+    code_branch: master
+  tasks:
+    - name: Change hostname
+      become: yes
+      hostname:
+        name: web-server
+  
+    - name: Install basic packages
+      become: yes
+      apt:
+        update_cache: yes
+        name:
+          - python3-pip
+          - python3-dev
+          - nginx
+          - curl
+
+    - name: Clone repo
+      git:
+        repo: https://github.com/vpcarroll15/personal.git
+        dest: /home/{{ username }}/source
+        version: "{{ code_branch }}"
+    
+    - name: Install virtualenv
+      become: yes
+      pip:
+        name: virtualenv
+
+    - name: Install virtualenv
+      become: yes
+      pip:
+        name: virtualenv
