@@ -37,14 +37,9 @@
       pip:
         requirements: /home/{{ username }}/source/requirements.txt
         virtualenv: /home/{{ username }}/venv
-    
-    - name: Copy environment file to remote machine
-      copy:
-        src: encrypted_environment_vars.env
-        dest: /home/{{ username }}/environment.env
-      tags: vault
 
-    - name: Copy .bash_aliases to remote machine
+    - name: Copy .bashrc to remote machine
       copy:
-        src: bash_aliases
-        dest: /home/{{ username }}/.bash_aliases
+        src: bashrc
+        dest: /home/{{ username }}/.bashrc
+      tags: vault
