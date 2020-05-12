@@ -37,3 +37,8 @@
       pip:
         requirements: /home/{{ username }}/source/requirements.txt
         virtualenv: /home/{{ username }}/venv
+    
+    - name: Copy environment file to remote machine
+      copy:
+        src: encrypted_environment_vars.env
+        dest: /home/{{ username }}/environment.env
