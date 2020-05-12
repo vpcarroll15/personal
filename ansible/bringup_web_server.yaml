@@ -42,3 +42,9 @@
       copy:
         src: encrypted_environment_vars.env
         dest: /home/{{ username }}/environment.env
+      tags: vault
+
+    - name: Copy .bash_aliases to remote machine
+      copy:
+        src: bash_aliases
+        dest: /home/{{ username }}/.bash_aliases

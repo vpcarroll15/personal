@@ -1,0 +1,10 @@
+#!/bin/bash
+alias st='git status'
+alias b='cd ..'
+alias bb='b && b'
+alias bbb='bb && b'
+alias gow='cd ~/source'
+
+source ~/venv/bin/activate
+source ~/environment.env
+export DJANGO_SETTINGS_MODULE='website.settings.local'
