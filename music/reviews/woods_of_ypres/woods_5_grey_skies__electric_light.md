@@ -30,6 +30,3 @@ is fair enough. I will be returning to this album in the future.
 
 UPDATE: I'm upgrading this album to a 3 because it is so damn memorable. Months later, I still find myself thinking
 about it a lot. Some albums create an entire world that we can enter, and this is one of them.
-
-
-
