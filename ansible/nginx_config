@@ -1,0 +1,11 @@
+server {
+    listen 80;
+    server_name paulcarroll.site www.paulcarroll.site 44.230.244.94;
+    location /static/ {
+        root /home/{{ username }}/source;
+    }
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
