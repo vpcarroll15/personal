@@ -121,6 +121,16 @@
         dest: /etc/nginx/sites-enabled/paulcarroll.site
         state: link
       tags: nginx
+    
+      # We want to get that A security rating!
+      # https://www.ssllabs.com/ssltest/analyze.html
+    - name: Disallow TLS 1.0 and 1.1, which are allowed by default.
+      become: yes
+      lineinfile:
+        path: /etc/nginx/nginx.conf
+        regexp: ssl_protocols
+        line: "        ssl_protocols TLSv1.2 TLSv1.3;"
+      tags: nginx, tls
 
     - name: Restart nginx
       become: yes
@@ -141,6 +151,16 @@
       apt:
         name: python-certbot-nginx
       tags: encrypt
+
+      # We want to get that A security rating!
+      # https://www.ssllabs.com/ssltest/analyze.html
+    - name: Disallow TLS 1.0 and 1.1, which are allowed by default.
+      become: yes
+      lineinfile:
+        path: /etc/letsencrypt/options-ssl-nginx.conf
+        regexp: ssl_protocols
+        line: ssl_protocols TLSv1.2 TLSv1.3;
+      tags: encrypt, tls
     
     # TODO: Script a better way of doing this!
     - debug:
