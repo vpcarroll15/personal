@@ -75,3 +75,23 @@
         enabled: yes
         daemon_reload: yes
         name: gunicorn.socket
+
+    # Getting nginx working.
+    - name: Copy in nginx config file
+      become: yes
+      template:
+        src: nginx_config
+        dest: /etc/nginx/sites-available/website
+
+    - name: Symlink nginx config file to make it "available"
+      become: yes
+      file:
+        src: /etc/nginx/sites-available/website
+        dest: /etc/nginx/sites-enabled/website
+        state: link
+
+    - name: Restart nginx
+      become: yes
+      systemd:
+        name: nginx
+        state: restarted
