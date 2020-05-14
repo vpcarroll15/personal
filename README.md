@@ -14,5 +14,5 @@ exit
 ...
 
 # Restart everything.
-ansible-playbook -i web_servers bringup_web_server.yaml --extra-vars "code_branch=master" --skip-tags vault
+ansible-playbook -i web_servers bringup_web_server.yaml --extra-vars "code_branch=master" --skip-tags django,vault
 ```
