@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name 44.230.244.94 paulcarroll.site;
+    server_name paulcarroll.site www.paulcarroll.site 44.230.244.94;
     location /static/ {
         root /home/{{ username }}/source;
     }

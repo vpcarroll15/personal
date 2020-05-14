@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export DJANGO_SETTINGS_MODULE='website.settings.local'
+export DJANGO_SETTINGS_MODULE='website.settings.prod'
 
 alias st='git status'
 alias b='cd ..'
