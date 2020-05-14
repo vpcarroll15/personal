@@ -12,6 +12,7 @@
       become: yes
       hostname:
         name: web-server
+      tags: basics
   
     - name: Install basic packages
       become: yes
@@ -26,10 +27,12 @@
           - ipython
           - postgresql
           - postgresql-contrib
+      tags: basics
 
     - name: Set pip3 to be pip
       become: yes
       shell: update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+      tags: basics
 
     # Getting Django app working.
     - name: Clone repo
@@ -37,42 +40,56 @@
         repo: https://github.com/vpcarroll15/personal.git
         dest: /home/{{ username }}/source
         version: "{{ code_branch }}"
-    
-      # TODO: collectstatic
-      # TODO: migrate
+      tags: django
 
     - name: Install virtualenv
       pip:
         name: virtualenv
+      tags: django
 
     - name: Install Django, gunicorn, other requirements
       pip:
         requirements: /home/{{ username }}/source/requirements.txt
         virtualenv: /home/{{ username }}/venv
+      tags: django
 
     - name: Copy .bash_aliases to remote machine
       copy:
         src: bash_aliases
         dest: /home/{{ username }}/.bash_aliases
+      tags: django
 
     - name: Copy environment.env to remote machine
       copy:
         src: encrypted_environment.env
         dest: /home/{{ username }}/environment.env
-      tags: vault
-    
+      tags: vault, django
+
+    - name: Collect static files
+      shell: /home/{{ username }}/source/manage.py collectstatic --noinput
+      tags: django
+
+    # NOTE: This migrates the prod database if the web server is pointed at the
+    # prod database, so...be aware. This is consistent with how platforms like
+    # Elastic Beanstalk work.
+    - name: Migrate database
+      shell: /home/{{ username }}/source/manage.py migrate
+      tags: django, migrate
+
     # Getting gunicorn working.
     - name: Install gunicorn socket file
       become: yes
       copy:
         src: gunicorn.socket
         dest: /etc/systemd/system/gunicorn.socket
+      tags: gunicorn
 
     - name: Install gunicorn service file
       become: yes
       template:
         src: gunicorn.service
         dest: /etc/systemd/system/gunicorn.service
+      tags: gunicorn
 
     - name: Enable and start gunicorn socket
       become: yes
@@ -81,6 +98,7 @@
         enabled: yes
         daemon_reload: yes
         name: gunicorn.socket
+      tags: gunicorn
 
     # Getting nginx working.
     - name: Copy in nginx config file
@@ -91,6 +109,7 @@
         # We can't replace this because Let's Encrypt edits it later. We don't
         # want to substitute back in the thing that doesn't support SSL.
         force: no
+      tags: nginx
 
     - name: Symlink nginx config file to make it "available"
       become: yes
@@ -98,24 +117,29 @@
         src: /etc/nginx/sites-available/paulcarroll.site
         dest: /etc/nginx/sites-enabled/paulcarroll.site
         state: link
+      tags: nginx
 
     - name: Restart nginx
       become: yes
       systemd:
         name: nginx
         state: restarted
+      tags: nginx
     
     # Getting Let's Encrypt working.
     - name: Install Certbot repository
       become: yes
       apt_repository:
         repo: ppa:certbot/certbot
+      tags: encrypt
     
     - name: Install Certbot
       become: yes
       apt:
         name: python-certbot-nginx
+      tags: encrypt
     
     # TODO: Script a better way of doing this!
     - debug:
         msg: If this is your first time setting up this machine, run "sudo certbot --nginx -d paulcarroll.site -d www.paulcarroll.site"
+      tags: encrypt
