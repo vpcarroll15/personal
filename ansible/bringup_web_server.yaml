@@ -4,6 +4,7 @@
     username: ubuntu
     code_branch: master
   tasks:
+    # Basics.
     - name: Change hostname
       become: yes
       hostname:
@@ -19,9 +20,15 @@
           - nginx
           - curl
           - libpq-dev
+          - ipython
           - postgresql
           - postgresql-contrib
 
+    - name: Set pip3 to be pip
+      become: yes
+      shell: update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+
+    # Getting Django app working.
     - name: Clone repo
       git:
         repo: https://github.com/vpcarroll15/personal.git
@@ -29,7 +36,6 @@
         version: "{{ code_branch }}"
     
     - name: Install virtualenv
-      become: yes
       pip:
         name: virtualenv
 
@@ -38,8 +44,34 @@
         requirements: /home/{{ username }}/source/requirements.txt
         virtualenv: /home/{{ username }}/venv
 
-    - name: Copy .bashrc to remote machine
+    - name: Copy .bash_aliases to remote machine
       copy:
-        src: bashrc
-        dest: /home/{{ username }}/.bashrc
+        src: bash_aliases
+        dest: /home/{{ username }}/.bash_aliases
+
+    - name: Copy environment.env to remote machine
+      copy:
+        src: encrypted_environment.env
+        dest: /home/{{ username }}/environment.env
       tags: vault
+    
+    # Getting gunicorn working.
+    - name: Install gunicorn socket file
+      become: yes
+      copy:
+        src: gunicorn.socket
+        dest: /etc/systemd/system/gunicorn.socket
+
+    - name: Install gunicorn service file
+      become: yes
+      template:
+        src: gunicorn.service
+        dest: /etc/systemd/system/gunicorn.service
+
+    - name: Enable and start gunicorn socket
+      become: yes
+      systemd:
+        state: started
+        enabled: yes
+        daemon_reload: yes
+        name: gunicorn.socket

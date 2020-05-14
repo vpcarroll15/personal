@@ -1,0 +1,19 @@
+# Unit file that actually starts gunicorn.
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+User={{ username }}
+Group=www-data
+WorkingDirectory=/home/{{ username }}/source
+ExecStart=/home/{{ username }}/venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          website.wsgi:application
+EnvironmentFile=/home/{{ username }}/environment.env
+
+[Install]
+WantedBy=multi-user.target
