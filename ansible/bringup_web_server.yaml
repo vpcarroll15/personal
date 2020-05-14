@@ -63,18 +63,14 @@
       copy:
         src: encrypted_environment.env
         dest: /home/{{ username }}/environment.env
-      tags: vault, django
-
-    - name: Collect static files
-      shell: /home/{{ username }}/source/manage.py collectstatic --noinput
+      tags: vault
+    
+    - name: Copy file that makes it easy to migrate Django
+      copy:
+        src: migrate_environment
+        dest: /home/{{ username }}/migrate_environment
+        mode: '0755'
       tags: django
-
-    # NOTE: This migrates the prod database if the web server is pointed at the
-    # prod database, so...be aware. This is consistent with how platforms like
-    # Elastic Beanstalk work.
-    - name: Migrate database
-      shell: /home/{{ username }}/source/manage.py migrate
-      tags: django, migrate
 
     # Getting gunicorn working.
     - name: Install gunicorn socket file
@@ -98,6 +94,13 @@
         enabled: yes
         daemon_reload: yes
         name: gunicorn.socket
+      tags: gunicorn
+
+    - name: Restart gunicorn
+      become: yes
+      systemd:
+        state: restarted
+        name: gunicorn
       tags: gunicorn
 
     # Getting nginx working.
