@@ -1,0 +1,1 @@
+This is a very good album, and similar to [False Readings On](https://paulcarroll.site/music/music/36), so please refer to that review. It's not quite as dextrous at emotional manipulation, probably because Eluvium was earlier in his career, but it creates a peaceful world that is pleasant to occupy for an hour.
