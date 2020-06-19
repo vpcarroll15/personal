@@ -5,4 +5,8 @@
 <h3>Created at: {{ hunt_template.created_at | date:"F j, Y" }}</h3>
 <h2>Description</h2>
 <p>{{ hunt_template.description }}</p>
+<form action="{% url 'scavenger_hunt:create_new_hunt' template_id=hunt_template.id %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Start this hunt!">
+</form>
 {% endblock %}
