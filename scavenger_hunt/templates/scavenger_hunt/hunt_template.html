@@ -1,8 +1,8 @@
 {% extends "scavenger_hunt/boilerplate.html" %}
 {% block all %}
-<p><a href="{% url 'scavenger_hunt:hunt_list' %}">See all hunts</a></p>
-<h1>{{ hunt.name }}</h1>
-<h3>Created at: {{ hunt.created_at | date:"F j, Y" }}</h3>
+<p><a href="{% url 'scavenger_hunt:hunt_templates' %}">See all hunts</a></p>
+<h1>{{ hunt_template.name }}</h1>
+<h3>Created at: {{ hunt_template.created_at | date:"F j, Y" }}</h3>
 <h2>Description</h2>
-<p>{{ hunt.description }}</p>
+<p>{{ hunt_template.description }}</p>
 {% endblock %}

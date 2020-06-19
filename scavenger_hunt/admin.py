@@ -4,7 +4,7 @@ from .models import ScavengerHunt, ScavengerHuntTemplate, Location
 
 
 class ScavengerHuntAdmin(admin.ModelAdmin):
-    list_display = ('hunt', 'current_location', 'updated_at')
+    list_display = ('hunt_template', 'current_location', 'updated_at')
 
 
 admin.site.register(ScavengerHunt, ScavengerHuntAdmin)

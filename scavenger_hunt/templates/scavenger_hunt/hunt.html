@@ -1,0 +1,12 @@
+{% extends "scavenger_hunt/boilerplate.html" %}
+{% block all %}
+<p>
+    <strong>
+        In order to progress in your scavenger hunt, you must visit the location
+        described by the clue and press "Advance."
+    </strong>
+</p>
+<p>{{ hunt.current_location.clue }}</p>
+<p><strong>Advance</strong> (TODO: make this a button)</p>
+<p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a></p>
+{% endblock %}
