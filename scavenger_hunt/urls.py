@@ -5,5 +5,5 @@ from . import views
 
 app_name = 'scavenger_hunt'
 urlpatterns = [
-    path('', views.index, name='home'),
+    path('', views.list_hunt_templates, name='home'),
 ]

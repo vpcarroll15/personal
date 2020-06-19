@@ -26,7 +26,7 @@ class ScavengerHuntTemplate(models.Model):
     """A description of a scavenger hunt that someone could start."""
     # The list of location ids, in order, that we are supposed to visit on this hunt.
     location_ids = ArrayField(models.IntegerField(), default=list)
-
+    # <a href="{% url 'scavenger_hunt:home' %}">
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
 
@@ -46,5 +46,8 @@ class ScavengerHunt(models.Model):
 
     current_location = models.ForeignKey("Location", on_delete=models.CASCADE)
 
+    is_finished = models.BooleanField(default=False)
+
     def __str__(self):
         return "{}, {}".format(self.hunt, self.current_location)
+    

@@ -1,28 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140792120-1"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'UA-140792120-1');
-    </script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <meta charset="UTF-8">
-    <title>{% block title %}Paul's Music{% endblock %}</title>
-    {% load static %}
-    <script src="{% static 'js/hide_with_checkboxes.js' %}"></script>
-    <link rel="icon" href={% static "favicon.png" %} type="image/png">
-    <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static "music/css/styles.css" %}">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-</head>
-<body>
+{% extends "base.html" %}
+{% block all %}
 <div>
     <div class="toolbar">
         <form action="{% url 'music:search' %}" class="toolbar-form">
@@ -35,5 +12,4 @@
     </div>
     {% block content %}{% endblock %}
 </div>
-</body>
-</html>
+{% endblock %}
