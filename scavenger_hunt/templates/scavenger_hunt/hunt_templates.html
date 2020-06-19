@@ -1,0 +1,30 @@
+{% extends "scavenger_hunt/boilerplate.html" %}
+{% block all %}
+{% if hunt_templates %}
+<h1>Choose your adventure!</h1>
+<table id="sortable-table" class="checkered-blue">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Updated At</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for hunt in hunt_templates %}
+        <tr>
+            <td>
+                {{ hunt.name }}
+            </td>
+            <td>
+                {{ hunt.description }}
+            </td>
+            <td>{{ hunt.updated_at | date:"F j, Y"}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<h1>No hunts available. :(</h3>
+{% endif %}
+{% endblock %}
