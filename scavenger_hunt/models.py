@@ -48,7 +48,7 @@ class ScavengerHunt(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    current_location = models.ForeignKey("Location", on_delete=models.CASCADE)
+    current_location = models.ForeignKey("Location", null=True, on_delete=models.CASCADE)
 
     is_finished = models.BooleanField(default=False)
 
