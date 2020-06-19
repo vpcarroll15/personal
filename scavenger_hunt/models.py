@@ -43,7 +43,7 @@ class ScavengerHuntTemplate(models.Model):
 
 class ScavengerHunt(models.Model):
     """Represents a scavenger hunt in progress."""
-    hunt = models.ForeignKey("ScavengerHuntTemplate", on_delete=models.CASCADE)
+    hunt_template = models.ForeignKey("ScavengerHuntTemplate", on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -53,5 +53,5 @@ class ScavengerHunt(models.Model):
     is_finished = models.BooleanField(default=False)
 
     def __str__(self):
-        return "{}, {}".format(self.hunt, self.current_location)
+        return "{}, {}".format(self.hunt_template, self.current_location)
     

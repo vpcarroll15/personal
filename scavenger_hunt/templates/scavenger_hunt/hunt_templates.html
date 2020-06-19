@@ -11,15 +11,15 @@
         </tr>
     </thead>
     <tbody>
-        {% for hunt in hunt_templates %}
+        {% for hunt_template in hunt_templates %}
         <tr>
             <td>
-                <a href="{% url 'scavenger_hunt:hunt_template' hunt_template_id=hunt.id %}">{{ hunt.name }}</a>
+                <a href="{% url 'scavenger_hunt:hunt_template' id=hunt_template.id %}">{{ hunt_template.name }}</a>
             </td>
             <td>
-                {{ hunt.description }}
+                {{ hunt_template.description }}
             </td>
-            <td>{{ hunt.created_at | date:"F j, Y"}}</td>
+            <td>{{ hunt_template.created_at | date:"F j, Y"}}</td>
         </tr>
         {% endfor %}
     </tbody>
