@@ -7,19 +7,19 @@
         <tr>
             <th>Name</th>
             <th>Description</th>
-            <th>Updated At</th>
+            <th>Created At</th>
         </tr>
     </thead>
     <tbody>
         {% for hunt in hunt_templates %}
         <tr>
             <td>
-                {{ hunt.name }}
+                <a href="{% url 'scavenger_hunt:hunt_template' hunt_template_id=hunt.id %}">{{ hunt.name }}</a>
             </td>
             <td>
                 {{ hunt.description }}
             </td>
-            <td>{{ hunt.updated_at | date:"F j, Y"}}</td>
+            <td>{{ hunt.created_at | date:"F j, Y"}}</td>
         </tr>
         {% endfor %}
     </tbody>
