@@ -20,5 +20,6 @@ from django.http import HttpResponseRedirect
 urlpatterns = [
     path('', lambda r: HttpResponseRedirect('music/')),
     path('music/', include('music.urls')),
+    path('scavenger_hunt/', include('scavenger_hunt.urls')),
     path('admin/', admin.site.urls),
 ]
