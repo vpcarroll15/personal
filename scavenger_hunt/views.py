@@ -55,12 +55,22 @@ def hunt_template(request, id):
 
 def hunt(request, id):
     """Renders a single hunt detailed view."""
+    hunt = get_object_or_404(ScavengerHunt, pk=id)
     if request.method == 'GET':
-        hunt = get_object_or_404(ScavengerHunt, pk=id)
         return render(request, 'scavenger_hunt/hunt.html', {'hunt': hunt})
     elif request.method == 'POST':
-        # TODO: This.
-        raise NotImplementedError
+        if hunt.should_advance_to_next_location(float(request.POST['latitude']), float(request.POST['longitude'])):
+            next_location_or_response, success = _get_next_location(
+                hunt.hunt_template.location_ids,
+                current_location=hunt.current_location
+            )
+            if not success:
+                return next_location_or_response
+            hunt.current_location = next_location_or_response
+            hunt.is_finished = hunt.current_location is None
+            hunt.save()
+        return redirect("scavenger_hunt:hunt", id=hunt.id)
+
     return HttpResponseNotAllowed(["GET", "POST"])
 
 
@@ -73,12 +83,12 @@ def create_new_hunt(request, template_id):
         return HttpResponseNotAllowed(["POST"])
 
     hunt_template = get_object_or_404(ScavengerHuntTemplate, pk=template_id)
-    current_location_or_response, success = _get_next_location(hunt_template.location_ids)
+    next_location_or_response, success = _get_next_location(hunt_template.location_ids)
     if not success:
-        return current_location_or_response
-    current_location = current_location_or_response
-    is_finished = current_location is None
+        return next_location_or_response
+    next_location = next_location_or_response
+    is_finished = next_location is None
 
-    hunt = ScavengerHunt(hunt_template=hunt_template, current_location=current_location, is_finished=is_finished)
+    hunt = ScavengerHunt(hunt_template=hunt_template, current_location=next_location, is_finished=is_finished)
     hunt.save()
     return redirect("scavenger_hunt:hunt", id=hunt.id)
