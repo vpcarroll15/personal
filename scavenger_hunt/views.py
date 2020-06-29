@@ -65,7 +65,7 @@ def hunt(request, id):
         try:
             latitude = float(request.POST['latitude'])
             longitude = float(request.POST['longitude'])
-            radius_meters = float(request.POST.get('radius_meters'), DEFAULT_SCAVENGER_HUNT_RADIUS_M)
+            radius_meters = float(request.POST.get('radius_meters', DEFAULT_SCAVENGER_HUNT_RADIUS_M))
         except ValueError:
             return HttpResponse(reason="Invalid input to POST", status=400)
 

@@ -36,10 +36,11 @@ function submitLocation() {
             described by the clue and press "Advance."
         </strong>
     </p>
-    <p>{{ hunt.current_location.clue }}</p>
+    <p><strong>Clue: </strong>{{ hunt.current_location.clue }}</p>
     <form id="location_form" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
         {% csrf_token %}
-        <input type="number" name="radius_meters">
+        <label for="radius_meters">Radius for match (m)</label>
+        <input type="number" id="radius_meters" name="radius_meters"><br>
         <button onclick="submitLocation()">Advance</button>
     </form>
     <p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a></p>

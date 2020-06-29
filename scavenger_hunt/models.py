@@ -77,7 +77,7 @@ class ScavengerHunt(models.Model):
         offset_heading = (heading_from_north + (DEGREES_PER_LABEL / 2))
         if offset_heading > 360:
             offset_heading -= 360
-        index_in_heading_labels =  offset_heading // DEGREES_PER_LABEL
+        index_in_heading_labels =  int(offset_heading / DEGREES_PER_LABEL)
         return distance_m, HEADING_LABELS[index_in_heading_labels]
 
     
