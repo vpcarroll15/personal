@@ -1,12 +1,46 @@
 {% extends "scavenger_hunt/boilerplate.html" %}
 {% block all %}
-<p>
-    <strong>
-        In order to progress in your scavenger hunt, you must visit the location
-        described by the clue and press "Advance."
-    </strong>
-</p>
-<p>{{ hunt.current_location.clue }}</p>
-<p><strong>Advance</strong> (TODO: make this a button)</p>
-<p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a></p>
+<script>
+function submitLocation() {
+    /* Submits the location form, after appending our location to it. */
+    function submitLocationHelper(position) {
+        const form = document.getElementById('location_form');
+
+        function addInputField(form, name, value) {
+            /* Adds a hidden field with name and value to the form.*/
+            const hiddenField = document.createElement('input');
+            hiddenField.type = 'hidden';
+            hiddenField.name = name;
+            hiddenField.value = value;
+            form.appendChild(hiddenField);
+        }
+
+        addInputField(form, "latitude", position.coords.latitude);
+        addInputField(form, "longitude", position.coords.longitude);
+        form.submit();
+    }
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(submitLocationHelper);
+    } else {
+        alert("Geolocation not supported. :(");
+    }
+}
+</script>
+{% if hunt.is_finished %}
+    <p>Congratulations! You are done with the hunt.</p>
+    <p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Return home</a></p>
+{% else %}
+    <p>
+        <strong>
+            In order to progress in your scavenger hunt, you must visit the location
+            described by the clue and press "Advance."
+        </strong>
+    </p>
+    <p>{{ hunt.current_location.clue }}</p>
+    <form id="location_form" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
+        {% csrf_token %}
+        <button onclick="submitLocation()">Advance</button>
+    </form>
+    <p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a></p>
+{% endif %}
 {% endblock %}

@@ -55,3 +55,10 @@ class ScavengerHunt(models.Model):
     def __str__(self):
         return "{}, {}".format(self.hunt_template, self.current_location)
     
+    def should_advance_to_next_location(self, latitude, longitude):
+        """
+        Return True if, according to our coordinates, we should advance to the next location.
+        """
+        # TODO: Implement this.
+        return True
+    
