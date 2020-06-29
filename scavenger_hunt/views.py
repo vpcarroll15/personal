@@ -4,6 +4,9 @@ from django.http import HttpResponseNotAllowed, HttpResponse
 from .models import ScavengerHuntTemplate, ScavengerHunt, Location
 
 
+DEFAULT_SCAVENGER_HUNT_RADIUS_M = 50
+
+
 def _get_next_location(location_ids, current_location=None):
     """
     Get the next Location that we should visit, given a sequence of location ids and the current location.
@@ -59,7 +62,14 @@ def hunt(request, id):
     if request.method == 'GET':
         return render(request, 'scavenger_hunt/hunt.html', {'hunt': hunt})
     elif request.method == 'POST':
-        if hunt.should_advance_to_next_location(float(request.POST['latitude']), float(request.POST['longitude'])):
+        try:
+            latitude = float(request.POST['latitude'])
+            longitude = float(request.POST['longitude'])
+            radius_meters = float(request.POST.get('radius_meters'), DEFAULT_SCAVENGER_HUNT_RADIUS_M)
+        except ValueError:
+            return HttpResponse(reason="Invalid input to POST", status=400)
+
+        if hunt.should_advance_to_next_location(latitude, longitude, radius_meters):
             next_location_or_response, success = _get_next_location(
                 hunt.hunt_template.location_ids,
                 current_location=hunt.current_location

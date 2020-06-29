@@ -27,7 +27,7 @@ function submitLocation() {
 }
 </script>
 {% if hunt.is_finished %}
-    <p>Congratulations! You are done with the hunt.</p>
+    <p>{{ hunt.hunt_template.finished_message }}</p>
     <p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Return home</a></p>
 {% else %}
     <p>
@@ -39,6 +39,7 @@ function submitLocation() {
     <p>{{ hunt.current_location.clue }}</p>
     <form id="location_form" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
         {% csrf_token %}
+        <input type="number" name="radius_meters">
         <button onclick="submitLocation()">Advance</button>
     </form>
     <p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a></p>

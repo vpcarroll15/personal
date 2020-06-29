@@ -1,6 +1,10 @@
 from django.db import models
-
 from django.contrib.postgres.fields import ArrayField
+from geographiclib.geodesic import Geodesic
+
+
+HEADING_LABELS = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"]
+DEGREES_PER_LABEL = 360 / len(HEADING_LABELS)
 
 
 class Location(models.Model):
@@ -55,10 +59,32 @@ class ScavengerHunt(models.Model):
     def __str__(self):
         return "{}, {}".format(self.hunt_template, self.current_location)
     
-    def should_advance_to_next_location(self, latitude, longitude):
+    def distance_and_direction_to_current_location(self, latitude, longitude):
+        """"
+        Returns the distance in meters to the current location, and the direction as a string: "WEST," "NORTHWEST," etc.
+        """
+        assert self.current_location is not None
+        out_dict = Geodesic.WGS84.Inverse(
+            latitude, longitude, self.current_location.latitude, self.current_location.longitude
+        )
+        distance_m = out_dict["s12"]
+        heading_from_north = out_dict["azi1"]
+        if heading_from_north < 0.0:
+            heading_from_north += 360
+
+        # We have to add a weird little offset because "north" doesn't start at 0 degrees. It starts at
+        # -22.5 degrees.
+        offset_heading = (heading_from_north + (DEGREES_PER_LABEL / 2))
+        if offset_heading > 360:
+            offset_heading -= 360
+        index_in_heading_labels =  offset_heading // DEGREES_PER_LABEL
+        return distance_m, HEADING_LABELS[index_in_heading_labels]
+
+    
+    def should_advance_to_next_location(self, latitude, longitude, radius_meters):
         """
         Return True if, according to our coordinates, we should advance to the next location.
         """
-        # TODO: Implement this.
-        return True
+        distance, _ = self.distance_and_direction_to_current_location(latitude, longitude)
+        return distance < radius_meters
     
