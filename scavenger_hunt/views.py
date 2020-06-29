@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponseNotAllowed, HttpResponse
 
 from .models import ScavengerHuntTemplate, ScavengerHunt, Location
@@ -60,7 +60,9 @@ def hunt(request, id):
     """Renders a single hunt detailed view."""
     hunt = get_object_or_404(ScavengerHunt, pk=id)
     if request.method == 'GET':
-        return render(request, 'scavenger_hunt/hunt.html', {'hunt': hunt})
+        success = request.GET.get("success", "True") == "True"
+        first_time = request.GET.get("firstTime", "False") == "True"
+        return render(request, 'scavenger_hunt/hunt.html', {'hunt': hunt, "success": success, "first_time": first_time})
     elif request.method == 'POST':
         try:
             latitude = float(request.POST['latitude'])
@@ -79,7 +81,10 @@ def hunt(request, id):
             hunt.current_location = next_location_or_response
             hunt.is_finished = hunt.current_location is None
             hunt.save()
-        return redirect("scavenger_hunt:hunt", id=hunt.id)
+        else:
+            success = False
+        url = reverse("scavenger_hunt:hunt", kwargs={"id": hunt.id}) + "?success={}".format(success)
+        return redirect(url)
 
     return HttpResponseNotAllowed(["GET", "POST"])
 
@@ -101,4 +106,5 @@ def create_new_hunt(request, template_id):
 
     hunt = ScavengerHunt(hunt_template=hunt_template, current_location=next_location, is_finished=is_finished)
     hunt.save()
-    return redirect("scavenger_hunt:hunt", id=hunt.id)
+    url = reverse("scavenger_hunt:hunt", kwargs={"id": hunt.id}) + "?firstTime=True"
+    return redirect(url)

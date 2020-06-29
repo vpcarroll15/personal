@@ -27,15 +27,28 @@ function submitLocation() {
 }
 </script>
 {% if hunt.is_finished %}
-    <p>{{ hunt.hunt_template.finished_message }}</p>
+    {% if hunt.hunt_template.finished_message %}
+        <p>{{ hunt.hunt_template.finished_message }}</p>
+    {% else %}
+        <p>Congratulations! You finished the hunt.</p>
+    {% endif %}
     <p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Return home</a></p>
 {% else %}
-    <p>
-        <strong>
-            In order to progress in your scavenger hunt, you must visit the location
-            described by the clue and press "Advance."
-        </strong>
-    </p>
+    {% if first_time %}
+        <p>
+            <strong>
+                In order to progress in your scavenger hunt, you must visit the location
+                described by the clue and press "Advance."
+            </strong>
+        </p>
+    {% endif %}
+    {% if not success %}
+        <p>
+            <strong>
+                You aren't close enough to the right spot to advance. Keep trying!
+            </strong>
+        </p>
+    {% endif %}
     <p><strong>Clue: </strong>{{ hunt.current_location.clue }}</p>
     <form id="location_form" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
         {% csrf_token %}
