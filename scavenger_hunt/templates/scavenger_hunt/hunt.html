@@ -1,26 +1,64 @@
 {% extends "scavenger_hunt/boilerplate.html" %}
 {% block all %}
 <script>
+function addInputField(form, name, value) {
+    /* Adds a hidden field with name and value to the form.*/
+    const hiddenField = document.createElement('input');
+    hiddenField.type = 'hidden';
+    hiddenField.value = value;
+    hiddenField.name = name;
+    form.appendChild(hiddenField);
+}
+
 function submitLocation() {
     /* Submits the location form, after appending our location to it. */
     function submitLocationHelper(position) {
-        const form = document.getElementById('location_form');
-
-        function addInputField(form, name, value) {
-            /* Adds a hidden field with name and value to the form.*/
-            const hiddenField = document.createElement('input');
-            hiddenField.type = 'hidden';
-            hiddenField.name = name;
-            hiddenField.value = value;
-            form.appendChild(hiddenField);
-        }
-
+        const form = document.getElementById('advance_form');
         addInputField(form, "latitude", position.coords.latitude);
         addInputField(form, "longitude", position.coords.longitude);
         form.submit();
     }
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(submitLocationHelper);
+    } else {
+        alert("Geolocation not supported. :(");
+    }
+}
+
+function retrieveHint() {
+    /* Retrieves a hint from the backend and logs it to the console. */
+    function retrieveHintHelper(position) {
+        // Submit the position to the backend with AJAX.
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                const hint_content = JSON.parse(this.responseText);
+
+                const hint = document.getElementById("hint");
+                hint.innerHTML = '';
+
+                const approximate_distance_m = parseFloat(hint_content["distance"].toPrecision(1));
+                var distance_string = "";
+                if (approximate_distance_m > 1000) {
+                    distance_string = "~" + (approximate_distance_m / 1000) + "km"
+                } else {
+                    distance_string = "~" + approximate_distance_m + "m"
+                }
+                var distance = document.createElement("p");
+                distance.innerHTML = "<strong>Target distance: </strong>" + distance_string;
+                hint.appendChild(distance);
+
+                var direction = document.createElement("p");
+                direction.innerHTML = "<strong>Target heading: </strong>" + hint_content["direction"];
+                hint.appendChild(direction);
+            }
+        };
+        var base_url = "{% url 'scavenger_hunt:hint' id=hunt.id %}"
+        xhttp.open("GET", base_url + "?latitude=" + position.coords.latitude + "&longitude=" + position.coords.longitude, true);
+        xhttp.send();
+    }
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(retrieveHintHelper);
     } else {
         alert("Geolocation not supported. :(");
     }
@@ -38,7 +76,7 @@ function submitLocation() {
         <p>
             <strong>
                 In order to progress in your scavenger hunt, you must visit the location
-                described by the clue and press "Advance."
+                indicated by the clue and press "Advance." Ask for a hint if you get stuck!
             </strong>
         </p>
     {% endif %}
@@ -50,7 +88,9 @@ function submitLocation() {
         </p>
     {% endif %}
     <p><strong>Clue: </strong>{{ hunt.current_location.clue }}</p>
-    <form id="location_form" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
+    <div id="hint"></div>
+    <button onclick="retrieveHint()">Hint</button>
+    <form id="advance_form" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
         {% csrf_token %}
         <label for="radius_meters">Radius for match (m)</label>
         <input type="number" id="radius_meters" name="radius_meters"><br>

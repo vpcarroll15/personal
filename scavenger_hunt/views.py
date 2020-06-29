@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
-from django.http import HttpResponseNotAllowed, HttpResponse
+from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
 
 from .models import ScavengerHuntTemplate, ScavengerHunt, Location
 
@@ -68,7 +68,7 @@ def hunt(request, id):
             latitude = float(request.POST['latitude'])
             longitude = float(request.POST['longitude'])
             radius_meters = float(request.POST.get('radius_meters', DEFAULT_SCAVENGER_HUNT_RADIUS_M))
-        except ValueError:
+        except (KeyError, ValueError):
             return HttpResponse(reason="Invalid input to POST", status=400)
 
         if hunt.should_advance_to_next_location(latitude, longitude, radius_meters):
@@ -108,3 +108,21 @@ def create_new_hunt(request, template_id):
     hunt.save()
     url = reverse("scavenger_hunt:hunt", kwargs={"id": hunt.id}) + "?firstTime=True"
     return redirect(url)
+
+
+def hunt_hint(request, id):
+    """
+    Returns a JSON dictionary consisting of a hint for the hunt with id.
+    """
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(["GET"])
+    hunt = get_object_or_404(ScavengerHunt, pk=id)
+
+    try:
+        latitude = float(request.GET["latitude"])
+        longitude = float(request.GET["longitude"])
+    except (KeyError, ValueError):
+        return HttpResponse(reason="Invalid input to GET", status=400)
+    
+    distance, direction = hunt.distance_and_direction_to_current_location(latitude, longitude)
+    return JsonResponse({"distance": distance, "direction": direction})
