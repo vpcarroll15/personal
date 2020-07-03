@@ -1,0 +1,26 @@
+.simple-border {
+  border-style: solid;
+  border-width: thin;
+  border-color: black;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.clue {
+  background-color: #ecefd5;
+}
+
+#hint {
+  background-color:	#9ACD32;
+  display: none;
+}
+
+.scavenger-control-panel {
+  background-color: #FAFAD2;
+}
+
+.scavenger-control-panel-elem {
+  display: inline;
+  margin-right: 10px;
+}
