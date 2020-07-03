@@ -18,7 +18,7 @@ admin.site.register(ScavengerHuntTemplate, ScavengerHuntTemplateAdmin)
 
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'updated_at')
+    list_display = ('id', 'name', 'radius', 'updated_at')
 
 
 admin.site.register(Location, LocationAdmin)
