@@ -7,6 +7,21 @@
   margin-top: 10px;
 }
 
+.scavenger-hunt-title-border {
+  border-style: solid;
+  border-width: thin;
+  border-color: black;
+  margin-top: 15px;
+}
+
+.simple-border-no-radius {
+  border-style: solid;
+  border-width: thin;
+  border-color: black;
+  padding: 10px;
+  margin-top: 10px;
+}
+
 .clue {
   background-color: #ecefd5;
 }
@@ -23,4 +38,32 @@
 .scavenger-control-panel-elem {
   display: inline;
   margin-right: 10px;
+}
+
+.scavenger-hunt-title {
+  background-color: #FFFF33;
+  padding: 10px;
+}
+
+.scavenger-hunt-metadata {
+  background-color:	#9ACD32;
+  padding: 10px;
+}
+
+.scavenger-hunt-description {
+  background-color: #ecefd5;
+  padding: 10px;
+}
+
+.scavenger-hunt-start {
+  display: inline;
+  margin-right: 10px;
+}
+
+.scavenger-hunt-start-nav-bar {
+  padding: 10px;
+  background-color: #FAFAD2;
+  border-style: solid;
+  border-width: thin;
+  margin-top: 10px;
 }

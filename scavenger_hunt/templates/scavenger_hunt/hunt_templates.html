@@ -7,7 +7,7 @@
         <tr>
             <th>Name</th>
             <th>Description</th>
-            <th>Created At</th>
+            <th>Updated At</th>
         </tr>
     </thead>
     <tbody>
@@ -19,7 +19,7 @@
             <td>
                 {{ hunt_template.description }}
             </td>
-            <td>{{ hunt_template.created_at | date:"F j, Y"}}</td>
+            <td>{{ hunt_template.updated_at | date:"F j, Y"}}</td>
         </tr>
         {% endfor %}
     </tbody>
