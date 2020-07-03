@@ -99,9 +99,9 @@ function retrieveHint() {
     <div class="scavenger-control-panel simple-border">
         <form id="advance_form" class="scavenger-control-panel-elem" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
             {% csrf_token %}
-            <button onclick="submitLocation()">Advance</button>
+            <button type="button" onclick="submitLocation()">Advance</button>
         </form>
-        <button class="scavenger-control-panel-elem" onclick="retrieveHint()">Calculate heading</button>
+        <button class="scavenger-control-panel-elem" type="button" onclick="retrieveHint()">Calculate heading</button>
         <a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a>
     </div>
 {% endif %}
