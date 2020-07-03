@@ -85,10 +85,10 @@ class ScavengerHunt(models.Model):
         return distance_m, HEADING_LABELS[index_in_heading_labels]
 
     
-    def should_advance_to_next_location(self, latitude, longitude, radius_meters):
+    def should_advance_to_next_location(self, latitude, longitude):
         """
         Return True if, according to our coordinates, we should advance to the next location.
         """
         distance, _ = self.distance_and_direction_to_current_location(latitude, longitude)
-        return distance < radius_meters
+        return distance < self.current_location.radius
     
