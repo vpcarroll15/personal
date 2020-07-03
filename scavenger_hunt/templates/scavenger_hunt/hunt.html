@@ -44,13 +44,20 @@ function retrieveHint() {
                 } else {
                     distance_string = "~" + approximate_distance_m + "m"
                 }
+
+                var header = document.createElement("h2");
+                header.innerHTML = "Your heading:";
+                hint.appendChild(header);
+
                 var distance = document.createElement("p");
-                distance.innerHTML = "<strong>Target distance: </strong>" + distance_string;
+                distance.innerHTML = "Distance: " + distance_string;
                 hint.appendChild(distance);
 
                 var direction = document.createElement("p");
-                direction.innerHTML = "<strong>Target heading: </strong>" + hint_content["direction"];
+                direction.innerHTML = "Direction: " + hint_content["direction"];
                 hint.appendChild(direction);
+
+                hint.style.display = "block";
             }
         };
         var base_url = "{% url 'scavenger_hunt:hint' id=hunt.id %}"
@@ -73,29 +80,28 @@ function retrieveHint() {
     <p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Return home</a></p>
 {% else %}
     {% if first_time %}
-        <p>
-            <strong>
-                In order to progress in your scavenger hunt, you must visit the location
-                indicated by the clue and press "Advance." Ask for a hint if you get stuck!
-            </strong>
-        </p>
+        <div class="toolbar">
+            In order to progress in your scavenger hunt, you must visit the location
+            indicated by the clue and press "Advance." Ask for your heading if you get stuck!
+        </div>
     {% endif %}
     {% if not success %}
-        <p>
-            <strong>
-                You aren't close enough to the right spot to advance. Keep trying!
-            </strong>
-        </p>
+        <div class="toolbar">
+            You aren't close enough to the right spot to advance. Keep trying!
+        </div>
     {% endif %}
-    <p><strong>Clue: </strong>{{ hunt.current_location.clue }}</p>
-    <div id="hint"></div>
-    <button onclick="retrieveHint()">Hint</button>
-    <form id="advance_form" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
-        {% csrf_token %}
-        <label for="radius_meters">Radius for match (m)</label>
-        <input type="number" id="radius_meters" name="radius_meters"><br>
-        <button onclick="submitLocation()">Advance</button>
-    </form>
-    <p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a></p>
+    <div class="clue simple-border">
+        <h2>Your clue:</h2>
+        <div>{{ hunt.current_location.clue }}</div>
+    </div>
+    <div id="hint" class="simple-border"></div>
+    <div class="scavenger-control-panel simple-border">
+        <form id="advance_form" class="scavenger-control-panel-elem" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
+            {% csrf_token %}
+            <button onclick="submitLocation()">Advance</button>
+        </form>
+        <button class="scavenger-control-panel-elem" onclick="retrieveHint()">Calculate heading</button>
+        <a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a>
+    </div>
 {% endif %}
 {% endblock %}

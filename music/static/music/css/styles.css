@@ -15,7 +15,7 @@ p {
   padding-bottom: 3px;
 }
 
-td {
+.checkered-blue td {
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -31,8 +31,7 @@ td {
   border: 1px solid black;
 }
 
-.checkered-blue tr:nth-child(even) td:nth-child(odd),
-tr:nth-child(odd) td:nth-child(even)
+.checkered-blue tr:nth-child(even)
 {
     background-color: #7ed4fc;
 }
