@@ -19,6 +19,10 @@ class Location(models.Model):
         help_text="This will never be displayed to the user. It is only used in the admin.",
     )
 
+    radius = models.IntegerField(default=30, help_text=(
+        "How close the user needs to be in meters to the coordinate in order to advance."
+    ))
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
