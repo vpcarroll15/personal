@@ -16,6 +16,12 @@
   display: none;
 }
 
+@media (pointer:none), (pointer:coarse) {
+  .scavenger-hunt {
+    font-size: 3em;
+  }
+}
+
 .scavenger-control-panel {
   background-color: #FAFAD2;
 }

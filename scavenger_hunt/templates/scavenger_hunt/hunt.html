@@ -71,6 +71,7 @@ function retrieveHint() {
     }
 }
 </script>
+<div class="scavenger-hunt">
 {% if hunt.is_finished %}
     {% if hunt.hunt_template.finished_message %}
         <p>{{ hunt.hunt_template.finished_message }}</p>
@@ -105,3 +106,4 @@ function retrieveHint() {
     </div>
 {% endif %}
 {% endblock %}
+</div>
