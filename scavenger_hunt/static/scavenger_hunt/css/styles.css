@@ -67,3 +67,10 @@
   border-width: thin;
   margin-top: 10px;
 }
+
+.max-size-img {
+  width: auto;
+  max-width: 600px;
+  height: auto;
+  max-height: 600px;
+}

@@ -6,6 +6,10 @@
 </div>
 <div class="simple-border-no-radius scavenger-hunt-description">
     <h2>Description</h2>
+    {% if hunt_template.path_to_static_img_asset %}
+        {% load static %}
+        <img class="max-size-img" src="{% static hunt_template.path_to_static_img_asset %}" alt="{{ hunt_template.path_to_static_img_asset }}">
+    {% endif %}
     <p>{{ hunt_template.description }}</p>
 </div>
 <div class="scavenger-hunt-start-nav-bar">

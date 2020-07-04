@@ -24,7 +24,7 @@ class Location(models.Model):
     ))
 
     path_to_static_img_asset = models.CharField(
-        null=True, blank=True, max_length=200, help_text="This should point to an asset in scavenger_hunt/img. Optional."
+        null=True, blank=True, max_length=200, help_text="This should point to a static image asset. Optional."
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -47,7 +47,7 @@ class ScavengerHuntTemplate(models.Model):
     )
 
     path_to_static_img_asset = models.CharField(
-        null=True, blank=True, max_length=200, help_text="This should point to an asset in scavenger_hunt/img. Optional."
+        null=True, blank=True, max_length=200, help_text="This should point to a static image asset. Optional."
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
