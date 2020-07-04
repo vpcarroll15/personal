@@ -73,3 +73,8 @@
   max-width: 100%;
   height: auto;
 }
+
+.heading-disabled {
+  color: red;
+  margin-right: 10px;
+}

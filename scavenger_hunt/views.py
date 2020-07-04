@@ -120,5 +120,8 @@ def hunt_hint(request, id):
     except (KeyError, ValueError):
         return HttpResponse(reason="Invalid input to GET", status=400)
     
+    if hunt.current_location.disable_heading:
+        return HttpResponse(reason="Not allowed to request a hint for this location", status=403)
+
     distance, direction = hunt.distance_and_direction_to_current_location(latitude, longitude)
     return JsonResponse({"distance": distance, "direction": direction})

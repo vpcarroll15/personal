@@ -27,6 +27,8 @@ class Location(models.Model):
         null=True, blank=True, max_length=200, help_text="This should point to a static image asset. Optional."
     )
 
+    disable_heading = models.BooleanField(default=False, help_text="If true, disables the ability to compute a heading to this destination.")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

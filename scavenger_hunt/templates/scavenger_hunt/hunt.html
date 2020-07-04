@@ -107,7 +107,11 @@ function retrieveHint() {
             {% csrf_token %}
             <button type="button" onclick="submitLocation()">Advance</button>
         </form>
+        {% if hunt.current_location.disable_heading %}
+        <span class="heading-disabled">Calculating a heading has been disabled for this location.</span>
+        {% else %}
         <button class="scavenger-control-panel-elem" type="button" onclick="retrieveHint()">Calculate heading</button>
+        {% endif %}
         <a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a>
     </div>
 {% endif %}
