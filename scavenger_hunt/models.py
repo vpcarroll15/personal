@@ -23,6 +23,10 @@ class Location(models.Model):
         "How close the user needs to be in meters to the coordinate in order to advance."
     ))
 
+    path_to_static_img_asset = models.CharField(
+        null=True, blank=True, max_length=200, help_text="This should point to an asset in scavenger_hunt/img. Optional."
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -40,6 +44,10 @@ class ScavengerHuntTemplate(models.Model):
 
     finished_message = models.TextField(
         blank=True, help_text="The user will read this if they complete your hunt.",
+    )
+
+    path_to_static_img_asset = models.CharField(
+        null=True, blank=True, max_length=200, help_text="This should point to an asset in scavenger_hunt/img. Optional."
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
