@@ -12,7 +12,7 @@ class Location(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
 
-    clue = models.TextField()
+    clue = models.TextField(blank=True)
 
     name = models.CharField(
         max_length=200,

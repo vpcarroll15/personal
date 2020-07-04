@@ -93,11 +93,13 @@ function retrieveHint() {
     {% endif %}
     <div class="clue simple-border">
         <h2>Your clue:</h2>
-        {% if hunt.hunt_template.path_to_static_img_asset %}
+        {% if hunt.current_location.path_to_static_img_asset %}
             {% load static %}
-            <img class="max-size-img" src="{% static hunt.hunt_template.path_to_static_img_asset %}" alt="{{ hunt.hunt_template.path_to_static_img_asset }}">
+            <img class="max-size-img" src="{% static hunt.current_location.path_to_static_img_asset %}" alt="{{ hunt.current_location.path_to_static_img_asset }}">
         {% endif %}
-        <div>{{ hunt.current_location.clue }}</div>
+        {% if hunt.current_location.clue %}
+            <div>{{ hunt.current_location.clue }}</div>
+        {% endif %}
     </div>
     <div id="hint" class="simple-border"></div>
     <div class="scavenger-control-panel simple-border">
