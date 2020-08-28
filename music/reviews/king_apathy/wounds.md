@@ -7,7 +7,7 @@ Thränenkind.) If you liked that album, there is much more to like here.
 so heavy and distorted that it was possible to listen to it all the way through and
 not think about them. With *Wounds*, this is impossible. The album starts
 with a spoken-word piece about the damage that humans are doing to the environment, and
-that theme continues to be developed throughout. I find spoken-word stuff offputting in metal music,
+that theme is developed throughout. I find spoken-word stuff offputting in metal music,
 and frankly I think that it does some aesthetic damage here. It just doesn't seem to be
 integrated well. Lyrics have never been this band's strong point, anyway. There is
 never any verbal inventiveness, just nihilistic despair, which is exhausting.
