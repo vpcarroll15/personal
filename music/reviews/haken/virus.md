@@ -1,7 +1,6 @@
 I've wondered in the last couple years...do I actually like prog music at all?
-I've enjoyed, but not adored, several prog albums: [*Veil of Imagination*]
-(https://paulcarroll.site/music/music/101) and, very recently, [*The Long Dream*]
-(https://paulcarroll.site/music/music/114). Prog music is often interesting,
+I've enjoyed, but not adored, several prog albums: [*Veil of Imagination*](https://paulcarroll.site/music/music/101)
+and, very recently, [*The Long Dream*](https://paulcarroll.site/music/music/114). Prog music is often interesting,
 often has a great flow, but usually fails to grab my heart and not let it go.
 
 *Virus* ripped those doubts into a thousand pieces and scattered them to the winds.
