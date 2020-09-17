@@ -70,7 +70,7 @@ def hunt(request, id):
 
         if hunt.should_advance_to_next_location(latitude, longitude, solution):
             next_location_or_response, success = _get_next_location(
-                hunt.hunt_template.location_ids,
+                hunt.location_ids,
                 current_location=hunt.current_location
             )
             if not success:
@@ -101,7 +101,12 @@ def create_new_hunt(request, template_id):
     next_location = next_location_or_response
     is_finished = next_location is None
 
-    hunt = ScavengerHunt(hunt_template=hunt_template, current_location=next_location, is_finished=is_finished)
+    hunt = ScavengerHunt(
+        hunt_template=hunt_template,
+        location_ids=hunt_template.location_ids,
+        current_location=next_location,
+        is_finished=is_finished,
+    )
     hunt.save()
     url = reverse("scavenger_hunt:hunt", kwargs={"id": hunt.id}) + "?firstTime=True"
     return redirect(url)

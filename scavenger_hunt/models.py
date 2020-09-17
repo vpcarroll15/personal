@@ -83,6 +83,8 @@ class ScavengerHunt(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # The list of location ids, in order, that we are supposed to visit on this hunt.
+    location_ids = ArrayField(models.IntegerField(), default=list)
     current_location = models.ForeignKey("Location", null=True, on_delete=models.CASCADE)
 
     is_finished = models.BooleanField(default=False)
