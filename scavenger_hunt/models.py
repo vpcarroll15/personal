@@ -18,6 +18,7 @@ class Location(models.Model):
     longitude = models.FloatField(null=True, blank=True)
 
     clue = models.TextField(blank=True)
+    hint = models.TextField(null=True, blank=True)
 
     name = models.CharField(
         max_length=200,

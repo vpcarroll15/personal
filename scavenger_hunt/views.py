@@ -112,9 +112,9 @@ def create_new_hunt(request, template_id):
     return redirect(url)
 
 
-def hunt_hint(request, id):
+def hunt_heading(request, id):
     """
-    Returns a JSON dictionary consisting of a hint for the hunt with id.
+    Returns a JSON dictionary consisting of a heading for the hunt with id.
     """
     if request.method != 'GET':
         return HttpResponseNotAllowed(["GET"])
@@ -127,7 +127,7 @@ def hunt_hint(request, id):
         return HttpResponse(reason="Invalid input to GET", status=400)
     
     if hunt.current_location.disable_heading:
-        return HttpResponse(reason="Not allowed to request a hint for this location", status=403)
+        return HttpResponse(reason="Not allowed to request a heading for this location", status=403)
 
     try:
         distance, direction = hunt.distance_and_direction_to_current_location(latitude, longitude)
