@@ -80,17 +80,26 @@ function retrieveHint() {
     {% endif %}
     <p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Return home</a></p>
 {% else %}
-    {% if first_time %}
-        <div class="toolbar">
-            In order to progress in your scavenger hunt, you must visit the location
-            indicated by the clue and press "Advance." Ask for your heading if you get stuck!
-        </div>
-    {% endif %}
     {% if not success %}
         <div class="toolbar">
-            You aren't close enough to the right spot to advance. Keep trying!
+            {% if hunt.current_location.latitude is not None and hunt.current_location.solution %}
+                You may not be close enough to the right spot to advance, or you may have entered the wrong solution. Keep trying!
+            {% elif hunt.current_location.latitude is not None %}
+                You are not close enough to the right spot to advance. Keep trying!
+            {% else %}
+                That's not the right passcode. Keep trying!
+            {% endif %}
         </div>
     {% endif %}
+    <div class="instructions toolbar">
+        {% if hunt.current_location.latitude is not None and hunt.current_location.solution %}
+            Visit this location and enter the passcode to advance.
+        {% elif hunt.current_location.latitude is not None %}
+            Visit this location to advance.
+        {% else %}
+            Enter the passcode to advance.
+        {% endif %}
+    </div>
     <div class="clue simple-border">
         <h2>Your clue:</h2>
         {% if hunt.current_location.path_to_static_img_asset %}
@@ -105,12 +114,18 @@ function retrieveHint() {
     <div class="scavenger-control-panel simple-border">
         <form id="advance_form" class="scavenger-control-panel-elem" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
             {% csrf_token %}
+            {% if hunt.current_location.solution %}
+            <label for="solution">Enter passcode here: </label>
+            <input type="text" name="solution" value=""><br>
+            {% endif %}
             <button type="button" onclick="submitLocation()">Advance</button>
         </form>
-        {% if hunt.current_location.disable_heading %}
-        <span class="heading-disabled">Calculating a heading has been disabled for this location.</span>
-        {% else %}
-        <button class="scavenger-control-panel-elem" type="button" onclick="retrieveHint()">Calculate heading</button>
+        {% if hunt.current_location.latitude is not None %}
+            {% if hunt.current_location.disable_heading %}
+            <span class="heading-disabled">Calculating a heading has been disabled for this location.</span>
+            {% else %}
+            <button class="scavenger-control-panel-elem" type="button" onclick="retrieveHint()">Calculate heading</button>
+            {% endif %}
         {% endif %}
         <a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a>
     </div>

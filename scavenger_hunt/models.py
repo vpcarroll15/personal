@@ -1,5 +1,6 @@
-from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
+from django.db import models
 from geographiclib.geodesic import Geodesic
 
 
@@ -7,10 +8,14 @@ HEADING_LABELS = ["north", "northeast", "east", "southeast", "south", "southwest
 DEGREES_PER_LABEL = 360 / len(HEADING_LABELS)
 
 
+class UnknownLocationException(Exception):
+    """We throw this if someone tries to compute distance to a location with an unspecified location."""
+
+
 class Location(models.Model):
     """Represents one target in a scavenger hunt."""
-    latitude = models.FloatField()
-    longitude = models.FloatField()
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     clue = models.TextField(blank=True)
 
@@ -20,7 +25,7 @@ class Location(models.Model):
     )
 
     radius = models.IntegerField(default=30, help_text=(
-        "How close the user needs to be in meters to the coordinate in order to advance."
+        "How close the user needs to be in meters to the coordinate in order to advance. This will have no meaning if lat/lng aren't provided."
     ))
 
     path_to_static_img_asset = models.CharField(
@@ -29,11 +34,23 @@ class Location(models.Model):
 
     disable_heading = models.BooleanField(default=False, help_text="If true, disables the ability to compute a heading to this destination.")
 
+    solution = models.CharField(
+        null=True, blank=True, max_length=200, help_text="If provided, the user must input this in order to move on to the next section."
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        if not self.solution and self.latitude is None:
+            raise ValidationError("Either a coordinate or a solution must be provided.")
+        if not self.clue and not self.path_to_static_img_asset:
+            raise ValidationError("Either a clue or an image must be provided.")
+        if (self.latitude and self.longitude is None) or (self.latitude is None and self.longitude):
+            raise ValidationError("If you provide one of lat/lng, you must provide the other.")
 
 
 class ScavengerHuntTemplate(models.Model):
@@ -78,6 +95,9 @@ class ScavengerHunt(models.Model):
         Returns the distance in meters to the current location, and the direction as a string: "WEST," "NORTHWEST," etc.
         """
         assert self.current_location is not None
+        if self.current_location.latitude is None or self.current_location.longitude is None:
+            raise UnknownLocationException("Lat/lng of target is unknown.")
+
         out_dict = Geodesic.WGS84.Inverse(
             latitude, longitude, self.current_location.latitude, self.current_location.longitude
         )
@@ -95,10 +115,18 @@ class ScavengerHunt(models.Model):
         return distance_m, HEADING_LABELS[index_in_heading_labels]
 
     
-    def should_advance_to_next_location(self, latitude, longitude):
+    def should_advance_to_next_location(self, latitude, longitude, solution):
         """
-        Return True if, according to our coordinates, we should advance to the next location.
+        Return True if, according to our coordinates and the user-provided solution, we should advance to the next location.
         """
-        distance, _ = self.distance_and_direction_to_current_location(latitude, longitude)
-        return distance < self.current_location.radius
+        try:
+            distance, _ = self.distance_and_direction_to_current_location(latitude, longitude)
+        except UnknownLocationException:
+            pass
+        else:
+            if distance > self.current_location.radius:
+                return False
+        if self.current_location.solution and self.current_location.solution.casefold() != solution.casefold():
+            return False
+        return True
     

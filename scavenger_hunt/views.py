@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
 
-from .models import ScavengerHuntTemplate, ScavengerHunt, Location
+from .models import ScavengerHuntTemplate, ScavengerHunt, Location, UnknownLocationException
 
 
 def _get_next_location(location_ids, current_location=None):
@@ -66,8 +66,9 @@ def hunt(request, id):
             longitude = float(request.POST['longitude'])
         except (KeyError, ValueError):
             return HttpResponse(reason="Invalid input to POST", status=400)
+        solution = request.POST.get('solution')
 
-        if hunt.should_advance_to_next_location(latitude, longitude):
+        if hunt.should_advance_to_next_location(latitude, longitude, solution):
             next_location_or_response, success = _get_next_location(
                 hunt.hunt_template.location_ids,
                 current_location=hunt.current_location
@@ -123,5 +124,9 @@ def hunt_hint(request, id):
     if hunt.current_location.disable_heading:
         return HttpResponse(reason="Not allowed to request a hint for this location", status=403)
 
-    distance, direction = hunt.distance_and_direction_to_current_location(latitude, longitude)
+    try:
+        distance, direction = hunt.distance_and_direction_to_current_location(latitude, longitude)
+    except UnknownLocationException:
+        return HttpResponse(reason="Can't compute heading to location with unspecified coords", status=404)
+
     return JsonResponse({"distance": distance, "direction": direction})
