@@ -26,6 +26,11 @@
   background-color: #ecefd5;
 }
 
+#heading {
+  background-color:	#9ACD32;
+  display: none;
+}
+
 #hint {
   background-color:	#9ACD32;
   display: none;

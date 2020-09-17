@@ -25,19 +25,19 @@ function submitLocation() {
     }
 }
 
-function retrieveHint() {
-    /* Retrieves a hint from the backend and logs it to the console. */
-    function retrieveHintHelper(position) {
+function retrieveHeading() {
+    /* Retrieves a heading from the backend. */
+    function retrieveHeadingHelper(position) {
         // Submit the position to the backend with AJAX.
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                const hint_content = JSON.parse(this.responseText);
+                const heading_content = JSON.parse(this.responseText);
 
-                const hint = document.getElementById("hint");
-                hint.innerHTML = '';
+                const heading = document.getElementById("heading");
+                heading.innerHTML = '';
 
-                const approximate_distance_m = parseFloat(hint_content["distance"].toPrecision(1));
+                const approximate_distance_m = parseFloat(heading_content["distance"].toPrecision(1));
                 var distance_string = "";
                 if (approximate_distance_m > 1000) {
                     distance_string = "~" + (approximate_distance_m / 1000) + "km"
@@ -47,28 +47,33 @@ function retrieveHint() {
 
                 var header = document.createElement("h2");
                 header.innerHTML = "Your heading:";
-                hint.appendChild(header);
+                heading.appendChild(header);
 
                 var distance = document.createElement("p");
                 distance.innerHTML = "Distance: " + distance_string;
-                hint.appendChild(distance);
+                heading.appendChild(distance);
 
                 var direction = document.createElement("p");
-                direction.innerHTML = "Direction: " + hint_content["direction"];
-                hint.appendChild(direction);
+                direction.innerHTML = "Direction: " + heading_content["direction"];
+                heading.appendChild(direction);
 
-                hint.style.display = "block";
+                heading.style.display = "block";
             }
         };
-        var base_url = "{% url 'scavenger_hunt:hint' id=hunt.id %}"
+        var base_url = "{% url 'scavenger_hunt:heading' id=hunt.id %}"
         xhttp.open("GET", base_url + "?latitude=" + position.coords.latitude + "&longitude=" + position.coords.longitude, true);
         xhttp.send();
     }
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(retrieveHintHelper);
+        navigator.geolocation.getCurrentPosition(retrieveHeadingHelper);
     } else {
         alert("Geolocation not supported. :(");
     }
+}
+
+function revealHint() {
+    const hint = document.getElementById('hint');
+    hint.style.display = "block";
 }
 </script>
 <div class="scavenger-hunt">
@@ -110,7 +115,12 @@ function retrieveHint() {
             <div>{{ hunt.current_location.clue }}</div>
         {% endif %}
     </div>
-    <div id="hint" class="simple-border"></div>
+    <div id="heading" class="simple-border"></div>
+    {% if hunt.current_location.hint %}
+    <div id="hint" class="simple-border" style="display:none">
+        <div><h2>Your hint:</h2>{{ hunt.current_location.hint }}</div>
+    </div>
+    {% endif %}
     <div class="scavenger-control-panel simple-border">
         <form id="advance_form" class="scavenger-control-panel-elem" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
             {% csrf_token %}
@@ -124,8 +134,11 @@ function retrieveHint() {
             {% if hunt.current_location.disable_heading %}
             <span class="heading-disabled">Calculating a heading has been disabled for this location.</span>
             {% else %}
-            <button class="scavenger-control-panel-elem" type="button" onclick="retrieveHint()">Calculate heading</button>
+            <button class="scavenger-control-panel-elem" type="button" onclick="retrieveHeading()">Calculate heading</button>
             {% endif %}
+        {% endif %}
+        {% if hunt.current_location.hint %}
+            <button class="scavenger-control-panel-elem" type="button" onclick="revealHint()">Show hint</button>
         {% endif %}
         <a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a>
     </div>
