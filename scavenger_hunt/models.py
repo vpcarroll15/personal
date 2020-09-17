@@ -9,7 +9,7 @@ DEGREES_PER_LABEL = 360 / len(HEADING_LABELS)
 
 
 class UnknownLocationException(Exception):
-    """We throw this if someone tries to compute distance to a location with an unspecified location."""
+    """We throw this if someone tries to compute distance to a location with unspecified coordinates."""
 
 
 class Location(models.Model):
