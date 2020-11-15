@@ -19,6 +19,9 @@ class Question(models.Model):
 
     def __str__(self):
         return self.text
+    
+    def to_dict_for_api(self):
+        return dict(text=self.text)
 
 
 class User(models.Model):
@@ -33,6 +36,13 @@ class User(models.Model):
 
     def __str__(self):
         return str(self.phone_number)
+
+    def to_dict_for_api(self):
+        return dict(
+            phone_number=str(self.phone_number),
+            send_message_at_time=self.send_message_at_time.isoformat(),
+            questions=[question.to_dict_for_api() for question in self.questions.all()],
+        )
 
 
 class DataPoint(models.Model):

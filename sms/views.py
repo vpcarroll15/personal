@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from sms.permissions import UserInSmsManagerGroup, UserInSmsWebhookCaller
+from sms.models import User
 
 
 class SmsManagerView(APIView):
@@ -14,6 +15,16 @@ class SmsManagerView(APIView):
 class SmsWebhookView(APIView):
     permission_classes = [IsAuthenticated, UserInSmsWebhookCaller]
 
+
+class UsersView(SmsManagerView):
+    def get(self, request):
+        # For now, when the SMS manager requests the users to manage, just return
+        # all the users. At some point this in theory wouldn't be scalable...but
+        # we'll never reach that point.
+        return Response(dict(users=[user.to_dict_for_api() for user in User.objects.all()]))
+
+
+class WebhookView(SmsWebhookView):
     def post(self, request):
         """
         Example:
