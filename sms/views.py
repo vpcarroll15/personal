@@ -1,7 +1,7 @@
 """Views for the sms app."""
 
+from django.http import HttpResponse
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from sms.permissions import UserInSmsManagerGroup, UserInSmsWebhookCaller
@@ -33,4 +33,6 @@ class WebhookView(SmsWebhookView):
         # TODO: Replace this with something that isn't horrific.
         with open("/tmp/testfile.txt", "w") as testfile:
             testfile.write(repr(request))
-        return Response(dict(success=True))
+        # Return a blank response to the webhook. We don't have any commands for Twilio
+        # at this time, but we want it to know that everything worked as expected.
+        return HttpResponse(status=204)
