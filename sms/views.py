@@ -3,7 +3,6 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from twilio.twiml.messaging_response import MessagingResponse
 
 from sms.permissions import UserInSmsManagerGroup, UserInSmsWebhookCaller
 
@@ -20,6 +19,7 @@ class SmsWebhookView(APIView):
         Example:
         http POST sms/webhook/ {...(data)...}
         """
-        resp = MessagingResponse()
-        resp.message("The Robots are coming! Head for the hills!")
-        return Response(str(resp))
+        # TODO: Replace this with something that isn't horrific.
+        with open("/tmp/testfile.txt", "w") as testfile:
+            testfile.write(repr(request))
+        return Response(dict(success=True))
