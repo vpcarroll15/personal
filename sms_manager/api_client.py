@@ -19,6 +19,7 @@ class RestApiClient(object):
     Client for invoking endpoints in this app with basic auth.
     """
     def __init__(self):
+        platform_info.install_environment_variables()
         self.api_base = "{}://{}".format(platform_info.get_protocol(), platform_info.get_api_domain())
 
     def invoke(self, resource, request_type="get", payload=None, timeout=10, **kwargs):
