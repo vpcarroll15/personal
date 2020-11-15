@@ -21,5 +21,6 @@ urlpatterns = [
     path('', lambda r: HttpResponseRedirect('music/')),
     path('music/', include('music.urls')),
     path('scavenger_hunt/', include('scavenger_hunt.urls')),
+    path('sms/', include('sms.urls')),
     path('admin/', admin.site.urls),
 ]

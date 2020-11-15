@@ -8,6 +8,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 INSTALLED_APPS = [
     'music.apps.MusicConfig',
     'scavenger_hunt.apps.ScavengerHuntConfig',
+    'sms.apps.SmsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -15,6 +16,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'phonenumber_field',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
