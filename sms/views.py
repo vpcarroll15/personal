@@ -40,7 +40,7 @@ class WebhookView(SmsWebhookView):
         Example:
         http POST sms/webhook/ {...(data)...}
         """
-        id = request["MessageSid"]
+        id = request.POST["MessageSid"]
         # Return a blank response to the webhook. We don't have any commands for Twilio
         # at this time, but we want it to know that everything worked as expected.
         return HttpResponse(status=204)
