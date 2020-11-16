@@ -40,9 +40,6 @@ class WebhookView(SmsWebhookView):
         Example:
         http POST sms/webhook/ {...(data)...}
         """
-        # TODO: Replace this with something that isn't horrific.
-        with open("/tmp/testfile2.txt", "w") as testfile:
-            testfile.write(request["MessageSid"])
         # Return a blank response to the webhook. We don't have any commands for Twilio
         # at this time, but we want it to know that everything worked as expected.
         return HttpResponse(status=204)
