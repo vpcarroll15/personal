@@ -43,8 +43,6 @@ class WebhookView(SmsWebhookView):
         # TODO: Replace this with something that isn't horrific.
         with open("/tmp/testfile2.txt", "w") as testfile:
             testfile.write(vars(request))
-        with open("/tmp/testfile.txt", "w") as testfile:
-            testfile.write(str(request.data))
         # Return a blank response to the webhook. We don't have any commands for Twilio
         # at this time, but we want it to know that everything worked as expected.
         return HttpResponse(status=204)
