@@ -10,6 +10,18 @@ from sms.permissions import UserInSmsManagerGroup, UserInSmsWebhookCaller
 from sms.models import User, DataPoint
 
 
+def get_relevant_data_point(phone_number_str):
+    raise NotImplementedError
+
+
+def parse_message_body(message_body_str):
+    return 0, ""
+
+
+def validate_score(reference_question, score):
+    raise NotImplementedError
+
+
 class SmsManagerView(APIView):
     permission_classes = [IsAuthenticated, UserInSmsManagerGroup]
 
@@ -40,7 +52,15 @@ class WebhookView(SmsWebhookView):
         Example:
         http POST sms/webhook/ {...(data)...}
         """
-        id = request.POST["MessageSid"]
-        # Return a blank response to the webhook. We don't have any commands for Twilio
-        # at this time, but we want it to know that everything worked as expected.
-        return HttpResponse(status=204)
+        # TODO(vpcarroll): Try/catch something here.
+        # If we fail, return a blank response to the webhook.
+        data_point = get_relevant_data_point(request.POST["From"])
+        score, note = parse_message_body(request.POST["Body"])
+        validate_score(data_point.question, score)
+        
+        data_point.response_message_id = request.POST.get("MessageSid")
+        data_point.score = score
+        data_point.note = note
+        data_point.save()
+
+        return HttpResponse(status=200)

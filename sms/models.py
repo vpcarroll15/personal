@@ -21,7 +21,7 @@ class Question(models.Model):
         return self.text
     
     def to_dict_for_api(self):
-        return dict(text=self.text)
+        return dict(id=self.id, text=self.text)
 
 
 class User(models.Model):
@@ -39,6 +39,7 @@ class User(models.Model):
 
     def to_dict_for_api(self):
         return dict(
+            id=self.id,
             phone_number=str(self.phone_number),
             send_message_at_time=self.send_message_at_time.isoformat(),
             questions=[question.to_dict_for_api() for question in self.questions.all()],
@@ -67,11 +68,16 @@ class DataPoint(models.Model):
     # in addition to a score.
     text = models.TextField(blank=True, null=True)
 
+    # This short ID is given to us by Twilio when we get a message response.
+    # It is guaranteed to be less than 40 chars long.
+    response_message_id = models.CharField(max_length=40, blank=True, null=True)
+
     def to_dict_for_api(self):
         return dict(
             id=self.id,
             question_id=self.question_id,
             user_id=self.user_id,
+            response_message_id=self.response_message_id,
             created_at=self.created_at,
             updated_at=self.updated_at,
             score=self.score,
