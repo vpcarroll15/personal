@@ -66,4 +66,15 @@ class DataPoint(models.Model):
     # This is used for unstructured text that the user may send back
     # in addition to a score.
     text = models.TextField(blank=True, null=True)
+
+    def to_dict_for_api(self):
+        return dict(
+            id=self.id,
+            question_id=self.question_id,
+            user_id=self.user_id,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            score=self.score,
+            text=self.text,
+        )
     
