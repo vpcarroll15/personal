@@ -1,6 +1,7 @@
 """
 Models for the SMS app.
 """
+from datetime import timedelta
 
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
@@ -31,6 +32,12 @@ class User(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     send_message_at_time = models.DateTimeField(auto_now_add=True)
+
+    # How long the user has to reply to texts before replies will be
+    # rejected.
+    expire_message_after = models.DurationField(
+        default=timedelta(minutes=15),
+    )
 
     questions = models.ManyToManyField(Question)
 

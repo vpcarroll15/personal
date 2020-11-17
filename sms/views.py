@@ -1,6 +1,8 @@
 """Views for the sms app."""
 
-from django.http import HttpResponse
+from datetime import datetime
+
+from django.http import HttpResponse, HttpResponseBadRequest
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,8 +12,35 @@ from sms.permissions import UserInSmsManagerGroup, UserInSmsWebhookCaller
 from sms.models import User, DataPoint
 
 
+class NoRelevantDataPointException(Exception):
+    pass
+
+
+class DataPointAlreadyPopulatedException(Exception):
+    pass
+
+
+class ResponseToTextTooOld(Exception):
+    pass
+
+
 def get_relevant_data_point(phone_number_str):
-    raise NotImplementedError
+    users = User.objects.filter(phone_number_str)
+    if len(users) != 1:
+        raise NoRelevantDataPointException
+    user = users[0]
+
+    data_points = DataPoint.objects.filter(user=user).order_by("-created-at")[:1]
+    if len(data_points) != 1:
+        raise NoRelevantDataPointException
+    data_point = data_points[0]
+
+    if datetime.now() - data_point.created_at > user.expire_message_after:
+        raise ResponseToTextTooOld
+
+    if data_point.score is not None or data_point.note is not None:
+        raise DataPointAlreadyPopulatedException
+    return data_point
 
 
 def parse_message_body(message_body_str):
@@ -52,10 +81,22 @@ class WebhookView(SmsWebhookView):
         Example:
         http POST sms/webhook/ {...(data)...}
         """
-        # TODO(vpcarroll): Try/catch something here.
-        # If we fail, return a blank response to the webhook.
-        data_point = get_relevant_data_point(request.POST["From"])
-        score, note = parse_message_body(request.POST["Body"])
+        for key in ["From", "Body"]:
+            if key not in request.POST:
+                return HttpResponseBadRequest(f"Missing required key: {key}")
+
+        phone_number = request.POST["From"]
+        try:
+            data_point = get_relevant_data_point(phone_number)
+        except NoRelevantDataPointException:
+            return HttpResponseBadRequest(f"No relevant DataPoint for this phone number: {phone_number}")
+        except (DataPointAlreadyPopulatedException, ResponseToTextTooOld):
+            # Nothing to be done if the DataPoint is already populated, or if the
+            # window of opportunity has passed. Just do nothing.
+            return HttpResponse(status=204)
+
+        body = request.POST["Body"]
+        score, note = parse_message_body(body)
         validate_score(data_point.question, score)
         
         data_point.response_message_id = request.POST.get("MessageSid")
