@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from django.contrib.auth.models import User, Group
 from rest_framework import status
@@ -28,6 +28,8 @@ class AccountTests(APITestCase):
         self.client.force_authenticate(user=user)
         response = self.client.get('/sms/users/', {})
         assert response.status_code == 403
+        response = self.client.get('/sms/user/', {})
+        assert response.status_code == 403
         response = self.client.post('/sms/data_point/', {})
         assert response.status_code == 403
         response = self.client.get('/sms/webhook/', {})
@@ -46,6 +48,8 @@ class AccountTests(APITestCase):
         assert response.status_code == 403
         response = self.client.get('/sms/users/', {})
         assert response.status_code == 403
+        response = self.client.get('/sms/user/', {})
+        assert response.status_code == 403
 
     def test_get_users(self):
         user = User.objects.get(username='manager')
@@ -55,6 +59,27 @@ class AccountTests(APITestCase):
         assert response.status_code == 200
         assert "users" in response.data
         assert len(response.data["users"]) == 1
+
+    def test_put_user(self):
+        user = User.objects.get(username='manager')
+        self.client.force_authenticate(user=user)
+
+        question = Question.objects.get(text="Why?")
+        sms_user = SmsUser.objects.get(phone_number="+13033033003")
+
+        send_message_at_time_str = datetime.now(tz=timezone.utc).isoformat()
+
+        response = self.client.put(
+            '/sms/user/',
+            {
+                "id": sms_user.id,
+                "phone_number": str(sms_user.phone_number),
+                "questions": [question.to_dict_for_api()],
+                "send_message_at_time": send_message_at_time_str,
+            }, format="json")
+        assert response.status_code == 200
+        assert "user" in response.data
+        assert response.data["user"]["send_message_at_time"] == send_message_at_time_str
 
     def test_create_data_point(self):
         user = User.objects.get(username='manager')

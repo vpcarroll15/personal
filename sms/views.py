@@ -1,6 +1,7 @@
 """Views for the sms app."""
 
 from datetime import datetime, timezone
+import dateutil
 
 from django.http import HttpResponse, HttpResponseBadRequest
 from rest_framework.permissions import IsAuthenticated
@@ -76,6 +77,22 @@ class UsersView(SmsManagerView):
         # all the users. At some point this in theory wouldn't be scalable...but
         # we'll never reach that point.
         return Response(dict(users=[user.to_dict_for_api() for user in User.objects.all()]))
+
+
+class UserView(SmsManagerView):
+    def put(self, request):
+        # Clean up request.data.
+        request.data.pop("questions", None)
+        if "send_message_at_time" in request.data:
+            request.data["send_message_at_time"] = dateutil.parser.parse(request.data["send_message_at_time"])
+
+        # Figure out if we're creating a new object...then do it.
+        user_id = request.data.pop("id", None)
+        if user_id is None:
+            user = User.objects.create(**request.data)
+        else:
+            user, _ = User.objects.update_or_create(id=user_id, defaults=request.data)
+        return Response(dict(user=user.to_dict_for_api()))
 
 
 class DataPointView(SmsManagerView):
