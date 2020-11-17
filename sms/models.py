@@ -39,6 +39,14 @@ class User(models.Model):
         default=timedelta(minutes=15),
     )
 
+    # Don't text this user before this time in the morning.
+    start_text_hour = models.SmallIntegerField(default=7)
+    # Don't text this user after this time at night.
+    end_text_hour = models.SmallIntegerField(default=22)
+    # This should be the name of a pytz timezone.
+    timezone = models.CharField(max_length=100, default="America/Los_Angeles")
+    text_every_n_days = models.SmallIntegerField(default=1)
+
     questions = models.ManyToManyField(Question)
 
     def __str__(self):
@@ -50,6 +58,10 @@ class User(models.Model):
             phone_number=str(self.phone_number),
             send_message_at_time=self.send_message_at_time.isoformat(),
             questions=[question.to_dict_for_api() for question in self.questions.all()],
+            start_text_hour=self.start_text_hour,
+            end_text_hour=self.end_text_hour,
+            timezone=self.timezone,
+            text_every_n_days=self.text_every_n_days,
         )
 
 
