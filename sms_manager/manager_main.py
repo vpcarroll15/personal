@@ -1,5 +1,6 @@
-import time
 from datetime import datetime, timezone
+import logging
+import time
 
 from types import Question, User
 from api_client import RestApiClient
@@ -29,5 +30,10 @@ def run_cycle():
 
 if __name__ == "__main__":
     while True:
-        run_cycle()
+        try:
+            run_cycle()
+        except Exception as e:
+            # Catch all "normal" errors and don't crash. Do log though.
+            logging.error(repr(e))
+
         time.sleep(60 * 15)
