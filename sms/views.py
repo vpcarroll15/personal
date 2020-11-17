@@ -1,6 +1,6 @@
 """Views for the sms app."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from django.http import HttpResponse, HttpResponseBadRequest
 from rest_framework.permissions import IsAuthenticated
@@ -24,31 +24,42 @@ class ResponseToTextTooOld(Exception):
     pass
 
 
+class UnparseableMessageException(Exception):
+    pass
+
+
 def get_relevant_data_point(phone_number_str):
-    users = User.objects.filter(phone_number_str)
+    users = User.objects.filter(phone_number=phone_number_str)
     if len(users) != 1:
         raise NoRelevantDataPointException
     user = users[0]
 
-    data_points = DataPoint.objects.filter(user=user).order_by("-created-at")[:1]
+    data_points = DataPoint.objects.filter(user=user).order_by("-created_at")[:1]
     if len(data_points) != 1:
         raise NoRelevantDataPointException
     data_point = data_points[0]
 
-    if datetime.now() - data_point.created_at > user.expire_message_after:
+    if datetime.now(tz=timezone.utc) - data_point.created_at > user.expire_message_after:
         raise ResponseToTextTooOld
 
-    if data_point.score is not None or data_point.note is not None:
+    if data_point.score is not None or data_point.text is not None:
         raise DataPointAlreadyPopulatedException
     return data_point
 
 
-def parse_message_body(message_body_str):
-    return 0, ""
+def parse_message_body(message_body_str, reference_question):
+    message_body = message_body_str.split()
+    if not message_body:
+        raise UnparseableMessageException
+    try:
+        score = int(message_body[0])
+    except ValueError:
+        raise UnparseableMessageException
+    
+    if score < reference_question.min_score or score > reference_question.max_score:
+        raise UnparseableMessageException
 
-
-def validate_score(reference_question, score):
-    raise NotImplementedError
+    return score, " ".join(message_body[1:])
 
 
 class SmsManagerView(APIView):
@@ -96,12 +107,15 @@ class WebhookView(SmsWebhookView):
             return HttpResponse(status=204)
 
         body = request.POST["Body"]
-        score, note = parse_message_body(body)
-        validate_score(data_point.question, score)
+        try:
+            score, text = parse_message_body(body, data_point.question)
+        except UnparseableMessageException:
+            # Don't do anything because this is probably just user error.
+            return HttpResponse(status=204)
         
         data_point.response_message_id = request.POST.get("MessageSid")
         data_point.score = score
-        data_point.note = note
+        data_point.text = text
         data_point.save()
 
         return HttpResponse(status=200)

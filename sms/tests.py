@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.contrib.auth.models import User, Group
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -70,6 +72,56 @@ class AccountTests(APITestCase):
     def test_webhook(self):
         user = User.objects.get(username='webhooker')
         self.client.force_authenticate(user=user)
+        # No phone number provided.
         response = self.client.post('/sms/webhook/', {})
         assert response.status_code == 400
-        # TODO: add many more tests!
+
+        # Garbage phone number provided.
+        response = self.client.post('/sms/webhook/', {"From": "+19999999999", "Body": "3"})
+        assert response.status_code == 400
+
+        # Good phone number, but there isn't a DataPoint yet in the backend.
+        response = self.client.post('/sms/webhook/', {"From": "+13033033003", "Body": "3"})
+        assert response.status_code == 400
+
+        question = Question.objects.get(text="Why?")
+        sms_user = SmsUser.objects.get(phone_number="+13033033003")
+
+        # Create a DataPoint that is too old.
+        data_point, _ = DataPoint.objects.get_or_create(user=sms_user, question=question)
+        data_point.created_at = datetime.now() - timedelta(minutes=30)
+        data_point.save()
+        response = self.client.post('/sms/webhook/', {"From": "+13033033003", "Body": "3"})
+        assert response.status_code == 204
+
+        # OK, now it's not too old, but it's already been populated.
+        data_point.created_at = datetime.now()
+        data_point.score = 3
+        data_point.save()
+        response = self.client.post('/sms/webhook/', {"From": "+13033033003", "Body": "3"})
+        assert response.status_code == 204
+        data_point.score = None
+        data_point.save()
+
+        # Let's create several DataPoints and make sure that we return the most recent one.
+        DataPoint.objects.create(user=sms_user, question=question)
+        DataPoint.objects.create(user=sms_user, question=question)
+        most_recent_datapoint = DataPoint.objects.create(user=sms_user, question=question)
+
+        # Now let's pass in some messages that can't be parsed.
+        response = self.client.post('/sms/webhook/', {"From": "+13033033003", "Body": ""})
+        assert response.status_code == 204
+        response = self.client.post('/sms/webhook/', {"From": "+13033033003", "Body": "eggplant"})
+        assert response.status_code == 204
+        response = self.client.post('/sms/webhook/', {"From": "+13033033003", "Body": "100"})
+        assert response.status_code == 204
+        response = self.client.post('/sms/webhook/', {"From": "+13033033003", "Body": "-1"})
+        assert response.status_code == 204
+
+        # Finally we post a good message!
+        response = self.client.post('/sms/webhook/', {"From": "+13033033003", "Body": "3 testnote"})
+        assert response.status_code == 200
+        # Reload from DB.
+        most_recent_datapoint = DataPoint.objects.get(id=most_recent_datapoint.id)
+        assert most_recent_datapoint.score == 3
+        assert most_recent_datapoint.text == "testnote"
