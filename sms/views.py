@@ -1,7 +1,7 @@
 """Views for the sms app."""
 
 from datetime import datetime, timezone
-import dateutil
+import dateutil.parser
 
 from django.http import HttpResponse, HttpResponseBadRequest
 from rest_framework.permissions import IsAuthenticated

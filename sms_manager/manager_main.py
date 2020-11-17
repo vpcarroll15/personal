@@ -1,24 +1,25 @@
 from datetime import datetime, timezone
 import logging
+import sys
 import time
 
-from types import Question, User
+from sms_types import Question, User
 from api_client import RestApiClient
 
 
 def set_next_contact_time(user, api_client):
-    pass
+    logging.info(f"Setting next contact time for user {user.id}")
 
 
 def send_sms_and_create_data_point(user, api_client):
-    pass
+    logging.info(f"Sending sms to user {user.id}")
 
 
 def run_cycle():
     # 1) Get the list of users.
     api_client = RestApiClient()
     serialized_users = api_client.invoke("sms/users")
-    users = [User(serialized_user) for serialized_user in serialized_users]
+    users = [User(serialized_user) for serialized_user in serialized_users["users"]]
 
     for user in users:
         if user.send_message_at_time < datetime.now(tz=timezone.utc):

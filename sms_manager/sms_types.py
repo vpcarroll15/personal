@@ -5,7 +5,7 @@ This will strongly resemble what is defined in sms/models.py, but without
 dependencies on Django or web stuff. We will often serialize into or
 deserialize from these classes.
 """
-import dateutil
+import dateutil.parser
 
 
 class Question:
