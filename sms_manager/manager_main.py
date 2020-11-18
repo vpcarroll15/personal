@@ -50,7 +50,7 @@ def send_sms_and_create_data_point(user, api_client, twilio_client, twilio_phone
     logging.info(f"Sending SMS to user {user.id}")
 
     sms_body = f"{question.text} ({question.min_score}-{question.max_score})"
-    twilio_client.messages.create(_from=twilio_phone_number, body=sms_body, to=user.phone_number)
+    twilio_client.messages.create(from_=twilio_phone_number, body=sms_body, to=user.phone_number)
 
 
 def run_cycle():
