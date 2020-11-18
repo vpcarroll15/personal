@@ -12,6 +12,8 @@ class Question:
     def __init__(self, serialized_dict):
         self.id = serialized_dict["id"]
         self.text = serialized_dict["text"]
+        self.min_score = serialized_dict["min_score"]
+        self.max_score = serialized_dict["max_score"]
 
 
 class User:

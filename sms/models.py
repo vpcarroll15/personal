@@ -22,7 +22,7 @@ class Question(models.Model):
         return self.text
     
     def to_dict_for_api(self):
-        return dict(id=self.id, text=self.text)
+        return dict(id=self.id, text=self.text, max_score=self.max_score, min_score=self.min_score)
 
 
 class User(models.Model):
