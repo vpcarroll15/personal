@@ -161,7 +161,32 @@
         regexp: ssl_protocols
         line: ssl_protocols TLSv1.2 TLSv1.3;
       tags: encrypt, tls
-    
+
+    - name: Copy SMS manager service
+      become: yes
+      become_user: root
+      template:
+        src: sms_manager.service
+        dest: /etc/systemd/system/
+      tags: sms
+
+    - name: Enable and load sms_manager service
+      become: yes
+      become_user: root
+      systemd:
+        name: /etc/systemd/system/sms_manager.service
+        enabled: yes
+        daemon_reload: yes
+      tags: sms
+
+    - name: Restart sms_manager service
+      become: yes
+      become_user: root
+      systemd:
+        name: sms_manager.service
+        state: restarted
+      tags: sms
+
     # TODO: Script a better way of doing this!
     - debug:
         msg: If this is your first time setting up this machine, run "sudo certbot --nginx -d paulcarroll.site -d www.paulcarroll.site"

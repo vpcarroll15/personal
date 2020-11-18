@@ -1,0 +1,15 @@
+[Unit]
+Description="Launches SMS manager"
+After=network-online.target
+
+[Service]
+Type=simple
+User={{ username }}
+Restart=always
+RestartSec=1
+# We expect manager_main to install its own environment variables.
+WorkingDirectory=/home/{{ username }}/source/sms_manager
+ExecStart=/home/{{ username }}/venv/bin/python /home/{{ username }}/source/sms_manager/manager_main.py
+
+[Install]
+WantedBy=multi-user.target
