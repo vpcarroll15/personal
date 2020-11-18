@@ -14,8 +14,9 @@ import time
 import pytz
 from twilio.rest import Client as TwilioClient
 
-from sms_types import Question, User
 from api_client import RestApiClient
+import platform_info
+from sms_types import Question, User
 
 
 def set_next_contact_time(user, api_client):
@@ -77,6 +78,7 @@ def run_cycle():
 
 
 if __name__ == "__main__":
+    platform_info.install_environment_variables()
     while True:
         try:
             run_cycle()
