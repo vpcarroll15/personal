@@ -91,6 +91,9 @@ class DataPoint(models.Model):
     # It is guaranteed to be less than 40 chars long.
     response_message_id = models.CharField(max_length=40, blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.user.phone_number}, {self.score}"
+
     def to_dict_for_api(self):
         return dict(
             id=self.id,
