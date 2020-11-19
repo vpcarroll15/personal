@@ -17,7 +17,6 @@
     - name: Install basic packages
       become: yes
       apt:
-        update_cache: yes
         name:
           - python3-pip
           - python3-dev
