@@ -92,7 +92,7 @@ class DataPoint(models.Model):
     response_message_id = models.CharField(max_length=40, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.user.phone_number}, {self.score}"
+        return f"{self.user.phone_number}, {self.question.text}, {self.score}"
 
     def to_dict_for_api(self):
         return dict(
