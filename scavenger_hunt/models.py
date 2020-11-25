@@ -69,6 +69,7 @@ class ScavengerHuntTemplate(models.Model):
     path_to_static_img_asset = models.CharField(
         null=True, blank=True, max_length=200, help_text="This should point to a static image asset. Optional."
     )
+    skip_all_checks = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -122,6 +123,8 @@ class ScavengerHunt(models.Model):
         """
         Return True if, according to our coordinates and the user-provided solution, we should advance to the next location.
         """
+        if self.hunt_template.skip_all_checks:
+            return True
         try:
             distance, _ = self.distance_and_direction_to_current_location(latitude, longitude)
         except UnknownLocationException:
