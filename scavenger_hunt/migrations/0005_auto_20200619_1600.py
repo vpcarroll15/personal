@@ -7,13 +7,17 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scavenger_hunt', '0004_auto_20200619_1441'),
+        ("scavenger_hunt", "0004_auto_20200619_1441"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='scavengerhunt',
-            name='current_location',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='scavenger_hunt.Location'),
+            model_name="scavengerhunt",
+            name="current_location",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="scavenger_hunt.Location",
+            ),
         ),
     ]

@@ -6,4 +6,3 @@ if out.returncode == 0:
     print("It seems to be up!")
 else:
     print("Failed to ping paulcarroll.site! Is it down?")
-

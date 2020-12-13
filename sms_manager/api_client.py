@@ -18,9 +18,12 @@ class RestApiClient(object):
     """
     Client for invoking endpoints in this app with basic auth.
     """
+
     def __init__(self):
         platform_info.install_environment_variables()
-        self.api_base = "{}://{}".format(platform_info.get_protocol(), platform_info.get_api_domain())
+        self.api_base = "{}://{}".format(
+            platform_info.get_protocol(), platform_info.get_api_domain()
+        )
 
     def invoke(self, resource, request_type="get", payload=None, timeout=10, **kwargs):
         """
@@ -34,7 +37,9 @@ class RestApiClient(object):
             url += "/"
 
         client_method = getattr(requests, request_type)
-        response = client_method(url, auth=self.get_auth(), json=payload, timeout=timeout, **kwargs)
+        response = client_method(
+            url, auth=self.get_auth(), json=payload, timeout=timeout, **kwargs
+        )
         response.raise_for_status()
         response_dict = response.json()
 

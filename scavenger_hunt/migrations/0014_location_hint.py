@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scavenger_hunt', '0013_scavengerhunt_location_ids'),
+        ("scavenger_hunt", "0013_scavengerhunt_location_ids"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='location',
-            name='hint',
+            model_name="location",
+            name="hint",
             field=models.TextField(blank=True, null=True),
         ),
     ]

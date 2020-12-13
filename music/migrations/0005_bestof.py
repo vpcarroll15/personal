@@ -6,18 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('music', '0004_music_src'),
+        ("music", "0004_music_src"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BestOf',
+            name="BestOf",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_date', models.DateField()),
-                ('end_date', models.DateField()),
-                ('name', models.CharField(max_length=100)),
-                ('include_on_home_page', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("start_date", models.DateField()),
+                ("end_date", models.DateField()),
+                ("name", models.CharField(max_length=100)),
+                ("include_on_home_page", models.BooleanField(default=True)),
             ],
         ),
     ]

@@ -6,18 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scavenger_hunt', '0002_location_name'),
+        ("scavenger_hunt", "0002_location_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='scavengerhunt',
-            name='is_finished',
+            model_name="scavengerhunt",
+            name="is_finished",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='scavengerhunttemplate',
-            name='finished_message',
-            field=models.TextField(blank=True, help_text='The user will read this if they complete your hunt.'),
+            model_name="scavengerhunttemplate",
+            name="finished_message",
+            field=models.TextField(
+                blank=True,
+                help_text="The user will read this if they complete your hunt.",
+            ),
         ),
     ]

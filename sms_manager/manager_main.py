@@ -23,7 +23,9 @@ def set_next_contact_time(user, api_client):
     logging.info(f"Setting next contact time for user {user.id}")
 
     # I hate timezones so much. Get the current time in the user's timezone.
-    target_datetime = datetime.now(tz=timezone.utc).astimezone(pytz.timezone(user.timezone))
+    target_datetime = datetime.now(tz=timezone.utc).astimezone(
+        pytz.timezone(user.timezone)
+    )
 
     # Increment it.
     target_datetime += timedelta(days=user.text_every_n_days)
@@ -34,31 +36,45 @@ def set_next_contact_time(user, api_client):
     target_datetime = target_datetime.replace(hour=hour, minute=minute)
 
     # Save this to the DB.
-    api_client.invoke("sms/user", request_type="put", payload={"id": user.id, "send_message_at_time": target_datetime.isoformat()})
-    logging.info(f"Set next contact time for user {user.id} to time {target_datetime.isoformat()}")
+    api_client.invoke(
+        "sms/user",
+        request_type="put",
+        payload={"id": user.id, "send_message_at_time": target_datetime.isoformat()},
+    )
+    logging.info(
+        f"Set next contact time for user {user.id} to time {target_datetime.isoformat()}"
+    )
 
 
-def send_sms_and_create_data_point(user, api_client, twilio_client, twilio_phone_number):
+def send_sms_and_create_data_point(
+    user, api_client, twilio_client, twilio_phone_number
+):
     # First we create the DataPoint...just in case the user responds to our text really really fast. :)
     # There is also no cost to creating a DataPoint and never sending a text, if that fails.
     logging.info(f"Creating DataPoint for user {user.id}")
 
     question = random.choice(user.questions)
-    api_client.invoke("sms/data_point", request_type="post", payload={"user_id": user.id, "question_id": question.id})
+    api_client.invoke(
+        "sms/data_point",
+        request_type="post",
+        payload={"user_id": user.id, "question_id": question.id},
+    )
 
     # Now that we have created the data point, let's send the SMS.
     logging.info(f"Sending SMS to user {user.id}")
 
     sms_body = f"{question.text} ({question.min_score}-{question.max_score})"
-    twilio_client.messages.create(from_=twilio_phone_number, body=sms_body, to=user.phone_number)
+    twilio_client.messages.create(
+        from_=twilio_phone_number, body=sms_body, to=user.phone_number
+    )
 
 
 def run_cycle():
     # This will crash if these variables aren't found in our environment, which
     # is perfect.
-    account_sid = os.environ['TWILIO_ACCOUNT_SID']
-    auth_token = os.environ['TWILIO_AUTH_TOKEN']
-    twilio_phone_number = os.environ['TWILIO_PHONE_NUMBER']
+    account_sid = os.environ["TWILIO_ACCOUNT_SID"]
+    auth_token = os.environ["TWILIO_AUTH_TOKEN"]
+    twilio_phone_number = os.environ["TWILIO_PHONE_NUMBER"]
     twilio_client = TwilioClient(account_sid, auth_token)
 
     api_client = RestApiClient()
@@ -71,7 +87,9 @@ def run_cycle():
                 # Set the next contact time FIRST, so that we don't spam Twilio if something goes
                 # wrong with this request.
                 set_next_contact_time(user, api_client)
-                send_sms_and_create_data_point(user, api_client, twilio_client, twilio_phone_number)
+                send_sms_and_create_data_point(
+                    user, api_client, twilio_client, twilio_phone_number
+                )
             except Exception as e:
                 # One bad user shouldn't break things for everyone.
                 logging.error(f"User {user.id} couldn't be processed: {repr(e)}")

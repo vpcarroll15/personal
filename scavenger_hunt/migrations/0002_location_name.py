@@ -6,14 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scavenger_hunt', '0001_initial'),
+        ("scavenger_hunt", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='location',
-            name='name',
-            field=models.CharField(default='testlocation', help_text='This will never be displayed to the user. It is only used in the admin.', max_length=200),
+            model_name="location",
+            name="name",
+            field=models.CharField(
+                default="testlocation",
+                help_text="This will never be displayed to the user. It is only used in the admin.",
+                max_length=200,
+            ),
             preserve_default=False,
         ),
     ]

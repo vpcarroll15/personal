@@ -18,9 +18,9 @@ from django.urls import include, path
 from django.http import HttpResponseRedirect
 
 urlpatterns = [
-    path('', lambda r: HttpResponseRedirect('music/')),
-    path('music/', include('music.urls')),
-    path('scavenger_hunt/', include('scavenger_hunt.urls')),
-    path('sms/', include('sms.urls')),
-    path('admin/', admin.site.urls),
+    path("", lambda r: HttpResponseRedirect("music/")),
+    path("music/", include("music.urls")),
+    path("scavenger_hunt/", include("scavenger_hunt.urls")),
+    path("sms/", include("sms.urls")),
+    path("admin/", admin.site.urls),
 ]

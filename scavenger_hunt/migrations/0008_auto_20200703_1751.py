@@ -6,18 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scavenger_hunt', '0007_location_path_to_static_img_asset'),
+        ("scavenger_hunt", "0007_location_path_to_static_img_asset"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='scavengerhunttemplate',
-            name='path_to_static_img_asset',
-            field=models.CharField(blank=True, help_text='This should point to an asset in scavenger_hunt/img. Optional.', max_length=200, null=True),
+            model_name="scavengerhunttemplate",
+            name="path_to_static_img_asset",
+            field=models.CharField(
+                blank=True,
+                help_text="This should point to an asset in scavenger_hunt/img. Optional.",
+                max_length=200,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='location',
-            name='path_to_static_img_asset',
-            field=models.CharField(blank=True, help_text='This should point to an asset in scavenger_hunt/img. Optional.', max_length=200, null=True),
+            model_name="location",
+            name="path_to_static_img_asset",
+            field=models.CharField(
+                blank=True,
+                help_text="This should point to an asset in scavenger_hunt/img. Optional.",
+                max_length=200,
+                null=True,
+            ),
         ),
     ]

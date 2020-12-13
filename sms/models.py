@@ -9,6 +9,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 class Question(models.Model):
     """Represents one question that we might want to ask a user."""
+
     # This is the max length of an ASCII SMS.
     text = models.CharField(max_length=160)
 
@@ -20,13 +21,19 @@ class Question(models.Model):
 
     def __str__(self):
         return self.text
-    
+
     def to_dict_for_api(self):
-        return dict(id=self.id, text=self.text, max_score=self.max_score, min_score=self.min_score)
+        return dict(
+            id=self.id,
+            text=self.text,
+            max_score=self.max_score,
+            min_score=self.min_score,
+        )
 
 
 class User(models.Model):
     """Represents one user of the app."""
+
     phone_number = PhoneNumberField(unique=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -35,9 +42,7 @@ class User(models.Model):
 
     # How long the user has to reply to texts before replies will be
     # rejected.
-    expire_message_after = models.DurationField(
-        default=timedelta(minutes=15),
-    )
+    expire_message_after = models.DurationField(default=timedelta(minutes=15),)
 
     # Don't text this user before this time in the morning.
     start_text_hour = models.SmallIntegerField(default=7)
@@ -67,11 +72,12 @@ class User(models.Model):
 
 class DataPoint(models.Model):
     """Represents one collected response to one Question."""
+
     class Meta:
-        # We expect to be doing a lot of queries like "give me the most 
+        # We expect to be doing a lot of queries like "give me the most
         # recent DataPoints for this user."
         indexes = [
-            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=["user", "-created_at"]),
         ]
 
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -105,4 +111,3 @@ class DataPoint(models.Model):
             score=self.score,
             text=self.text,
         )
-    
