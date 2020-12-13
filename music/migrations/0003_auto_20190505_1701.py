@@ -7,18 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('music', '0002_music_album_released_date'),
+        ("music", "0002_music_album_released_date"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='music',
-            name='album_of_the_month',
+            model_name="music",
+            name="album_of_the_month",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='music',
-            name='reviewed_at',
+            model_name="music",
+            name="reviewed_at",
             field=models.DateTimeField(default=datetime.datetime.now),
         ),
     ]

@@ -20,8 +20,13 @@ class User:
     def __init__(self, serialized_dict):
         self.id = serialized_dict["id"]
         self.phone_number = serialized_dict["phone_number"]
-        self.send_message_at_time = dateutil.parser.parse(serialized_dict["send_message_at_time"])
-        self.questions = [Question(serialized_question) for serialized_question in serialized_dict["questions"]]
+        self.send_message_at_time = dateutil.parser.parse(
+            serialized_dict["send_message_at_time"]
+        )
+        self.questions = [
+            Question(serialized_question)
+            for serialized_question in serialized_dict["questions"]
+        ]
         self.start_text_hour = serialized_dict["start_text_hour"]
         self.end_text_hour = serialized_dict["end_text_hour"]
         self.timezone = serialized_dict["timezone"]

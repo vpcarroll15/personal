@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scavenger_hunt', '0014_location_hint'),
+        ("scavenger_hunt", "0014_location_hint"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='scavengerhunttemplate',
-            name='skip_all_checks',
+            model_name="scavengerhunttemplate",
+            name="skip_all_checks",
             field=models.BooleanField(default=False),
         ),
     ]

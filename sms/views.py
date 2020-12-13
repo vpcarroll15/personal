@@ -40,7 +40,10 @@ def get_relevant_data_point(phone_number_str):
         raise NoRelevantDataPointException
     data_point = data_points[0]
 
-    if datetime.now(tz=timezone.utc) - data_point.created_at > user.expire_message_after:
+    if (
+        datetime.now(tz=timezone.utc) - data_point.created_at
+        > user.expire_message_after
+    ):
         raise ResponseToTextTooOld
 
     if data_point.score is not None or data_point.text is not None:
@@ -56,7 +59,7 @@ def parse_message_body(message_body_str, reference_question):
         score = int(message_body[0])
     except ValueError:
         raise UnparseableMessageException
-    
+
     if score < reference_question.min_score or score > reference_question.max_score:
         raise UnparseableMessageException
 
@@ -76,7 +79,9 @@ class UsersView(SmsManagerView):
         # For now, when the SMS manager requests the users to manage, just return
         # all the users. At some point this in theory wouldn't be scalable...but
         # we'll never reach that point.
-        return Response(dict(users=[user.to_dict_for_api() for user in User.objects.all()]))
+        return Response(
+            dict(users=[user.to_dict_for_api() for user in User.objects.all()])
+        )
 
 
 class UserView(SmsManagerView):
@@ -84,7 +89,9 @@ class UserView(SmsManagerView):
         # Clean up request.data.
         request.data.pop("questions", None)
         if "send_message_at_time" in request.data:
-            request.data["send_message_at_time"] = dateutil.parser.parse(request.data["send_message_at_time"])
+            request.data["send_message_at_time"] = dateutil.parser.parse(
+                request.data["send_message_at_time"]
+            )
 
         # Figure out if we're creating a new object...then do it.
         user_id = request.data.pop("id", None)
@@ -99,8 +106,10 @@ class DataPointView(SmsManagerView):
     def post(self, request):
         data_point = DataPoint(**request.data)
         data_point.save()
-        return Response(dict(data_point=data_point.to_dict_for_api()),
-                        status=status.HTTP_201_CREATED)
+        return Response(
+            dict(data_point=data_point.to_dict_for_api()),
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class WebhookView(SmsWebhookView):
@@ -117,7 +126,9 @@ class WebhookView(SmsWebhookView):
         try:
             data_point = get_relevant_data_point(phone_number)
         except NoRelevantDataPointException:
-            return HttpResponseBadRequest(f"No relevant DataPoint for this phone number: {phone_number}")
+            return HttpResponseBadRequest(
+                f"No relevant DataPoint for this phone number: {phone_number}"
+            )
         except (DataPointAlreadyPopulatedException, ResponseToTextTooOld):
             # Nothing to be done if the DataPoint is already populated, or if the
             # window of opportunity has passed. Just do nothing.
@@ -129,7 +140,7 @@ class WebhookView(SmsWebhookView):
         except UnparseableMessageException:
             # Don't do anything because this is probably just user error.
             return HttpResponse(status=204)
-        
+
         data_point.response_message_id = request.POST.get("MessageSid")
         data_point.score = score
         data_point.text = text

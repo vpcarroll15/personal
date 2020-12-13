@@ -9,7 +9,7 @@ import markdown2
 
 def convert_name_to_directory_format(name):
     """Returns human-readable names to a format that is friendlier for Unix directories."""
-    name = "".join([x for x in name if x.isalnum() or x == ' '])
+    name = "".join([x for x in name if x.isalnum() or x == " "])
     name = name.lower()
     return name.replace(" ", "_")
 
@@ -26,13 +26,14 @@ def convert_markdown_and_mark_safe(text):
 
 class Musician(models.Model):
     """Represents one musician or band."""
+
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    updated_at = models.DateTimeField(db_index=True,
-                                      auto_now=True,  # Updates each time save() is called
-                                      )
+    updated_at = models.DateTimeField(
+        db_index=True, auto_now=True,  # Updates each time save() is called
+    )
 
     name = models.CharField(max_length=100, unique=True)
-    tags = models.ManyToManyField('Tag')
+    tags = models.ManyToManyField("Tag")
 
     def __str__(self):
         return self.name
@@ -40,10 +41,11 @@ class Musician(models.Model):
 
 class Music(models.Model):
     """Represents one album or piece of music."""
+
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    updated_at = models.DateTimeField(db_index=True,
-                                      auto_now=True,  # Updates each time save() is called
-                                      )
+    updated_at = models.DateTimeField(
+        db_index=True, auto_now=True,  # Updates each time save() is called
+    )
     album_released_date = models.DateTimeField(null=True, blank=True)
     reviewed_at = models.DateTimeField(default=datetime.now)
 
@@ -64,12 +66,14 @@ class Music(models.Model):
         return convert_markdown_and_mark_safe(self.review_txt())
 
     def review_txt(self):
-        path_to_review = os.path.join(settings.BASE_DIR,
-                                      'music/reviews/',
-                                      convert_name_to_directory_format(self.musician.name),
-                                      convert_name_to_directory_format(self.name) + '.md')
+        path_to_review = os.path.join(
+            settings.BASE_DIR,
+            "music/reviews/",
+            convert_name_to_directory_format(self.musician.name),
+            convert_name_to_directory_format(self.name) + ".md",
+        )
         try:
-            with open(path_to_review, encoding='utf-8') as review_file:
+            with open(path_to_review, encoding="utf-8") as review_file:
                 review_as_markdown = review_file.read()
         except IOError:
             return None
@@ -80,9 +84,9 @@ class Music(models.Model):
         tags = self.musician.tags.all()
         tag_names = [tag.name for tag in tags]
         if len(tag_names):
-            tags_string = '(' + ', '.join(tag_names) + ')'
+            tags_string = "(" + ", ".join(tag_names) + ")"
         else:
-            tags_string = '[no tags]'
+            tags_string = "[no tags]"
 
         review = self.review_txt()
         if review:
@@ -90,13 +94,17 @@ class Music(models.Model):
             if len(review) != len(review_clipped):
                 review_clipped += "..."
         else:
-            review_clipped = '[no review]'
-        return tags_string + ' ' + review_clipped
+            review_clipped = "[no review]"
+        return tags_string + " " + review_clipped
 
     def image_src(self):
-        path = os.path.join('music', 'images', convert_name_to_directory_format(self.musician.name),
-                            convert_name_to_directory_format(self.name) + '.jpg')
-        if os.path.exists(os.path.join(settings.BASE_DIR, 'music/static', path)):
+        path = os.path.join(
+            "music",
+            "images",
+            convert_name_to_directory_format(self.musician.name),
+            convert_name_to_directory_format(self.name) + ".jpg",
+        )
+        if os.path.exists(os.path.join(settings.BASE_DIR, "music/static", path)):
             return path
         else:
             return None
@@ -107,6 +115,7 @@ class Music(models.Model):
 
 class Tag(models.Model):
     """Encapsulates a tag that can be applied to musicians to classify their work."""
+
     name = models.CharField(max_length=100)
 
     def __str__(self):
@@ -118,6 +127,7 @@ class Tag(models.Model):
 
 class BestOf(models.Model):
     """Data about albums spanning a particular period of time."""
+
     start_date = models.DateField()
     end_date = models.DateField()
 
@@ -125,11 +135,13 @@ class BestOf(models.Model):
     include_on_home_page = models.BooleanField(default=True)
 
     def description_txt(self):
-        path_to_description = os.path.join(settings.BASE_DIR,
-                                           'music/best_of/',
-                                           convert_name_to_directory_format(self.name) + '.md')
+        path_to_description = os.path.join(
+            settings.BASE_DIR,
+            "music/best_of/",
+            convert_name_to_directory_format(self.name) + ".md",
+        )
         try:
-            with open(path_to_description, encoding='utf-8') as description_file:
+            with open(path_to_description, encoding="utf-8") as description_file:
                 description_as_markdown = description_file.read()
         except IOError:
             return None
@@ -139,4 +151,6 @@ class BestOf(models.Model):
         return convert_markdown_and_mark_safe(self.description_txt())
 
     def __str__(self):
-        return "{}: {} until {}".format(self.name, self.start_date.isoformat(), self.end_date.isoformat())
+        return "{}: {} until {}".format(
+            self.name, self.start_date.isoformat(), self.end_date.isoformat()
+        )

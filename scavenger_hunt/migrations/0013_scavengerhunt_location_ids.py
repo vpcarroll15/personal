@@ -7,13 +7,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scavenger_hunt', '0012_auto_20200916_2042'),
+        ("scavenger_hunt", "0012_auto_20200916_2042"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='scavengerhunt',
-            name='location_ids',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.IntegerField(), default=list, size=None),
+            model_name="scavengerhunt",
+            name="location_ids",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.IntegerField(), default=list, size=None
+            ),
         ),
     ]

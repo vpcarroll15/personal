@@ -2,7 +2,7 @@ from django.urls import path
 
 from sms import views
 
-app_name = 'sms'
+app_name = "sms"
 urlpatterns = [
     path("data_point/", view=views.DataPointView.as_view(), name="data_point"),
     path("webhook/", view=views.WebhookView.as_view(), name="webhook"),

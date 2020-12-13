@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scavenger_hunt', '0010_auto_20200703_1834'),
+        ("scavenger_hunt", "0010_auto_20200703_1834"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='location',
-            name='disable_heading',
-            field=models.BooleanField(default=False, help_text='If true, disables the ability to compute a heading to this destination.'),
+            model_name="location",
+            name="disable_heading",
+            field=models.BooleanField(
+                default=False,
+                help_text="If true, disables the ability to compute a heading to this destination.",
+            ),
         ),
     ]

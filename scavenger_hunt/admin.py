@@ -4,21 +4,21 @@ from .models import ScavengerHunt, ScavengerHuntTemplate, Location
 
 
 class ScavengerHuntAdmin(admin.ModelAdmin):
-    list_display = ('hunt_template', 'current_location', 'updated_at')
+    list_display = ("hunt_template", "current_location", "updated_at")
 
 
 admin.site.register(ScavengerHunt, ScavengerHuntAdmin)
 
 
 class ScavengerHuntTemplateAdmin(admin.ModelAdmin):
-    list_display = ('name', 'updated_at')
+    list_display = ("name", "updated_at")
 
 
 admin.site.register(ScavengerHuntTemplate, ScavengerHuntTemplateAdmin)
 
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'radius', 'updated_at')
+    list_display = ("id", "name", "radius", "updated_at")
 
 
 admin.site.register(Location, LocationAdmin)

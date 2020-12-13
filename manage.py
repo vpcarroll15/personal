@@ -10,7 +10,7 @@ ENVIRONMENT_FILE_PATH = os.path.expanduser("~/environment.env")
 
 
 def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'website.settings')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "website.settings")
     # Load these environment variables if they exist. We need them to make Django work
     # in the cloud.
     if os.path.exists(ENVIRONMENT_FILE_PATH):
@@ -26,5 +26,5 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

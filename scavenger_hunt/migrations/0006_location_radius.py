@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scavenger_hunt', '0005_auto_20200619_1600'),
+        ("scavenger_hunt", "0005_auto_20200619_1600"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='location',
-            name='radius',
-            field=models.IntegerField(default=30, help_text='How close the user needs to be in meters to the coordinate in order to advance.'),
+            model_name="location",
+            name="radius",
+            field=models.IntegerField(
+                default=30,
+                help_text="How close the user needs to be in meters to the coordinate in order to advance.",
+            ),
         ),
     ]

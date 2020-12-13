@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sms', '0001_initial'),
+        ("sms", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='datapoint',
-            name='response_message_id',
+            model_name="datapoint",
+            name="response_message_id",
             field=models.CharField(blank=True, max_length=40, null=True),
         ),
     ]
