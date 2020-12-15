@@ -170,4 +170,10 @@ def hunt_heading(request, id):
             status=404,
         )
 
-    return JsonResponse({"distance": distance, "direction": direction})
+    return JsonResponse(
+        {
+            "distance": distance,
+            "direction": direction,
+            "required_distance": hunt.current_location.radius,
+        }
+    )

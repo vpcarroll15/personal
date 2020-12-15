@@ -57,6 +57,10 @@ function retrieveHeading() {
                 direction.innerHTML = "Direction: " + heading_content["direction"];
                 heading.appendChild(direction);
 
+                var required_distance = document.createElement("p");
+                required_distance.innerHTML = "You must be within " + heading_content["required_distance"] + "m to advance.";
+                heading.appendChild(required_distance);
+
                 heading.style.display = "block";
             }
         };
