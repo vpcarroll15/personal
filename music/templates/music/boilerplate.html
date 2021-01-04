@@ -8,6 +8,14 @@
         </form>
         <a href="{% url 'music:best_of' name=2019 %}">Best of 2019</a>
         <a href="{% url 'music:best_of' name=2020 %}" style="padding-left: 10px;">Best of 2020</a>
+
+        <span style="float: right; padding-right: 10px; padding-left: 30px;">
+        {% if user.is_authenticated %}
+        Welcome {{ user.username }}! <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+        </span>
         <a href="{% url 'music:rss' %}" style="float: right; padding-right: 10px;">RSS Feed</a>
         <a href="https://github.com/paul-cobalt/personal/tree/master/music" style="float: right; padding-right: 10px;">Source code</a>
     </div>
