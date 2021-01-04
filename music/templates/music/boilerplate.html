@@ -6,18 +6,26 @@
             Find more reviews:
             <input type="text" name="search_term" class="toolbar-input">
         </form>
-        <a href="{% url 'music:best_of' name=2019 %}">Best of 2019</a>
-        <a href="{% url 'music:best_of' name=2020 %}" style="padding-left: 10px;">Best of 2020</a>
 
-        <span style="float: right; padding-right: 10px; padding-left: 30px;">
-        {% if user.is_authenticated %}
-        Welcome {{ user.username }}! <a href="{% url 'logout' %}">Logout</a>
-        {% else %}
-        <a href="{% url 'login' %}">Login</a>
-        {% endif %}
+        <span class="hide-on-small-screens">
+            <a href="{% url 'music:best_of' name=2019 %}">Best of 2019</a>
+            <a href="{% url 'music:best_of' name=2020 %}" style="padding-left: 10px;">Best of 2020</a>
         </span>
-        <a href="{% url 'music:rss' %}" style="float: right; padding-right: 10px;">RSS Feed</a>
-        <a href="https://github.com/paul-cobalt/personal/tree/master/music" style="float: right; padding-right: 10px;">Source code</a>
+
+        <span style="float: right;">
+            <span class="hide-on-small-screens">
+                <a href="{% url 'music:rss' %}" style="padding-right: 10px;">RSS Feed</a>
+                <a href="https://github.com/paul-cobalt/personal/tree/master/music" style="padding-right: 30px;">Source code</a>
+            </span>
+            <span style="padding-right: 10px;">
+                {% if user.is_authenticated %}
+                Welcome {{ user.username }}! <a href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                {% endif %}
+            </span>
+        </span>
+
     </div>
     {% block content %}{% endblock %}
 </div>

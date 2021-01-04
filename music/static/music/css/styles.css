@@ -151,3 +151,9 @@ p {
   padding-left: 20px;
   padding-right: 20px;
 }
+
+@media screen and (max-width: 500px) {
+  .hide-on-small-screen {
+    display: none;
+  }
+}
