@@ -3,6 +3,7 @@ Models for the SMS app.
 """
 from datetime import timedelta
 
+from django.conf import settings
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -33,6 +34,10 @@ class Question(models.Model):
 
 class User(models.Model):
     """Represents one user of the app."""
+
+    logged_in_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True,
+    )
 
     phone_number = PhoneNumberField(unique=True)
 
