@@ -36,7 +36,7 @@ class User(models.Model):
     """Represents one user of the app."""
 
     logged_in_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True,
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
     )
 
     phone_number = PhoneNumberField(unique=True)
