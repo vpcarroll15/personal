@@ -44,6 +44,7 @@ TEMPLATES = [
         "DIRS": [
             os.path.join(BASE_DIR, "music/templates/music"),
             os.path.join(BASE_DIR, "scavenger_hunt/templates/scavenger_hunt"),
+            os.path.join(BASE_DIR, "sms/templates/sms"),
             os.path.join(BASE_DIR, "templates"),
         ],
         "APP_DIRS": True,

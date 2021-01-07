@@ -8,4 +8,7 @@ urlpatterns = [
     path("webhook/", view=views.WebhookView.as_view(), name="webhook"),
     path("users/", view=views.UsersView.as_view(), name="users"),
     path("user/", view=views.UserView.as_view(), name="user"),
+    path("home/", view=views.home, name="home"),
+    path("home/question/<int:id>", view=views.question, name="question"),
+    path("home/error/", view=views.error, name="error"),
 ]

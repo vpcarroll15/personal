@@ -1,0 +1,11 @@
+{% extends "sms/boilerplate.html" %}
+{% block all %}
+<p>Please choose a question to inspect.</p>
+<ul>
+    {% for question in questions %}
+        <li>
+            <a href="{% url 'sms:question' question.id %}">{{question.text}}</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

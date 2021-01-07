@@ -3,14 +3,17 @@
 from datetime import datetime, timezone
 import dateutil.parser
 
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
 from sms.permissions import UserInSmsManagerGroup, UserInSmsWebhookCaller
-from sms.models import User, DataPoint
+from sms.models import User, DataPoint, Question
 
 
 class NoRelevantDataPointException(Exception):
@@ -147,3 +150,80 @@ class WebhookView(SmsWebhookView):
         data_point.save()
 
         return HttpResponse(status=200)
+
+
+class TooManySmsUsersException(Exception):
+    """An exception that we throw if one logged_in_user is
+    associated with more than one SMS user."""
+
+
+def get_sms_account(logged_in_user):
+    """Returns the SMS user, given the logged-in user.
+    
+    Throws TooManySmsUsersException is more than one SMS
+    user is somehow associated with a particular account.
+    May return None."""
+    sms_users = logged_in_user.user_set.all()
+    num_sms_users = sms_users.count()
+    if not num_sms_users:
+        return None
+    if num_sms_users > 1:
+        raise TooManySmsUsersException
+    return sms_users[0]
+
+
+def has_valid_sms_account(logged_in_user):
+    """Returns if the user has a valid account for seeing their SMSs."""
+    try:
+        sms_user = get_sms_account(logged_in_user)
+    except TooManySmsUsersException:
+        return False
+    return sms_user is not None
+
+
+@login_required
+def question(request, id):
+    """Renders a single question detailed view."""
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+
+    question = get_object_or_404(Question, pk=id)
+    if not has_valid_sms_account(request.user):
+        url = reverse("sms:error")
+        return redirect(url)
+    return render(request, "sms/question.html", {"question": question})
+
+
+@login_required
+def home(request):
+    """Renders either a list of questions that might be relevant to the
+    user, or redirects to the single question applying to the user
+    for convenience."""
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+
+    error_url = reverse("sms:error")
+    if not has_valid_sms_account(request.user):
+        return redirect(error_url)
+
+    sms_account = get_sms_account(request.user)
+    questions = sms_account.questions.all()
+    num_questions = questions.count()
+
+    if not num_questions:
+        return redirect(error_url)
+
+    # Special case for convenience! If the user only cares about one
+    # question, redirect them directly to that page.
+    if num_questions == 1:
+        url = reverse("sms:question", kwargs={"id": questions[0].id})
+        return redirect(url)
+
+    return render(request, "sms/questions.html", {"questions": list(questions)})
+
+
+def error(request):
+    """Renders an error view for the user."""
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+    return render(request, "sms/error.html")
