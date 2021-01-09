@@ -2,4 +2,22 @@
 {% block all %}
 <h1>{{ question.text }} ({{question.min_score}}-{{question.max_score}})</h1>
 <div id="plot-over-time"></div>
+<script>
+function retrieveDataPoints() {
+    // Submit the position to the backend with AJAX.
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            // const data_points = JSON.parse(this.responseText);
+            // TODO: do something with parsed JSON.
+            const heading = document.getElementById("plot-over-time");
+            heading.innerHTML = this.responseText;
+        }
+    };
+    var base_url = "{% url 'sms:data_points' %}";
+    xhttp.open("GET", base_url + "?question_id={{ question.id }}", true);
+    xhttp.send();
+}
+retrieveDataPoints();
+</script>
 {% endblock %}

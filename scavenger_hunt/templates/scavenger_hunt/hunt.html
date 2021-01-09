@@ -64,7 +64,7 @@ function retrieveHeading() {
                 heading.style.display = "block";
             }
         };
-        var base_url = "{% url 'scavenger_hunt:heading' id=hunt.id %}"
+        var base_url = "{% url 'scavenger_hunt:heading' id=hunt.id %}";
         xhttp.open("GET", base_url + "?latitude=" + position.coords.latitude + "&longitude=" + position.coords.longitude, true);
         xhttp.send();
     }
