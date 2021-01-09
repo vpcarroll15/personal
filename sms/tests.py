@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
 from django.contrib.auth.models import User, Group
-from rest_framework import status
+from django.test import Client, TestCase
+import pytz
 from rest_framework.test import APITestCase
 
 from sms.models import DataPoint, Question
@@ -25,7 +26,7 @@ class AccountTests(APITestCase):
         User.objects.create_user("hacker", "hacked@carroll.com", "paulpassword")
 
         Question.objects.get_or_create(text="Why?")
-        SmsUser.objects.get_or_create(phone_number="+13033033003")
+        SmsUser.objects.get_or_create(phone_number="+13033033003", logged_in_user=webhooker)
 
     def test_bad_auth(self):
         user = User.objects.get(username="hacker")
@@ -180,3 +181,91 @@ class AccountTests(APITestCase):
         most_recent_datapoint = DataPoint.objects.get(id=most_recent_datapoint.id)
         assert most_recent_datapoint.score == 3
         assert most_recent_datapoint.text == "testnote"
+
+
+def to_local_time(time_str, timezone="America/Los_Angeles"):
+    local_time = pytz.timezone(timezone)
+    if time_str is None:
+        localized_time = None
+    else:
+        localized_time = local_time.localize(
+            datetime.strptime(time_str, "%Y-%m-%d")
+        )
+    return localized_time
+
+
+class SmsHomeTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user1 = User.objects.create_user(
+            "paul", "paul@carroll.com", "paulpassword"
+        )
+
+        cls.user2 = User.objects.create_user(
+            "grace", "grace@boorstein.com", "gracepassword"
+        )
+        cls.sms_user_1 = SmsUser.objects.create(phone_number="+13033033003", logged_in_user=cls.user1)
+        cls.sms_user_2 = SmsUser.objects.create(phone_number="+13033033023", logged_in_user=cls.user2)
+        cls.question_1 = Question.objects.create(text="Why?")
+        cls.question_2 = Question.objects.create(text="Why not?")
+
+        cls.data_point_1_1 = DataPoint.objects.create(question=cls.question_1, user=cls.sms_user_1, score=1)
+        cls.start_date_str_1_1 = "2020-10-10"
+        cls.data_point_1_1.created_at = to_local_time(cls.start_date_str_1_1)
+        cls.data_point_1_1.save()
+
+        cls.data_point_1_2 = DataPoint.objects.create(question=cls.question_1, user=cls.sms_user_1, score=2)
+        cls.start_date_str_1_2 = "2020-10-11"
+        cls.data_point_1_2.created_at = to_local_time(cls.start_date_str_1_2)
+        cls.data_point_1_2.save()
+
+    def test_fetch_all_data_points(self):
+        c = Client()
+        c.force_login(self.user1)
+        response = c.get('/sms/home/data_points/', {'question_id': self.question_1.id})
+        self.assertEqual(response.status_code, 200)
+        data_points = response.json()["data_points"]
+        self.assertEqual(len(data_points), 2)
+
+    def test_fetch_with_start_date(self):
+        c = Client()
+        c.force_login(self.user1)
+        response = c.get('/sms/home/data_points/', {'question_id': self.question_1.id, 'start_date': '2020-10-11'})
+        self.assertEqual(response.status_code, 200)
+        data_points = response.json()["data_points"]
+        self.assertEqual(len(data_points), 1)
+
+    def test_fetch_with_end_date(self):
+        c = Client()
+        c.force_login(self.user1)
+        response = c.get('/sms/home/data_points/', {'question_id': self.question_1.id, 'end_date': '2020-10-11'})
+        self.assertEqual(response.status_code, 200)
+        data_points = response.json()["data_points"]
+        self.assertEqual(len(data_points), 1)
+
+    def test_wrong_question(self):
+        c = Client()
+        c.force_login(self.user1)
+        response = c.get('/sms/home/data_points/', {'question_id': self.question_2.id})
+        self.assertEqual(response.status_code, 200)
+        data_points = response.json()["data_points"]
+        self.assertEqual(len(data_points), 0)
+
+    def test_wrong_user(self):
+        c = Client()
+        c.force_login(self.user2)
+        response = c.get('/sms/home/data_points/', {'question_id': self.question_1.id})
+        self.assertEqual(response.status_code, 200)
+        data_points = response.json()["data_points"]
+        self.assertEqual(len(data_points), 0)
+
+    def test_no_parse_date(self):
+        c = Client()
+        c.force_login(self.user1)
+        response = c.get('/sms/home/data_points/', {'question_id': self.question_1.id, 'end_date': '2020-10-??11'})
+        self.assertEqual(response.status_code, 400)
+
+    def test_no_logged_in(self):
+        c = Client()
+        response = c.get('/sms/home/data_points/', {'question_id': self.question_1.id, 'end_date': '2020-10-??11'})
+        self.assertEqual(response.status_code, 302)

@@ -111,8 +111,8 @@ class DataPoint(models.Model):
             question_id=self.question_id,
             user_id=self.user_id,
             response_message_id=self.response_message_id,
-            created_at=self.created_at,
-            updated_at=self.updated_at,
+            created_at=self.created_at.isoformat(),
+            updated_at=self.updated_at.isoformat(),
             score=self.score,
             text=self.text,
         )

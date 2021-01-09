@@ -10,5 +10,6 @@ urlpatterns = [
     path("user/", view=views.UserView.as_view(), name="user"),
     path("home/", view=views.home, name="home"),
     path("home/question/<int:id>", view=views.question, name="question"),
+    path("home/data_points/", view=views.data_points, name="data_points"),
     path("home/error/", view=views.error, name="error"),
 ]

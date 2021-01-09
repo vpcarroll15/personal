@@ -4,9 +4,10 @@ from datetime import datetime, timezone
 import dateutil.parser
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
+import pytz
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -227,3 +228,49 @@ def error(request):
     if request.method != "GET":
         return HttpResponseNotAllowed(["GET"])
     return render(request, "sms/error.html")
+
+
+@login_required
+def data_points(request):
+    """Returns a JSON object consisting of a serialized list of DataPoints.
+    
+    Required params: question_id, parseable as int
+    Optional params:
+        - start_date (inclusive): in the format 2017-12-31
+        - end_date (noninclusive): in the format 2017-12-31
+    """
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+
+    error_url = reverse("sms:error")
+    if not has_valid_sms_account(request.user):
+        return redirect(error_url)
+
+    sms_account = get_sms_account(request.user)
+
+    local_time = pytz.timezone(sms_account.timezone)
+    def to_local_time(time_str):
+        if time_str is None:
+            localized_time = None
+        else:
+            localized_time = local_time.localize(
+                datetime.strptime(time_str, "%Y-%m-%d")
+            )
+        return localized_time
+    try:
+        question_id = int(request.GET["question_id"])
+        start_datetime = to_local_time(request.GET.get("start_date"))
+        end_datetime = to_local_time(request.GET.get("end_date"))
+    except (KeyError, ValueError):
+        return HttpResponse(reason="Invalid input to GET", status=400)
+
+    data_points = DataPoint.objects.filter(user=sms_account, question_id=question_id)
+    if start_datetime is not None:
+        data_points = data_points.filter(created_at__gte=start_datetime)
+    if end_datetime is not None:
+        data_points = data_points.filter(created_at__lt=end_datetime)
+    data_points = data_points.exclude(score=None)
+
+    return JsonResponse({
+            "data_points": [data_point.to_dict_for_api() for data_point in data_points]
+        })
