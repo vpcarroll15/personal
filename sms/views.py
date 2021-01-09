@@ -4,7 +4,12 @@ from datetime import datetime, timezone
 import dateutil.parser
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, JsonResponse
+from django.http import (
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseNotAllowed,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 import pytz
@@ -249,6 +254,7 @@ def data_points(request):
     sms_account = get_sms_account(request.user)
 
     local_time = pytz.timezone(sms_account.timezone)
+
     def to_local_time(time_str):
         if time_str is None:
             localized_time = None
@@ -257,6 +263,7 @@ def data_points(request):
                 datetime.strptime(time_str, "%Y-%m-%d")
             )
         return localized_time
+
     try:
         question_id = int(request.GET["question_id"])
         start_datetime = to_local_time(request.GET.get("start_date"))
@@ -271,6 +278,6 @@ def data_points(request):
         data_points = data_points.filter(created_at__lt=end_datetime)
     data_points = data_points.exclude(score=None)
 
-    return JsonResponse({
-            "data_points": [data_point.to_dict_for_api() for data_point in data_points]
-        })
+    return JsonResponse(
+        {"data_points": [data_point.to_dict_for_api() for data_point in data_points]}
+    )
