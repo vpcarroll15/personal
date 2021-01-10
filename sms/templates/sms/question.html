@@ -18,10 +18,6 @@ function plotDataPoints(data_points) {
         data.addRow([new Date(data_point["created_at"]), data_point["score"], data_point["text"]]);
     }
 
-    var formatter_short = new google.visualization.DateFormat({formatType: 'short'});
-    formatter_short.format(data, 0); // Apply formatter to zeroth column
-    formatter_short.format(data, 1); // Apply formatter to zeroth column
-
     var options = {
         hAxis: {
             format: 'MM/dd/YY'
