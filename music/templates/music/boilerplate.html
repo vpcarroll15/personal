@@ -2,6 +2,21 @@
 {% block all %}
 <div>
     <div class="toolbar">
+        {% if user.is_authenticated %}
+        <span class="hide-on-small-screens" style="padding-right: 10px;">
+            Welcome {{ user.username }}! 
+        </span>
+        {% endif %}
+        <span style="padding-right: 10px;">
+            {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">Logout</a> 
+            {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            {% endif %}
+        </span>
+        <span style="padding-right: 10px;">
+            <a href="{% url 'sms:home' %}">Daily Pulse</a>
+        </span>
         <form action="{% url 'music:search' %}" class="toolbar-form">
             Find more reviews:
             <input type="text" name="search_term" class="toolbar-input">
@@ -16,13 +31,6 @@
             <span class="hide-on-small-screens">
                 <a href="{% url 'music:rss' %}" style="padding-right: 10px;">RSS Feed</a>
                 <a href="https://github.com/paul-cobalt/personal/tree/master/music" style="padding-right: 30px;">Source code</a>
-            </span>
-            <span style="padding-right: 10px;">
-                {% if user.is_authenticated %}
-                Welcome {{ user.username }}! <a href="{% url 'logout' %}">Logout</a>
-                {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                {% endif %}
             </span>
         </span>
 
