@@ -22,6 +22,12 @@ function plotDataPoints(data_points) {
         hAxis: {
             format: 'MM/dd/YY'
         },
+        vAxis: {
+            viewWindow: {
+                min: parseInt("{{question.min_score}}"),
+                max: parseInt("{{question.max_score}}")
+            }
+        },
         title: 'Scores Over Time',
         curveType: 'function',
         // Settings chosen to look decent on mobile and desktop.
