@@ -24,9 +24,10 @@ function plotDataPoints(data_points) {
         },
         title: 'Scores Over Time',
         curveType: 'function',
+        // Settings chosen to look decent on mobile and desktop.
         width: '100%',
         height: '15%',
-        chartArea: {'width': '85%', 'height': '80%', left: '3%'},
+        chartArea: {'width': '80%', 'height': '80%', left: '5%'},
     };
 
     var chart = new google.visualization.LineChart(document.getElementById('plot-over-time'));
