@@ -2,13 +2,12 @@
 {% block all %}
 <h1>{{ question.text }} ({{question.min_score}}-{{question.max_score}})</h1>
 <div id="plot-over-time"></div>
+<div id="agg-stats"></div>
 <script>
 google.charts.load('current', {'packages': ['line', 'corechart']});
 
 // Plots an array of DataPoints in a line chart.
-function plotDataPoints(data_points) {
-    console.log("Received: " + JSON.stringify(data_points));
-
+function plotDataPointsOverTime(data_points, div_element) {
     var data = new google.visualization.DataTable();
     data.addColumn('date', 'X');
     data.addColumn('number', 'Score');
@@ -36,8 +35,70 @@ function plotDataPoints(data_points) {
         chartArea: {'width': '75%', 'height': '80%', left: '5%'},
     };
 
-    var chart = new google.visualization.LineChart(document.getElementById('plot-over-time'));
+    var chart = new google.visualization.LineChart(div_element);
     chart.draw(data, options);
+}
+
+function computeDataPointsAggStats(data_points, div_element) {
+    var daysOfWeekToScores = {};
+
+    var weekdays = new Array(7);
+    weekdays[0] = "Sunday";
+    weekdays[1] = "Monday";
+    weekdays[2] = "Tuesday";
+    weekdays[3] = "Wednesday";
+    weekdays[4] = "Thursday";
+    weekdays[5] = "Friday";
+    weekdays[6] = "Saturday";
+
+    for (var data_point of data_points) {
+        var score = data_point["score"];
+
+        var created_at = new Date(data_point["created_at"]);
+        var weekday = weekdays[created_at.getDay()];
+
+        if (weekday in daysOfWeekToScores) {
+            var scores = daysOfWeekToScores[weekday];
+            scores.push(score);
+            daysOfWeekToScores[weekday] = scores;
+        } else {
+            daysOfWeekToScores[weekday] = [score];
+        }
+    }
+
+    var table  = document.createElement('table');
+    div_element.appendChild(table);
+
+    var header = document.createElement('tr');
+    table.appendChild(header);
+    var td = document.createElement('td');
+    td.appendChild(document.createTextNode('Day of Week'));
+    header.appendChild(td);
+    td = document.createElement('td');
+    td.appendChild(document.createTextNode('Mean Score'));
+    header.appendChild(td);
+    td = document.createElement('td');
+    td.appendChild(document.createTextNode('Stddev Score'));
+    header.appendChild(td);
+
+    for (var weekday of weekdays) {
+        if (!weekday in daysOfWeekToScores) {
+            continue;
+        }
+        var scores = daysOfWeekToScores[weekday];
+
+        var tr = document.createElement('tr');
+        table.appendChild(tr);
+        td = document.createElement('td');
+        td.appendChild(document.createTextNode(weekday));
+        tr.appendChild(td);
+        td = document.createElement('td');
+        td.appendChild(document.createTextNode(math.mean(scores)));
+        tr.appendChild(td);
+        td = document.createElement('td');
+        td.appendChild(document.createTextNode(math.std(scores)));
+        tr.appendChild(td);
+    }
 }
 
 function retrieveDataPoints() {
@@ -48,7 +109,9 @@ function retrieveDataPoints() {
             const data_points = JSON.parse(this.responseText)["data_points"];
 
             function plotDataPointsWrapper() {
-                plotDataPoints(data_points);
+                console.log("Received: " + JSON.stringify(data_points));
+                plotDataPointsOverTime(data_points, document.getElementById('plot-over-time'));
+                computeDataPointsAggStats(data_points, document.getElementById('agg-stats'));
             }
             google.charts.setOnLoadCallback(plotDataPointsWrapper);
         }
