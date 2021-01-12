@@ -2,7 +2,10 @@
 {% block all %}
 <h1>{{ question.text }} ({{question.min_score}}-{{question.max_score}})</h1>
 <div id="plot-over-time"></div>
-<div id="agg-stats"></div>
+<div>
+    <div id="agg-weekday-stats" style="padding-top: 20px;"></div>
+    <div id="agg-time-of-day-stats" style="padding-top: 20px;"></div>
+</div>
 <script>
 google.charts.load('current', {'packages': ['line', 'corechart']});
 
@@ -39,9 +42,9 @@ function plotDataPointsOverTime(data_points, div_element) {
     chart.draw(data, options);
 }
 
-function computeDataPointsAggStats(data_points, div_element) {
-    var daysOfWeekToScores = {};
-
+// Note that getDay depends on this ordering, so please don't
+// rearrange.
+function getOrderedWeekdayKeys() {
     var weekdays = new Array(7);
     weekdays[0] = "Sunday";
     weekdays[1] = "Monday";
@@ -50,6 +53,22 @@ function computeDataPointsAggStats(data_points, div_element) {
     weekdays[4] = "Thursday";
     weekdays[5] = "Friday";
     weekdays[6] = "Saturday";
+    return weekdays;
+}
+
+function getOrderedTimeOfDayKeys() {
+    var times_of_day = new Array(5);
+    times_of_day[0] = "Morning";
+    times_of_day[1] = "Lunchtime";
+    times_of_day[2] = "Afternoon";
+    times_of_day[3] = "Dinnertime";
+    times_of_day[4] = "Evening";
+    return times_of_day;
+}
+
+function groupDataByWeekday(data_points) {
+    var daysOfWeekToScores = {};
+    var weekdays = getOrderedWeekdayKeys();
 
     for (var data_point of data_points) {
         var score = data_point["score"];
@@ -65,39 +84,75 @@ function computeDataPointsAggStats(data_points, div_element) {
             daysOfWeekToScores[weekday] = [score];
         }
     }
+    return daysOfWeekToScores;
+}
 
+function groupDataByTimeOfDay(data_points) {
+    var timesOfDayToScores = {};
+    var times_of_day = getOrderedTimeOfDayKeys();
+
+    for (var data_point of data_points) {
+        var score = data_point["score"];
+
+        var created_at = new Date(data_point["created_at"]);
+        var hour = created_at.getHours();
+        var time_of_day;
+        if (hour < 11) {
+            time_of_day = times_of_day[0];
+        } else if (hour < 13) {
+            time_of_day = times_of_day[1];
+        } else if (hour < 17) {
+            time_of_day = times_of_day[2];
+        } else if (hour < 19) {
+            time_of_day = times_of_day[3];
+        } else {
+            time_of_day = times_of_day[4];
+        }
+
+        if (time_of_day in timesOfDayToScores) {
+            var scores = timesOfDayToScores[time_of_day];
+            scores.push(score);
+            timesOfDayToScores[time_of_day] = scores;
+        } else {
+            timesOfDayToScores[time_of_day] = [score];
+        }
+    }
+    return timesOfDayToScores;
+}
+
+function createTableElement(row, content, is_strong) {
+    var td = document.createElement('td');
+    row.appendChild(td);
+    var node = document.createTextNode(content);
+    if (is_strong) {
+        var strong = document.createElement('strong');
+        td.appendChild(strong);
+        strong.appendChild(node);
+    } else {
+        td.appendChild(node);
+    }
+}
+
+function displayGroupedTable(ordered_keys, grouped_by, grouped_data, div_element) {
     var table  = document.createElement('table');
     div_element.appendChild(table);
 
     var header = document.createElement('tr');
     table.appendChild(header);
-    var td = document.createElement('td');
-    td.appendChild(document.createTextNode('Day of Week'));
-    header.appendChild(td);
-    td = document.createElement('td');
-    td.appendChild(document.createTextNode('Mean Score'));
-    header.appendChild(td);
-    td = document.createElement('td');
-    td.appendChild(document.createTextNode('Stddev Score'));
-    header.appendChild(td);
+    createTableElement(header, grouped_by, true);
+    createTableElement(header, 'Scores (mean)', true);
+    createTableElement(header, 'Scores (stddev)', true);
 
-    for (var weekday of weekdays) {
-        if (!weekday in daysOfWeekToScores) {
-            continue;
+    for (var key of ordered_keys) {
+        if (key in grouped_data) {
+            var scores = grouped_data[key];
+
+            var tr = document.createElement('tr');
+            table.appendChild(tr);
+            createTableElement(tr, key, false);
+            createTableElement(tr, math.mean(scores).toFixed(1), false);
+            createTableElement(tr, math.std(scores).toFixed(1), false);
         }
-        var scores = daysOfWeekToScores[weekday];
-
-        var tr = document.createElement('tr');
-        table.appendChild(tr);
-        td = document.createElement('td');
-        td.appendChild(document.createTextNode(weekday));
-        tr.appendChild(td);
-        td = document.createElement('td');
-        td.appendChild(document.createTextNode(math.mean(scores)));
-        tr.appendChild(td);
-        td = document.createElement('td');
-        td.appendChild(document.createTextNode(math.std(scores)));
-        tr.appendChild(td);
     }
 }
 
@@ -111,7 +166,13 @@ function retrieveDataPoints() {
             function plotDataPointsWrapper() {
                 console.log("Received: " + JSON.stringify(data_points));
                 plotDataPointsOverTime(data_points, document.getElementById('plot-over-time'));
-                computeDataPointsAggStats(data_points, document.getElementById('agg-stats'));
+                data_grouped_by_weekday = groupDataByWeekday(data_points);
+                data_grouped_by_time_of_day = groupDataByTimeOfDay(data_points);
+                console.log(data_grouped_by_time_of_day);
+                displayGroupedTable(getOrderedWeekdayKeys(), "Day of Week", data_grouped_by_weekday,
+                                    document.getElementById('agg-weekday-stats'));
+                displayGroupedTable(getOrderedTimeOfDayKeys(), "Time of Day", data_grouped_by_time_of_day,
+                                    document.getElementById('agg-time-of-day-stats'));
             }
             google.charts.setOnLoadCallback(plotDataPointsWrapper);
         }
