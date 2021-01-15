@@ -11,12 +11,6 @@ google.charts.load('current', {'packages': ['line', 'corechart']});
 
 function getGenericOptions() {
     return {
-        vAxis: {
-            viewWindow: {
-                min: parseInt("{{question.min_score}}"),
-                max: parseInt("{{question.max_score}}")
-            }
-        },
         curveType: 'function',
         lineWidth: 3,
         // Settings chosen to look decent on mobile and desktop.
@@ -41,6 +35,12 @@ function plotDataPointsOverTime(dataPoints, divElement) {
     var options = {
         hAxis: {
             format: 'MM/dd/YY'
+        },
+        vAxis: {
+            viewWindow: {
+                min: parseInt("{{question.min_score}}"),
+                max: parseInt("{{question.max_score}}")
+            }
         },
         title: 'Scores Over Time',
     };
