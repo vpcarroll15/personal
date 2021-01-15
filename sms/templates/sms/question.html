@@ -1,7 +1,7 @@
 {% extends "sms/boilerplate.html" %}
 {% block all %}
 <h1>{{ question.text }} ({{question.min_score}}-{{question.max_score}})</h1>
-<div id="plot-over-time"></div>
+<div id="plot-over-time" style="padding-top: 20px;"></div>
 <div>
     <div id="agg-weekday-stats" style="padding-top: 20px;"></div>
     <div id="agg-time-of-day-stats" style="padding-top: 20px;"></div>
@@ -9,37 +9,49 @@
 <script>
 google.charts.load('current', {'packages': ['line', 'corechart']});
 
-// Plots an array of DataPoints in a line chart.
-function plotDataPointsOverTime(data_points, div_element) {
-    var data = new google.visualization.DataTable();
-    data.addColumn('date', 'X');
-    data.addColumn('number', 'Score');
-    data.addColumn({type: 'string', role: 'tooltip'});
-
-    for (var data_point of data_points) {
-        data.addRow([new Date(data_point["created_at"]), data_point["score"], data_point["text"]]);
-    }
-
-    var options = {
-        hAxis: {
-            format: 'MM/dd/YY'
-        },
+function getGenericOptions() {
+    return {
         vAxis: {
             viewWindow: {
                 min: parseInt("{{question.min_score}}"),
                 max: parseInt("{{question.max_score}}")
             }
         },
-        title: 'Scores Over Time',
         curveType: 'function',
+        lineWidth: 3,
         // Settings chosen to look decent on mobile and desktop.
         width: '100%',
         height: '15%',
-        chartArea: {'width': '75%', 'height': '80%', left: '5%'},
+        chartArea: {'width': '90%', 'height': '80%', left: '5%'},
+        legend: 'none'
     };
+}
 
-    var chart = new google.visualization.LineChart(div_element);
-    chart.draw(data, options);
+// Plots an array of DataPoints in a line chart.
+function plotDataPointsOverTime(dataPoints, divElement) {
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'X');
+    data.addColumn('number', 'Score');
+    data.addColumn({type: 'string', role: 'tooltip'});
+
+    for (var dataPoint of dataPoints) {
+        data.addRow([new Date(dataPoint["created_at"]), dataPoint["score"], dataPoint["text"]]);
+    }
+
+    var options = {
+        hAxis: {
+            format: 'MM/dd/YY'
+        },
+        title: 'Scores Over Time',
+    };
+    var genericOptions = getGenericOptions();
+    const allOptions = {
+        ...options,
+        ...genericOptions,
+    }
+
+    var chart = new google.visualization.LineChart(divElement);
+    chart.draw(data, allOptions);
 }
 
 // Note that getDay depends on this ordering, so please don't
@@ -57,24 +69,24 @@ function getOrderedWeekdayKeys() {
 }
 
 function getOrderedTimeOfDayKeys() {
-    var times_of_day = new Array(5);
-    times_of_day[0] = "Morning";
-    times_of_day[1] = "Lunchtime";
-    times_of_day[2] = "Afternoon";
-    times_of_day[3] = "Dinnertime";
-    times_of_day[4] = "Evening";
-    return times_of_day;
+    var timesOfDay = new Array(5);
+    timesOfDay[0] = "Morning";
+    timesOfDay[1] = "Lunchtime";
+    timesOfDay[2] = "Afternoon";
+    timesOfDay[3] = "Dinnertime";
+    timesOfDay[4] = "Evening";
+    return timesOfDay;
 }
 
-function groupDataByWeekday(data_points) {
+function groupDataByWeekday(dataPoints) {
     var daysOfWeekToScores = {};
     var weekdays = getOrderedWeekdayKeys();
 
-    for (var data_point of data_points) {
-        var score = data_point["score"];
+    for (var dataPoint of dataPoints) {
+        var score = dataPoint["score"];
 
-        var created_at = new Date(data_point["created_at"]);
-        var weekday = weekdays[created_at.getDay()];
+        var createdAt = new Date(dataPoint["created_at"]);
+        var weekday = weekdays[createdAt.getDay()];
 
         if (weekday in daysOfWeekToScores) {
             var scores = daysOfWeekToScores[weekday];
@@ -87,73 +99,66 @@ function groupDataByWeekday(data_points) {
     return daysOfWeekToScores;
 }
 
-function groupDataByTimeOfDay(data_points) {
+function groupDataByTimeOfDay(dataPoints) {
     var timesOfDayToScores = {};
-    var times_of_day = getOrderedTimeOfDayKeys();
+    var timesOfDay = getOrderedTimeOfDayKeys();
 
-    for (var data_point of data_points) {
-        var score = data_point["score"];
+    for (var dataPoint of dataPoints) {
+        var score = dataPoint["score"];
 
-        var created_at = new Date(data_point["created_at"]);
-        var hour = created_at.getHours();
-        var time_of_day;
+        var createdAt = new Date(dataPoint["created_at"]);
+        var hour = createdAt.getHours();
+        var timeOfDay;
         if (hour < 11) {
-            time_of_day = times_of_day[0];
+            timeOfDay = timesOfDay[0];
         } else if (hour < 13) {
-            time_of_day = times_of_day[1];
+            timeOfDay = timesOfDay[1];
         } else if (hour < 17) {
-            time_of_day = times_of_day[2];
+            timeOfDay = timesOfDay[2];
         } else if (hour < 19) {
-            time_of_day = times_of_day[3];
+            timeOfDay = timesOfDay[3];
         } else {
-            time_of_day = times_of_day[4];
+            timeOfDay = timesOfDay[4];
         }
 
-        if (time_of_day in timesOfDayToScores) {
-            var scores = timesOfDayToScores[time_of_day];
+        if (timeOfDay in timesOfDayToScores) {
+            var scores = timesOfDayToScores[timeOfDay];
             scores.push(score);
-            timesOfDayToScores[time_of_day] = scores;
+            timesOfDayToScores[timeOfDay] = scores;
         } else {
-            timesOfDayToScores[time_of_day] = [score];
+            timesOfDayToScores[timeOfDay] = [score];
         }
     }
     return timesOfDayToScores;
 }
 
-function createTableElement(row, content, is_strong) {
-    var td = document.createElement('td');
-    row.appendChild(td);
-    var node = document.createTextNode(content);
-    if (is_strong) {
-        var strong = document.createElement('strong');
-        td.appendChild(strong);
-        strong.appendChild(node);
-    } else {
-        td.appendChild(node);
-    }
-}
+function plotGroupedDataPoints(orderedKeys, groupedBy, groupedData, divElement) {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'key');
+    data.addColumn('number', 'scores');
+    data.addColumn({id:'minusStddev', type:'number', role:'interval'});
+    data.addColumn({id:'plusStddev', type:'number', role:'interval'});
 
-function displayGroupedTable(ordered_keys, grouped_by, grouped_data, div_element) {
-    var table  = document.createElement('table');
-    div_element.appendChild(table);
-
-    var header = document.createElement('tr');
-    table.appendChild(header);
-    createTableElement(header, grouped_by, true);
-    createTableElement(header, 'Scores (mean)', true);
-    createTableElement(header, 'Scores (stddev)', true);
-
-    for (var key of ordered_keys) {
-        if (key in grouped_data) {
-            var scores = grouped_data[key];
-
-            var tr = document.createElement('tr');
-            table.appendChild(tr);
-            createTableElement(tr, key, false);
-            createTableElement(tr, math.mean(scores).toFixed(1), false);
-            createTableElement(tr, math.std(scores).toFixed(1), false);
+    for (var key of orderedKeys) {
+        if (key in groupedData) {
+            var mean = math.mean(groupedData[key])
+            var stddev = math.std(groupedData[key])
+            data.addRow([key, mean, mean - stddev, mean + stddev])
         }
     }
+
+    var options = {
+        title: groupedBy,
+        intervals: { 'style': 'area' },
+    };
+    var genericOptions = getGenericOptions();
+    const allOptions = {
+        ...options,
+        ...genericOptions
+    }
+
+    var chartLines = new google.visualization.LineChart(divElement);
+    chartLines.draw(data, allOptions);
 }
 
 function retrieveDataPoints() {
@@ -161,18 +166,21 @@ function retrieveDataPoints() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            const data_points = JSON.parse(this.responseText)["data_points"];
+            const dataPoints = JSON.parse(this.responseText)["data_points"];
 
             function plotDataPointsWrapper() {
-                console.log("Received: " + JSON.stringify(data_points));
-                plotDataPointsOverTime(data_points, document.getElementById('plot-over-time'));
-                data_grouped_by_weekday = groupDataByWeekday(data_points);
-                data_grouped_by_time_of_day = groupDataByTimeOfDay(data_points);
-                console.log(data_grouped_by_time_of_day);
-                displayGroupedTable(getOrderedWeekdayKeys(), "Day of Week", data_grouped_by_weekday,
-                                    document.getElementById('agg-weekday-stats'));
-                displayGroupedTable(getOrderedTimeOfDayKeys(), "Time of Day", data_grouped_by_time_of_day,
-                                    document.getElementById('agg-time-of-day-stats'));
+                console.log("Received: " + JSON.stringify(dataPoints));
+                plotDataPointsOverTime(dataPoints, document.getElementById('plot-over-time'));
+                var dataGroupedByWeekday = groupDataByWeekday(dataPoints);
+                var dataGroupedByTimeOfDay = groupDataByTimeOfDay(dataPoints);
+                plotGroupedDataPoints(
+                    getOrderedWeekdayKeys(), "Day of Week", dataGroupedByWeekday,
+                    document.getElementById('agg-weekday-stats')
+                );
+                plotGroupedDataPoints(
+                    getOrderedTimeOfDayKeys(), "Time of Day", dataGroupedByTimeOfDay,
+                    document.getElementById('agg-time-of-day-stats')
+                );
             }
             google.charts.setOnLoadCallback(plotDataPointsWrapper);
         }
