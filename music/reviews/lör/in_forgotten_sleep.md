@@ -17,9 +17,9 @@ This album is all over the place, just barely held together by relentless energy
 it work is that many of the riffs and refrains that it tosses out are
 so memorable. The little details, though overwhelming and chaotic, often caught my
 attention. The first minute of "Visions of Awakening"--big chunks of the opening track "Dusk"--
-the weird sultriness of "Spectrum." These all caught my attention and made me think that
+the weird sultriness of "Spectrum." These all made me think that
 I had stumbled across something special.
 
-Ultimately, the perfect album for me would have more structure, more discipline, and less
+The perfect album for me would have more structure, more discipline, and less
 schizophrenic energy. But I recognize this as a matter of taste, and for someone with
 different sensibilities, I think that *In Forgotten Sleep* would be a masterpiece.
