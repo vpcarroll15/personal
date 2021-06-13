@@ -125,6 +125,19 @@ class Tag(models.Model):
         return self.name.replace(" ", "")
 
 
+class Comment(models.Model):
+    """A user comment on an album."""
+
+    text = models.TextField()
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
+    album = models.ForeignKey(Music, on_delete=models.CASCADE)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"#{self.id}, author={self.author.username}"
+
+
 class BestOf(models.Model):
     """Data about albums spanning a particular period of time."""
 

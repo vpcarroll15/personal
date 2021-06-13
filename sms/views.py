@@ -277,7 +277,7 @@ def data_points(request):
     if end_datetime is not None:
         data_points = data_points.filter(created_at__lt=end_datetime)
     data_points = data_points.exclude(score=None)
-    data_points = data_points.order_by('id')
+    data_points = data_points.order_by("id")
 
     return JsonResponse(
         {"data_points": [data_point.to_dict_for_api() for data_point in data_points]}
