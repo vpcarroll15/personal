@@ -12,12 +12,13 @@ from .constants import URL_ROOT, MY_NAME, MY_EMAIL
 def update_context_with_album(context, album):
     context["album"] = album
     context["tags"] = album.musician.tags.all()
+    context["comments"] = album.comment_set.all().order_by("created_at")
 
 
 def apply_common_preselects_music(music_queryset):
     return (
         music_queryset.select_related("musician")
-        .prefetch_related("musician__tags")
+        .prefetch_related("musician__tags", "comment_set")
         .distinct()
     )
 

@@ -137,6 +137,13 @@ class Comment(models.Model):
     def __str__(self):
         return f"#{self.id}, author={self.author.username}"
 
+    @property
+    def display_name(self):
+        # Matt Parker will format as Matt P.
+        if self.author.first_name and self.author.last_name:
+            return self.author.first_name + " " + self.author.last_name[0] + "."
+        return self.author.username
+
 
 class BestOf(models.Model):
     """Data about albums spanning a particular period of time."""

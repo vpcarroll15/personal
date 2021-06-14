@@ -11,13 +11,21 @@
                 <h3><a href="{% url 'music:ratings' %}">Score: {{ album.rating }}/3</a></h3>
             </span>
             <span>
-                <ul>
+                <ul style="padding: 0px;">
                     {% for tag in tags %}
-                    <li>
-                        <a href="{% url 'music:search' %}?search_term={{ tag.name }}">
-                            {{ tag.name }}
-                        </a>
-                    </li>
+                        {% if forloop.last %}
+                            <li style="display:inline;">
+                                <a href="{% url 'music:search' %}?search_term={{ tag.name }}">
+                                    {{ tag.name }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li style="display:inline;">
+                                <a href="{% url 'music:search' %}?search_term={{ tag.name }}">
+                                    {{ tag.name }},
+                                </a>
+                            </li>
+                        {% endif %}
                     {% endfor %}
                 </ul>
             </span>
@@ -37,7 +45,7 @@
 <div class="review">
     {% if album.image_src %}
         {% load static %}
-        <img src="{% static album.image_src %}" alt="" style="width:32%; float: left; margin: 30px;">
+        <img src="{% static album.image_src %}" alt="" style="width:25%; float: left; margin: 30px;">
     {% endif %}
     <div class="review-text">
         {% if truncate %}
@@ -53,4 +61,19 @@
             {{ album.review }}
         {% endif %}
     </div>
+</div>
+
+{% load music_extras %}
+<div class="comments">
+    {% if comments %}
+        <h2>
+            Comments
+        </h2>
+        {% for comment in comments %}
+        <p>
+            <b>{{ comment.display_name }} ({{ comment.created_at|human_readable_how_long_ago }}):</b>
+            {{ comment.text }}
+        </p>
+        {% endfor %}
+    {% endif %}
 </div>

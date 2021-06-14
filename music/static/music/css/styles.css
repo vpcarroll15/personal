@@ -152,6 +152,11 @@ p {
   padding-right: 20px;
 }
 
+.comments {
+  background-color: #FFFFE0;
+  padding: 20px;
+}
+
 @media screen and (max-width: 1050px) {
   .hide-on-small-screens {
     display: none;
