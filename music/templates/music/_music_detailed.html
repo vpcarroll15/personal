@@ -63,17 +63,35 @@
     </div>
 </div>
 
-{% load music_extras %}
-<div class="comments">
-    {% if comments %}
+{% if show_comments %}
+    {% load music_extras %}
+    <div class="comments">
         <h2>
             Comments
         </h2>
-        {% for comment in comments %}
-        <p>
-            <b>{{ comment.display_name }} ({{ comment.created_at|human_readable_how_long_ago }}):</b>
-            {{ comment.text }}
-        </p>
-        {% endfor %}
-    {% endif %}
-</div>
+        {% if user.is_authenticated %}
+            <form id="comment_submission_form" action="{% url 'music:comment' music_id=album.id %}" method="post" >
+                {% csrf_token %}
+                <label for="comment">Care to comment?</label>
+                <br>
+                <textarea id="comment" name="comment" rows="1" cols="200"></textarea>
+                <br>
+                <input type="submit" value="Submit">
+            </form>
+        {% else %}
+            <p>
+                <i>
+                If you'd like to comment, you need to be logged in. See the status bar at the top.
+                If you don't have an account, I'd love to create one for you! Just email me.
+                </i>
+            </p>
+        {% endif %}
+        {% if comments %}
+            {% for comment in comments %}
+<pre style="padding-top: 3px;">
+<b>{{ comment.display_name }} ({{ comment.created_at|human_readable_how_long_ago }}):</b> {{ comment.text }}
+</pre>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endif %}

@@ -1,18 +1,22 @@
 from collections import defaultdict, Counter
 
-from django.shortcuts import get_object_or_404, render
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.db.utils import IntegrityError
 from django.http import HttpResponse
+from django.http import HttpResponseNotAllowed
+from django.shortcuts import get_object_or_404, render, redirect, reverse
 from feedgen.feed import FeedGenerator
-
-from .models import Music, BestOf
+from .models import Music, BestOf, Comment
 from .constants import URL_ROOT, MY_NAME, MY_EMAIL
 
 
-def update_context_with_album(context, album):
+def update_context_with_album(context, album, show_comments=True):
     context["album"] = album
     context["tags"] = album.musician.tags.all()
-    context["comments"] = album.comment_set.all().order_by("created_at")
+    context["show_comments"] = show_comments
+    if show_comments:
+        context["comments"] = album.comment_set.all().order_by("created_at")
 
 
 def apply_common_preselects_music(music_queryset):
@@ -39,7 +43,7 @@ def home(request):
     )
     if recommended_albums:
         album_of_the_month = recommended_albums.order_by("-reviewed_at")[0]
-        update_context_with_album(context, album_of_the_month)
+        update_context_with_album(context, album_of_the_month, show_comments=False)
 
     return render(request, "music/home.html", context)
 
@@ -52,6 +56,25 @@ def music(request, music_id):
     update_context_with_album(context, music)
 
     return render(request, "music/music.html", context)
+
+
+@login_required
+def comment(request, music_id):
+    """Adds a comment to a piece of music."""
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    try:
+        comment_text = request.POST["comment"]
+        Comment.objects.create(
+            text=comment_text, author=request.user, album_id=music_id
+        )
+    except (KeyError, IntegrityError):
+        return HttpResponse(reason="Invalid input to POST", status=400)
+
+    url = reverse("music:music_detailed", kwargs={"music_id": music_id})
+
+    return redirect(url)
 
 
 def search(request):
