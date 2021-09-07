@@ -20,7 +20,7 @@ are difficult to even find. Thy Catafalque has a deft touch with the synthesizer
 
 My favorite track, "Vadak (Az átváltozás rítusai)," is a perfect folk/black metal synthesis.
 After a rollicking guitar opening that, truth be told, I would have trimmed from the final
-edit of song, the band lays down a melody on the cello that could be the
+edit of the song, the band lays down a melody on the cello that could be the
 accompaniment to two medieval warloads fighting a duel to the death. This music is so badass.
 When the fantasy/folk music needs to be kicked to the next level, the vocalist crashes in
 with some anguished screaming.
