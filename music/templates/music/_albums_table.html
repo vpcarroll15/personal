@@ -22,7 +22,7 @@
                 </a>
             </td>
             <td>{{ album.rating }}</td>
-            <td>{{ album.album_released_date | date:"m/Y" }}</td>
+            <td>{{ album.album_released_date | date:"Y-m" }}</td>
         </tr>
         {% endfor %}
     </tbody>
