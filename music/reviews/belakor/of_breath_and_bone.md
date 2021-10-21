@@ -8,4 +8,4 @@ of an antihero. I'm thinking of the throwdowns at the beginnings of tracks like
 mastered. The color palette feels brighter.
 
 Really, all I have to say is that I am glad that this band continued to produce music
-at such a high level!
+at such a high level! (Also, the album cover definitely merits a 3/3. It's mesmerizing.)

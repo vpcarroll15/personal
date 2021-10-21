@@ -19,5 +19,5 @@ teach me a lesson about climate change.
 One big point in this album's favor is that it sounds completely like itself. Agalloch has a polished
 style and sound, and they commit fully to it. I prefer albums that are a bit tighter, with more
 energy; but if Agalloch had tried to move in that direction, it would have made their music
-worse. These guys know what they are, and the assurance of their sound is what made the album a classic
+worse. These guys know what they are, and the assurance of their sound is what makes the album a classic
 that people use as a reference point when talking about black metal.
