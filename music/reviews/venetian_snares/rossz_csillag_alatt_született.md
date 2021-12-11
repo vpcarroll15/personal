@@ -27,3 +27,9 @@ start a remarkably catchy dance track. I even love the odd beginning of
 is less pleasant.)
 
 Overall, a highly memorable album that I was pleased to discover.
+
+UPDATE: I am upgrading this album to a 3/3. Yes, it's messy and unpleasant in parts, but when
+I was making my end-of-the-year list, it was obvious to me that this album had some of the
+most captivating moments that I listened to this year. I wish that it were cleaner, but maybe
+the bizarre stuff is enabling the brilliant stuff in a way that I am not musically sophisticated
+enough to understand! I will accept it as it is.
