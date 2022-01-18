@@ -25,7 +25,7 @@ There is so much to like in this album. I haven't even talked about individual t
 the rich soundscape that is built up in the first minute, I love the bridge into the chorus.
 As for the chorus itself, although the lyrics don't make logical sense, they make
 emotional sense in context. I adore when she spits out: "Elation or disarray /
-Passions are the potent forces leading us along the way." The plosives and pentameter in
+Passions are the potent forces leading us along the way." The plosives and iambic verse in
 Marion's voice are irresistible.
 
 It's not a perfect album. "Strider" is structurally uninteresting, and I don't think it
