@@ -14,19 +14,20 @@
         name: web-server
       tags: basics
   
-    - name: Install basic packages
-      become: yes
-      apt:
-        name:
-          - python3-pip
-          - python3-dev
-          - nginx
-          - curl
-          - libpq-dev
-          - ipython
-          - postgresql
-          - postgresql-contrib
-      tags: basics
+    # TODO: Uncomment all this apt stuff once we upgrade to Ubuntu 22 and can fix it.
+    # - name: Install basic packages
+    #   become: yes
+    #   apt:
+    #     name:
+    #       - python3-pip
+    #       - python3-dev
+    #       - nginx
+    #       - curl
+    #       - libpq-dev
+    #       - ipython
+    #       - postgresql
+    #       - postgresql-contrib
+    #   tags: basics
 
     - name: Set pip3 to be pip
       become: yes
@@ -34,12 +35,12 @@
       tags: basics
 
     # Getting Django app working.
-    - name: Clone repo
-      git:
-        repo: https://github.com/vpcarroll15/personal.git
-        dest: /home/{{ username }}/source
-        version: "{{ code_branch }}"
-      tags: django
+    # - name: Clone repo
+    #   git:
+    #     repo: https://github.com/vpcarroll15/personal.git
+    #     dest: /home/{{ username }}/source
+    #     version: "{{ code_branch }}"
+    #   tags: django
 
     - name: Install virtualenv
       pip:
@@ -139,17 +140,17 @@
       tags: nginx
     
     # Getting Let's Encrypt working.
-    - name: Install Certbot repository
-      become: yes
-      apt_repository:
-        repo: ppa:certbot/certbot
-      tags: encrypt
+    # - name: Install Certbot repository
+    #   become: yes
+    #   apt_repository:
+    #     repo: ppa:certbot/certbot
+    #   tags: encrypt
     
-    - name: Install Certbot
-      become: yes
-      apt:
-        name: python-certbot-nginx
-      tags: encrypt
+    # - name: Install Certbot
+    #   become: yes
+    #   apt:
+    #     name: python-certbot-nginx
+    #   tags: encrypt
 
       # We want to get that A security rating!
       # https://www.ssllabs.com/ssltest/analyze.html
