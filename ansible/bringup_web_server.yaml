@@ -35,12 +35,12 @@
       tags: basics
 
     # Getting Django app working.
-    # - name: Clone repo
-    #   git:
-    #     repo: https://github.com/vpcarroll15/personal.git
-    #     dest: /home/{{ username }}/source
-    #     version: "{{ code_branch }}"
-    #   tags: django
+    - name: Clone repo
+      git:
+        repo: https://github.com/vpcarroll15/personal.git
+        dest: /home/{{ username }}/source
+        version: "{{ code_branch }}"
+      tags: django
 
     - name: Install virtualenv
       pip:
