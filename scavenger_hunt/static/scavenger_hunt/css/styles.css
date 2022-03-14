@@ -26,6 +26,10 @@
   background-color: #ecefd5;
 }
 
+.big {
+  font-size: xx-large;
+}
+
 #heading {
   background-color:	#9ACD32;
   display: none;

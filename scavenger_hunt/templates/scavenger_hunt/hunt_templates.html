@@ -1,5 +1,5 @@
 {% extends "scavenger_hunt/boilerplate.html" %}
-{% block all %}
+{% block content %}
 {% if hunt_templates %}
 <h1>Choose your adventure!</h1>
 <table id="sortable-table" class="checkered-blue">
@@ -17,7 +17,9 @@
                 <a href="{% url 'scavenger_hunt:hunt_template' id=hunt_template.id %}">{{ hunt_template.name }}</a>
             </td>
             <td>
-                {{ hunt_template.description }}
+                {% autoescape off %}
+                {{ hunt_template.description | safe }}
+                {% endautoescape %}
             </td>
             <td>{{ hunt_template.updated_at | date:"F j, Y"}}</td>
         </tr>

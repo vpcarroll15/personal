@@ -1,8 +1,7 @@
 {% extends "scavenger_hunt/boilerplate.html" %}
-{% block all %}
+{% block content %}
 <div class="scavenger-hunt-title-border">
     <h1 class="scavenger-hunt-title">{{ hunt_template.name }}</h1>
-    <h3 class="scavenger-hunt-metadata">{{ hunt_template.updated_at | date:"F j, Y" }}</h3>
 </div>
 <div class="simple-border-no-radius scavenger-hunt-description">
     <h2>Description</h2>
@@ -10,13 +9,16 @@
         {% load static %}
         <img class="max-size-img" src="{% static hunt_template.path_to_static_img_asset %}" alt="{{ hunt_template.path_to_static_img_asset }}">
     {% endif %}
-    <p>{{ hunt_template.description }}</p>
+    <p>
+    {% autoescape off %}
+    {{ hunt_template.description | safe }}
+    {% endautoescape %}
+    </p>
 </div>
 <div class="scavenger-hunt-start-nav-bar">
     <form class="scavenger-hunt-start" action="{% url 'scavenger_hunt:create_new_hunt' template_id=hunt_template.id %}" method="post">
         {% csrf_token %}
         <input type="submit" value="Start">
     </form>
-    <a href="{% url 'scavenger_hunt:hunt_templates' %}">Return to list of hunts</a>
 </div>
 {% endblock %}

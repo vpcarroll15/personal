@@ -1,5 +1,5 @@
 {% extends "scavenger_hunt/boilerplate.html" %}
-{% block all %}
+{% block content %}
 <script>
 function addInputField(form, name, value) {
     /* Adds a hidden field with name and value to the form.*/
@@ -87,7 +87,6 @@ function revealHint() {
     {% else %}
         <p>Congratulations! You finished the hunt.</p>
     {% endif %}
-    <p><a href="{% url 'scavenger_hunt:hunt_templates' %}">Return home</a></p>
 {% else %}
     {% if not success %}
         <div class="toolbar">
@@ -116,13 +115,22 @@ function revealHint() {
             <img class="max-size-img" src="{% static hunt.current_location.path_to_static_img_asset %}" alt="{{ hunt.current_location.path_to_static_img_asset }}">
         {% endif %}
         {% if hunt.current_location.clue %}
-            <div>{{ hunt.current_location.clue }}</div>
+            <div>
+            {% autoescape off %}
+                {{ hunt.current_location.clue | safe }}
+            {% endautoescape %}
+            </div>
         {% endif %}
     </div>
     <div id="heading" class="simple-border"></div>
     {% if hunt.current_location.hint %}
     <div id="hint" class="simple-border" style="display:none">
-        <div><h2>Your hint:</h2>{{ hunt.current_location.hint }}</div>
+        <div>
+            <h2>Your hint:</h2>
+            {% autoescape off %}
+            {{ hunt.current_location.hint | safe }}
+            {% endautoescape %}
+        </div>
     </div>
     {% endif %}
     <div class="scavenger-control-panel simple-border">
@@ -138,13 +146,12 @@ function revealHint() {
             {% if hunt.current_location.disable_heading %}
             <span class="heading-disabled">Calculating a heading has been disabled for this location.</span>
             {% else %}
-            <button class="scavenger-control-panel-elem" type="button" onclick="retrieveHeading()">Calculate heading</button>
+            <button class="scavenger-control-panel-elem" type="button" onclick="retrieveHeading()">Point me!</button>
             {% endif %}
         {% endif %}
         {% if hunt.current_location.hint %}
-            <button class="scavenger-control-panel-elem" type="button" onclick="revealHint()">Show hint</button>
+            <button class="scavenger-control-panel-elem" type="button" onclick="revealHint()">Hint please?</button>
         {% endif %}
-        <a href="{% url 'scavenger_hunt:hunt_templates' %}">Abandon hunt</a>
     </div>
 {% endif %}
 {% endblock %}

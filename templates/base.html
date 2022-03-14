@@ -24,8 +24,9 @@
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js"></script>
+    {% block extraheaders %}{% endblock %}
 </head>
 <body>
-    {% block all %}{% endblock %}
+  {% block all %}{% endblock %}
 </body>
 </html>
