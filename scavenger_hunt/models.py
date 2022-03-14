@@ -29,6 +29,7 @@ class Location(models.Model):
 
     clue = models.TextField(blank=True)
     hint = models.TextField(null=True, blank=True)
+    post_solve = models.TextField(null=True, blank=True, help_text="We show the user this text if they successfully solve the clue, before progressing to the next clue.")
 
     name = models.CharField(
         max_length=200,
@@ -122,6 +123,7 @@ class ScavengerHunt(models.Model):
         "Location", null=True, on_delete=models.CASCADE
     )
 
+    post_location_phase = models.BooleanField(default=False)
     is_finished = models.BooleanField(default=False)
 
     def __str__(self):
@@ -157,11 +159,13 @@ class ScavengerHunt(models.Model):
         index_in_heading_labels = int(offset_heading / DEGREES_PER_LABEL)
         return distance_m, HEADING_LABELS[index_in_heading_labels]
 
-    def should_advance_to_next_location(self, latitude, longitude, solution):
+    def location_is_completed(self, latitude, longitude, solution):
         """
         Return True if, according to our coordinates and the user-provided solution, we should advance to the next location.
         """
         if self.hunt_template.skip_all_checks:
+            return True
+        if self.hunt_template.post_location_phase:
             return True
         try:
             distance, _ = self.distance_and_direction_to_current_location(

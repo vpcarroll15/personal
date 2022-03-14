@@ -79,6 +79,17 @@ function revealHint() {
     {% else %}
         <p>Congratulations! You finished the hunt.</p>
     {% endif %}
+{% elif hunt.post_location_phase %}
+    Objective achieved! Well done.<br>
+    {% if hunt.current_location.post_solve %}
+    {{ hunt.current_location.post_solve }}
+    {% endif %}
+    <div class="scavenger-control-panel simple-border">
+        <form id="advance_form" class="scavenger-control-panel-elem" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
+            {% csrf_token %}
+            <button type="button" onclick="submitLocation()">Advance</button>
+        </form>
+    </div>
 {% else %}
     {% if not success %}
         <div class="toolbar">

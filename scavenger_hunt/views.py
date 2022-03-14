@@ -96,14 +96,20 @@ def hunt(request, id):
             return HttpResponse(reason="Invalid input to POST", status=400)
         solution = request.POST.get("solution")
 
-        if hunt.should_advance_to_next_location(latitude, longitude, solution):
-            next_location_or_response, success = _get_next_location(
-                hunt.location_ids, current_location=hunt.current_location
-            )
-            if not success:
-                return next_location_or_response
-            hunt.current_location = next_location_or_response
-            hunt.is_finished = hunt.current_location is None
+        if hunt.location_is_completed(latitude, longitude, solution):
+            if not hunt.post_location_phase:
+                hunt.post_location_phase = True
+                success = True
+            else:
+                # Otherwise, advance to the next location.
+                next_location_or_response, success = _get_next_location(
+                    hunt.location_ids, current_location=hunt.current_location
+                )
+                if not success:
+                    return next_location_or_response
+                hunt.post_location_phase = False
+                hunt.current_location = next_location_or_response
+                hunt.is_finished = hunt.current_location is None
             hunt.save()
         else:
             success = False
