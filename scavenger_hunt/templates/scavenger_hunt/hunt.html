@@ -82,7 +82,9 @@ function revealHint() {
 {% elif hunt.post_location_phase %}
     Objective achieved! Well done.<br>
     {% if hunt.current_location.post_solve %}
-    {{ hunt.current_location.post_solve }}
+        {% autoescape off %}
+        {{ hunt.current_location.post_solve | safe }}
+        {% endautoescape %}
     {% endif %}
     <div class="scavenger-control-panel simple-border">
         <form id="advance_form" class="scavenger-control-panel-elem" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
