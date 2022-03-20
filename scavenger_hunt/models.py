@@ -165,7 +165,7 @@ class ScavengerHunt(models.Model):
         """
         if self.hunt_template.skip_all_checks:
             return True
-        if self.hunt_template.post_location_phase:
+        if self.post_location_phase:
             return True
         try:
             distance, _ = self.distance_and_direction_to_current_location(
