@@ -55,11 +55,18 @@ class Location(models.Model):
         help_text="If true, disables the ability to compute a heading to this destination.",
     )
 
+    # Deprecated. TODO: Port to "solutions" and remove.
     solution = models.CharField(
         null=True,
         blank=True,
         max_length=200,
         help_text="If provided, the user must input this in order to move on to the next section.",
+    )
+    solutions = ArrayField(
+        models.CharField(max_length=200),
+        null=True,
+        blank=True,
+        help_text="If provided, the user must input one of these in order to move on to the next section.",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
