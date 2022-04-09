@@ -89,11 +89,8 @@ def hunt(request, id):
             {"hunt": hunt, "success": success, "first_time": first_time},
         )
     elif request.method == "POST":
-        try:
-            latitude = float(request.POST["latitude"])
-            longitude = float(request.POST["longitude"])
-        except (KeyError, ValueError):
-            return HttpResponse(reason="Invalid input to POST", status=400)
+        latitude = float(request.POST.get("latitude", 0.0))
+        longitude = float(request.POST.get("longitude", 0.0))
         solution = request.POST.get("solution")
 
         if hunt.location_is_completed(latitude, longitude, solution):

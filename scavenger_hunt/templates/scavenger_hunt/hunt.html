@@ -11,9 +11,16 @@ function addInputField(form, name, value) {
 }
 
 function submitLocation() {
-    /* Submits the location form, after appending our location to it. */
+    /*
+    Submits the location form.
+    
+    We append our location to the form if the form needs it.
+    */
+    const form = document.getElementById('advance_form');
+    {% if hunt.current_location.latitude is None %}
+    form.submit();
+    {% else %}
     function submitLocationHelper(position) {
-        const form = document.getElementById('advance_form');
         addInputField(form, "latitude", position.coords.latitude);
         addInputField(form, "longitude", position.coords.longitude);
         form.submit();
@@ -23,6 +30,7 @@ function submitLocation() {
     } else {
         alert("Geolocation not supported. :(");
     }
+    {% endif %}
 }
 
 function retrieveHeading() {
@@ -40,9 +48,9 @@ function retrieveHeading() {
                 const approximate_distance_m = parseFloat(heading_content["distance"].toPrecision(1));
                 var distance_string = "";
                 if (approximate_distance_m > 1000) {
-                    distance_string = "~" + (approximate_distance_m / 1000) + "km"
+                    distance_string = "~" + (approximate_distance_m / 1000) + "km";
                 } else {
-                    distance_string = "~" + approximate_distance_m + "m"
+                    distance_string = "~" + approximate_distance_m + "m";
                 }
 
                 var update_elem = document.createElement("div");
