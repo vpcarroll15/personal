@@ -1,7 +1,7 @@
 ---
 # Details on how to do this came from:
 # https://www.digitalocean.com/community/tutorials/how-to-set-up-django-with-postgres-nginx-and-gunicorn-on-ubuntu-18-04
-# https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-18-04
+# https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-20-04
 - hosts: all
   vars:
     username: ubuntu
@@ -14,20 +14,19 @@
         name: web-server
       tags: basics
   
-    # TODO: Uncomment all this apt stuff once we upgrade to Ubuntu 22 and can fix it.
-    # - name: Install basic packages
-    #   become: yes
-    #   apt:
-    #     name:
-    #       - python3-pip
-    #       - python3-dev
-    #       - nginx
-    #       - curl
-    #       - libpq-dev
-    #       - ipython
-    #       - postgresql
-    #       - postgresql-contrib
-    #   tags: basics
+    - name: Install basic packages
+      become: yes
+      apt:
+        name:
+          - python3-pip
+          - python3-dev
+          - nginx
+          - curl
+          - libpq-dev
+          - postgresql
+          - postgresql-contrib
+          - python-is-python3
+      tags: basics
 
     - name: Set pip3 to be pip
       become: yes
@@ -45,6 +44,8 @@
     - name: Install virtualenv
       pip:
         name: virtualenv
+      become: yes
+      become_user: root
       tags: django
 
     - name: Install Django, gunicorn, other requirements
@@ -138,29 +139,6 @@
         name: nginx
         state: restarted
       tags: nginx
-    
-    # Getting Let's Encrypt working.
-    # - name: Install Certbot repository
-    #   become: yes
-    #   apt_repository:
-    #     repo: ppa:certbot/certbot
-    #   tags: encrypt
-    
-    # - name: Install Certbot
-    #   become: yes
-    #   apt:
-    #     name: python-certbot-nginx
-    #   tags: encrypt
-
-      # We want to get that A security rating!
-      # https://www.ssllabs.com/ssltest/analyze.html
-    - name: Disallow TLS 1.0 and 1.1, which are allowed by default.
-      become: yes
-      lineinfile:
-        path: /etc/letsencrypt/options-ssl-nginx.conf
-        regexp: ssl_protocols
-        line: ssl_protocols TLSv1.2 TLSv1.3;
-      tags: encrypt, tls
 
     - name: Copy SMS manager service
       become: yes
@@ -186,8 +164,16 @@
         name: sms_manager.service
         state: restarted
       tags: sms
+    
+    # Getting Let's Encrypt working.
+    - name: Install Certbot
+      become: yes
+      apt:
+        name:
+          - certbot
+          - python3-certbot-nginx
+      tags: encrypt
 
-    # TODO: Script a better way of doing this!
     - debug:
         msg: If this is your first time setting up this machine, run "sudo certbot --nginx -d paulcarroll.site -d www.paulcarroll.site"
       tags: encrypt
