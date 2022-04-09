@@ -55,13 +55,6 @@ class Location(models.Model):
         help_text="If true, disables the ability to compute a heading to this destination.",
     )
 
-    # Deprecated. TODO: Port to "solutions" and remove.
-    solution = models.CharField(
-        null=True,
-        blank=True,
-        max_length=200,
-        help_text="If provided, the user must input this in order to move on to the next section.",
-    )
     solutions = ArrayField(
         models.CharField(max_length=200),
         null=True,
@@ -76,7 +69,7 @@ class Location(models.Model):
         return self.name
 
     def clean(self):
-        if not self.solution and self.latitude is None:
+        if not self.solutions and self.latitude is None:
             raise ValidationError("Either a coordinate or a solution must be provided.")
         if not self.clue and not self.path_to_static_img_asset:
             raise ValidationError("Either a clue or an image must be provided.")
@@ -183,9 +176,9 @@ class ScavengerHunt(models.Model):
         else:
             if distance > self.current_location.radius:
                 return False
-        if (
-            self.current_location.solution
-            and self.current_location.solution.casefold() != solution.casefold()
-        ):
+        if self.current_location.solutions:
+            for correct_answer in self.current_location.solutions:
+                if correct_answer.casefold() == solution.casefold():
+                    return True
             return False
         return True

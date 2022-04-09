@@ -103,7 +103,7 @@ function revealHint() {
 {% else %}
     {% if not success %}
         <div class="toolbar">
-            {% if hunt.current_location.latitude is not None and hunt.current_location.solution %}
+            {% if hunt.current_location.latitude is not None and hunt.current_location.solutions %}
                 You may not be close enough to the right spot to advance, or you may have entered the wrong solution. Keep trying!
             {% elif hunt.current_location.latitude is not None %}
                 You are not close enough to the right spot to advance. Keep trying!
@@ -113,7 +113,7 @@ function revealHint() {
         </div>
     {% endif %}
     <div class="instructions toolbar">
-        {% if hunt.current_location.latitude is not None and hunt.current_location.solution %}
+        {% if hunt.current_location.latitude is not None and hunt.current_location.solutions %}
             Visit this location and enter the passcode to advance.
         {% elif hunt.current_location.latitude is not None %}
             Visit this location to advance.
@@ -147,7 +147,7 @@ function revealHint() {
     <div class="scavenger-control-panel simple-border">
         <form id="advance_form" class="scavenger-control-panel-elem" action="{% url 'scavenger_hunt:hunt' id=hunt.id %}" method="post" >
             {% csrf_token %}
-            {% if hunt.current_location.solution %}
+            {% if hunt.current_location.solutions %}
             <label for="solution">Enter passcode here: </label>
             <input type="text" name="solution" value=""><br>
             {% endif %}
