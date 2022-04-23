@@ -83,7 +83,9 @@ function revealHint() {
 <div class="scavenger-hunt">
 {% if hunt.is_finished %}
     {% if hunt.hunt_template.finished_message %}
-        <p>{{ hunt.hunt_template.finished_message }}</p>
+        {% autoescape off %}
+        <p>{{ hunt.hunt_template.finished_message | safe }}</p>
+        {% endautoescape %}
     {% else %}
         <p>Congratulations! You finished the hunt.</p>
     {% endif %}
