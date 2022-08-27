@@ -25,3 +25,5 @@ has a beautiful structure and shows off the vocalist's lovely voice.
 
 Overall, no complaints about this album, and I might bump it up to a 3 if I am still
 listening to it in a couple months.
+
+EDIT: Still listening. I'm going to bump it to a 3. It's pretty great.
