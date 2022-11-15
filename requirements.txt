@@ -67,7 +67,7 @@ pathspec==0.10.1
 pexpect==4.8.0
 phonenumbers==8.12.54
 pickleshare==0.7.5
-Pillow==9.2.0
+Pillow==9.3.0
 platformdirs==2.5.2
 prompt-toolkit==3.0.31
 psycopg2==2.9.3
