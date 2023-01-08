@@ -2,6 +2,7 @@
 Facilitates requests to the sms API by handling stuff like auth, URL composition, etc.
 """
 
+import abc
 import os
 import requests
 
@@ -14,7 +15,7 @@ class CredentialsNotFoundException(Exception):
     """
 
 
-class RestApiClient(object):
+class RestApiClient:
     """
     Client for invoking endpoints in this app with basic auth.
     """
@@ -45,6 +46,7 @@ class RestApiClient(object):
 
         return dict(response_dict)
 
+    @abc.abstractmethod
     def get_auth(self):
         """
         Returns a tuple consisting of the username and password.

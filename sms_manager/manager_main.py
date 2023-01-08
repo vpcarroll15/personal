@@ -14,9 +14,24 @@ import time
 import pytz
 from twilio.rest import Client as TwilioClient
 
-from api_client import RestApiClient
+from api_client import RestApiClient, CredentialsNotFoundException
 import platform_info
 from sms_types import Question, User
+
+
+class SmsApiClient(RestApiClient):
+    def get_auth(self):
+        """
+        Returns a tuple consisting of the username and password.
+        """
+        try:
+            username = os.environ["SMS_SENDER_API_USERNAME"]
+            password = os.environ["SMS_SENDER_API_PASSWORD"]
+        except KeyError as e:
+            raise CredentialsNotFoundException(e)
+
+        return username, password
+
 
 
 def set_next_contact_time(user, api_client):
@@ -77,7 +92,7 @@ def run_cycle():
     twilio_phone_number = os.environ["TWILIO_PHONE_NUMBER"]
     twilio_client = TwilioClient(account_sid, auth_token)
 
-    api_client = RestApiClient()
+    api_client = SmsApiClient()
     serialized_users = api_client.invoke("sms/users")
     users = [User(serialized_user) for serialized_user in serialized_users["users"]]
 
