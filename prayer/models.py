@@ -19,7 +19,7 @@ class SnippetType(models.TextChoices):
 
 
 def _get_time_now():
-    return datetime.now()
+    return datetime.now(tz=timezone.utc)
 
 
 class PrayerSchema(models.Model):
@@ -51,11 +51,11 @@ class PrayerSchema(models.Model):
     )
 
     def should_generate(self):
-        return self.next_generation_time <= datetime.now()
+        return self.next_generation_time <= datetime.now(tz=timezone.utc)
 
     def update_next_generation_time(self):
         """Update the time that we next generate the model."""
-        self.next_generation_time = datetime.now() + self.generation_cadence
+        self.next_generation_time = datetime.now(tz=timezone.utc) + self.generation_cadence
         self.save()
     
     def _get_snippets_by_type(self, use_sentinels=False) -> Dict[SnippetType, Iterator[str]]:

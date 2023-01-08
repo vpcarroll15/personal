@@ -27,10 +27,6 @@ class IsSuperUser(BasePermission):
 
 
 class UserInSmsManagerGroup(BasePermission):
-    """
-    Only authenticates users in the "Elevator" group.
-    """
-
     message = AUTH_FAILURE_MESSAGE
 
     def has_permission(self, request, view):
@@ -38,10 +34,6 @@ class UserInSmsManagerGroup(BasePermission):
 
 
 class UserInSmsWebhookCaller(BasePermission):
-    """
-    Only authenticates users in the "Elevator" group.
-    """
-
     message = AUTH_FAILURE_MESSAGE
 
     def has_permission(self, request, view):

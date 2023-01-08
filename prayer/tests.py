@@ -1,14 +1,16 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
+from django.core import mail
 from django.test import TestCase
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
 from freezegun import freeze_time
+from rest_framework.test import APITestCase
 
 from prayer.models import PrayerSchema, PrayerSnippet, SnippetType
 
 
-DATETIME_NOW = datetime(2022, 1, 30, 12, 0, 0)
+DATETIME_NOW = datetime(2022, 1, 30, 12, 0, 0, tzinfo=timezone.utc)
 
 
 @freeze_time(DATETIME_NOW)
@@ -53,7 +55,7 @@ class PrayerSchemaTests(TestCase):
         with_sentinels = schema.render(use_sentinels=True)
         without_sentinels = schema.render(use_sentinels=False)
         self.assertEquals(with_sentinels, '<p><em>I am grateful for this.</em> GRATITUDE_SNIPPET_HERE I want this: <ul><li>REQUEST_SNIPPET_HERE</li><li>REQUEST_SNIPPET_HERE</li></ul></p>')
-        self.assertEquals(without_sentinels, '<p><em>I am grateful for this.</em> I am snippet 7 of type GRATITUDE for user paul. I want this: <ul><li>I am snippet 7 of type REQUEST for user paul.</li><li>I am snippet 6 of type REQUEST for user paul.</li></ul></p>')
+        self.assertEquals(without_sentinels, '<p><em>I am grateful for this.</em> I am snippet 6 of type GRATITUDE for user paul. I want this: <ul><li>I am snippet 6 of type REQUEST for user paul.</li><li>I am snippet 5 of type REQUEST for user paul.</li></ul></p>')
 
     def test_render_broken_snippets_fails(self):
         # This works.
@@ -115,3 +117,39 @@ class PrayerSchemaTests(TestCase):
         assert schema.should_generate()
         schema.update_next_generation_time()
         assert schema.next_generation_time == DATETIME_NOW + timedelta(days=1)
+
+
+@freeze_time(DATETIME_NOW)
+class EmailTriggererTests(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user1 = User.objects.create_user("paul", "paul@carroll.com", "paulpassword")
+        cls.schema = PrayerSchema.objects.create(
+            user=cls.user1,
+            name="testname",
+            schema="No snippets here.",
+        )
+
+        cls.triggerer = User.objects.create_user(
+            "triggerer", "triggerer@carroll.com", "triggererpassword"
+        )
+        triggerer_group, _ = Group.objects.get_or_create(name="EmailTriggerer")
+        triggerer_group.user_set.add(cls.triggerer)
+
+    def test_email_triggerer(self):
+        self.client.force_authenticate(user=self.triggerer)
+        response = self.client.post("/prayer/trigger/", {})
+        self.assertEqual(response.status_code, 200)
+        updated_schema = PrayerSchema.objects.get(pk=self.schema.pk)
+        assert updated_schema.next_generation_time == DATETIME_NOW + timedelta(days=1)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["paul@carroll.com"])
+
+        # Now try again and verify that we don't produce an email
+        response = self.client.post("/prayer/trigger/", {})
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_wrong_credentials(self):
+        self.client.force_authenticate(user=self.user1)
+        response = self.client.post("/prayer/trigger/", {})
+        self.assertEqual(response.status_code, 403)

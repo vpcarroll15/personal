@@ -43,3 +43,9 @@ DATABASES = {
         "PORT": os.environ["RDS_PORT"],
     },
 }
+
+DEFAULT_FROM_EMAIL = "vpcarroll15@gmail.com"
+EMAIL_BACKEND = 'django_ses.SESBackend'
+AWS_SES_REGION_NAME = 'us-west-2'
+AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'
+USE_SES_V2 = True
