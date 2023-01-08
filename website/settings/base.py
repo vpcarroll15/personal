@@ -9,6 +9,7 @@ INSTALLED_APPS = [
     "music.apps.MusicConfig",
     "scavenger_hunt.apps.ScavengerHuntConfig",
     "sms.apps.SmsConfig",
+    "prayer.apps.PrayerConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
