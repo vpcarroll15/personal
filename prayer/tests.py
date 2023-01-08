@@ -53,7 +53,7 @@ class PrayerSchemaTests(TestCase):
         with_sentinels = schema.render(use_sentinels=True)
         without_sentinels = schema.render(use_sentinels=False)
         self.assertEquals(with_sentinels, '<p><em>I am grateful for this.</em> GRATITUDE_SNIPPET_HERE I want this: <ul><li>REQUEST_SNIPPET_HERE</li><li>REQUEST_SNIPPET_HERE</li></ul></p>')
-        self.assertEquals(without_sentinels, '<p><em>I am grateful for this.</em> I am snippet 6 of type GRATITUDE for user paul. I want this: <ul><li>I am snippet 6 of type REQUEST for user paul.</li><li>I am snippet 5 of type REQUEST for user paul.</li></ul></p>')
+        self.assertEquals(without_sentinels, '<p><em>I am grateful for this.</em> I am snippet 7 of type GRATITUDE for user paul. I want this: <ul><li>I am snippet 7 of type REQUEST for user paul.</li><li>I am snippet 6 of type REQUEST for user paul.</li></ul></p>')
 
     def test_render_broken_snippets_fails(self):
         # This works.
@@ -90,3 +90,28 @@ class PrayerSchemaTests(TestCase):
         # Just check that this doesn't throw an error.
         schema.render(use_sentinels=False)
  
+    def test_render_escaped_html(self):
+        PrayerSnippet.objects.create(
+            user=self.user1,
+            text=f"<h1>Escape this!</h1>",
+            type="GRATITUDE",
+            fixed_weight=1.0,
+        )
+        schema = PrayerSchema.objects.create(
+            user=self.user1,
+            name="testname",
+            schema="{{ GRATITUDE, 1 }}",
+        )
+        without_sentinels = schema.render(use_sentinels=False)
+        self.assertEquals(without_sentinels, '<p>&lt;h1&gt;Escape this!&lt;/h1&gt;</p>')
+
+    def test_generation_time(self):
+        schema = PrayerSchema.objects.create(
+            user=self.user1,
+            name="testname",
+            schema="{{ GRATITUDE, 1 }}",
+        )
+        assert schema.next_generation_time == DATETIME_NOW
+        assert schema.should_generate()
+        schema.update_next_generation_time()
+        assert schema.next_generation_time == DATETIME_NOW + timedelta(days=1)

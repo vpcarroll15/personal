@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import itertools
 import random
 import re
@@ -7,14 +7,14 @@ from typing import Dict, Iterator
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils.html import escape
 import markdown2
-import numpy
 
 
 class SnippetType(models.TextChoices):
-    GRATITUDE = "1", "GRATITUDE"
-    REQUEST = "2", "REQUEST"
-    PRAISE = "3", "PRAISE"
+    GRATITUDE = "GRATITUDE", "GRATITUDE"
+    REQUEST = "REQUEST", "REQUEST"
+    PRAISE = "PRAISE", "PRAISE"
 
 
 def _get_time_now():
@@ -33,8 +33,6 @@ class PrayerSchema(models.Model):
 
     next_generation_time = models.DateTimeField(default=_get_time_now, blank=True)
     generation_cadence = models.DurationField(default=timedelta(days=1), blank=True)
-
-    generation_variance = models.DurationField(default=timedelta(hours=6), blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -56,8 +54,7 @@ class PrayerSchema(models.Model):
 
     def update_next_generation_time(self):
         """Update the time that we next generate the model."""
-        seconds_of_variance = numpy.random.normal(0, self.generation_variance.total_seconds())
-        self.next_generation_time = datetime.now() + self.generation_cadence + timedelta(seconds=seconds_of_variance)
+        self.next_generation_time = datetime.now() + self.generation_cadence
         self.save()
     
     def _get_snippets_by_type(self, use_sentinels=False) -> Dict[SnippetType, Iterator[str]]:
@@ -73,12 +70,12 @@ class PrayerSchema(models.Model):
                 snippets = list(PrayerSnippet.objects.filter(
                     user=self.user,
                     type=snippet_type,
-                    expires_at__gt=datetime.now(),
                 ))
+                snippets = [snippet for snippet in snippets if snippet.expires_at is None or snippet.expires_at > datetime.now(tz=timezone.utc)]
                 # Sort. Make sure that the highest-weighted snippets go first.
                 snippets.sort(key=lambda x: x.sample(), reverse=True)
-                # Now convert each snippet into text.
-                snippets_text = [snippet.text for snippet in snippets]
+                # Now convert each snippet into text. Escape the user input.
+                snippets_text = [escape(snippet.text) for snippet in snippets]
                 snippet_type_to_snippet[snippet_type] = iter(snippets_text)
 
         return snippet_type_to_snippet
@@ -167,14 +164,14 @@ class PrayerSnippet(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(10)],
         default=1,
         blank=True,
-        help_text="The dynamic weight of this snippet from 1 to 10.",
+        help_text="The dynamic weight of this snippet. Heigher weights are more likely to be sampled.",
     )
 
     fixed_weight = models.FloatField(
         validators=[MinValueValidator(0), MaxValueValidator(1)],
         null=True,
         blank=True,
-        help_text="If supplied, then we ignore the dynamic weight and always use this weight.",
+        help_text="If supplied, then we ignore the dynamic weight and always use this weight. Between 0 and 1.",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
