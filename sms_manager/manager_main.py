@@ -7,16 +7,15 @@ This should remain fairly compact, and complicated logic should be pushed to hel
 from datetime import datetime, timezone, timedelta
 import logging
 import os
-import sys
 import random
 import time
 
 import pytz
 from twilio.rest import Client as TwilioClient
 
-from api_client import RestApiClient, CredentialsNotFoundException
-import platform_info
-from sms_types import Question, User
+from utils.api_client import RestApiClient, CredentialsNotFoundException
+from utils import platform_info
+from sms_types import User
 
 
 class SmsApiClient(RestApiClient):
