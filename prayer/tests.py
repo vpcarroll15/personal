@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
-import random
 
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from freezegun import freeze_time
 
 from prayer.models import PrayerSchema, PrayerSnippet, SnippetType
@@ -62,19 +62,19 @@ class PrayerSchemaTests(TestCase):
             name="works",
             schema="{{ GRATITUDE, 1 }}",
         )
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             PrayerSchema.objects.create(
                 user=self.user1,
                 name="broken",
                 schema="{{ GRATITUDE, NOTANUMBER }}",
             )
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             PrayerSchema.objects.create(
                 user=self.user1,
                 name="broken",
                 schema="{{ NOTATHING, 1 }}",
             )
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             PrayerSchema.objects.create(
                 user=self.user1,
                 name="broken",

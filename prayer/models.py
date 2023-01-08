@@ -6,6 +6,7 @@ from typing import Dict, Iterator
 
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.html import escape
 import markdown2
@@ -132,12 +133,22 @@ class PrayerSchema(models.Model):
             else:
                 reassembled_schema += elem
         return reassembled_schema
+    
+    def clean(self):
+        """
+        Validate the schema before saving it.
+        """
+        try:
+            self.render(use_sentinels=True)
+        except Exception as e:
+            # Raising a ValidationError means that this error renders much better in the admin page.
+            raise ValidationError(f"Failed to render schema: {repr(e)}")
 
     def save(self, *args, **kwargs):
         """
         Validate the schema before saving it.
         """
-        self.render(use_sentinels=True)
+        self.clean()
         super().save(*args, **kwargs)
     
     def __str__(self):
