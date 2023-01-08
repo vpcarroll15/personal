@@ -17,6 +17,10 @@ class SnippetType(models.TextChoices):
     PRAISE = "3", "PRAISE"
 
 
+def _get_time_now():
+    return datetime.now()
+
+
 class PrayerSchema(models.Model):
     """
     The schema that we use to generate a prayer.
@@ -27,8 +31,9 @@ class PrayerSchema(models.Model):
     )
     name = models.TextField(help_text="The name of the prayer.")
 
-    next_generation_time = models.DateTimeField(default=datetime.min, blank=True)
+    next_generation_time = models.DateTimeField(default=_get_time_now, blank=True)
     generation_cadence = models.DurationField(default=timedelta(days=1), blank=True)
+
     generation_variance = models.DurationField(default=timedelta(hours=6), blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -55,7 +60,7 @@ class PrayerSchema(models.Model):
         self.next_generation_time = datetime.now() + self.generation_cadence + timedelta(seconds=seconds_of_variance)
         self.save()
     
-    def get_snippets_by_type(self, use_sentinels=False) -> Dict[SnippetType, Iterator[str]]:
+    def _get_snippets_by_type(self, use_sentinels=False) -> Dict[SnippetType, Iterator[str]]:
         # Next, retrieve all the snippets for this user if we aren't using sentinels.
         # If we are using sentinels, supply a convincing iterator instead.
         snippet_type_to_snippet: Dict[SnippetType, Iterator[str]] = {}
@@ -78,17 +83,19 @@ class PrayerSchema(models.Model):
 
         return snippet_type_to_snippet
 
-    def parse(self, use_sentinels=False):
+    def render(self, use_sentinels=False):
         """
-        Parse the schema and return the HTML prayer that we should send as an email.
+        Render the schema and return the HTML prayer that we should send as an email.
 
         If use_sentinels=True, then we use placeholders like GRATITUDE_SNIPPET_HERE, REQUEST_SNIPPET_HERE
         instead of actually fetching the text of the snippet. This is useful for validating the schema
         when we save it.
         """
         # The first step is to parse the markdown and see if that works.
-        parsed_schema = markdown2.markdown(self.schema)
-        snippets_by_type = self.get_snippets_by_type(use_sentinels=use_sentinels)
+        parsed_schema: str = markdown2.markdown(self.schema)
+        parsed_schema = parsed_schema.strip()
+
+        snippets_by_type = self._get_snippets_by_type(use_sentinels=use_sentinels)
 
         # This regex will turn strings like this:
         # "Start with this: {{ test }} and then this {{ test2, 3 }} finally"
@@ -109,10 +116,9 @@ class PrayerSchema(models.Model):
                 except Exception:
                     raise ValueError(f"Failed to parse snippet type or count from {elem}")
                 
-                # If the user just wants a single element, we use a paragraph instead of an
-                # unordered list. This is just a nice display detail.
+                # If the user just wants a single element, we don't create a list.
                 if snippet_count == 1:
-                    begin, end, element_begin, element_end = "<p>", "</p>", "", ""
+                    begin, end, element_begin, element_end = "", "", "", ""
                 else:
                     begin, end, element_begin, element_end = "<ul>", "</ul>", "<li>", "</li>"
                 
@@ -134,8 +140,11 @@ class PrayerSchema(models.Model):
         """
         Validate the schema before saving it.
         """
-        self.parse(use_sentinels=True)
+        self.render(use_sentinels=True)
         super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.name} by {self.user}"
 
 
 class PrayerSnippet(models.Model):
@@ -154,16 +163,27 @@ class PrayerSnippet(models.Model):
         blank=True,
         help_text="When this snippet expires."
     )
-    weighting = models.SmallIntegerField(
+    dynamic_weight = models.SmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)],
         default=1,
         blank=True,
-        help_text="The value of this snippet from 1 to 10.",
+        help_text="The dynamic weight of this snippet from 1 to 10.",
     )
 
+    fixed_weight = models.FloatField(
+        validators=[MinValueValidator(0), MaxValueValidator(1)],
+        null=True,
+        blank=True,
+        help_text="If supplied, then we ignore the dynamic weight and always use this weight.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def sample(self):
         """Sample the snippet according to its weighting and return a score from 0 to 1."""
-        return max(random.random() for _ in range(self.weighting))
+        if self.fixed_weight is not None:
+            return self.fixed_weight
+        return max(random.random() for _ in range(self.dynamic_weight))
+
+    def __str__(self):
+        return f"{self.text[:25]}... by {self.user}"
