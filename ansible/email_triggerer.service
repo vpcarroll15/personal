@@ -1,5 +1,5 @@
 [Unit]
-Description="Launches SMS manager"
+Description="Launches email triggerer"
 After=network-online.target
 
 [Service]
