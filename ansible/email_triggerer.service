@@ -1,0 +1,15 @@
+[Unit]
+Description="Launches SMS manager"
+After=network-online.target
+
+[Service]
+Type=simple
+User={{ username }}
+Restart=always
+RestartSec=1
+# We expect email_triggerer to install its own environment variables.
+WorkingDirectory=/home/{{ username }}/source/email_triggerer
+ExecStart=/home/{{ username }}/venv/bin/python /home/{{ username }}/source/email_triggerer/email_triggerer.py
+
+[Install]
+WantedBy=multi-user.target

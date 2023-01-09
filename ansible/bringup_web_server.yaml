@@ -164,6 +164,31 @@
         name: sms_manager.service
         state: restarted
       tags: sms
+ 
+    - name: Copy email triggerer service
+      become: yes
+      become_user: root
+      template:
+        src: email_triggerer.service
+        dest: /etc/systemd/system/
+      tags: email
+
+    - name: Enable and load email_triggerer service
+      become: yes
+      become_user: root
+      systemd:
+        name: /etc/systemd/system/email_triggerer.service
+        enabled: yes
+        daemon_reload: yes
+      tags: email
+
+    - name: Restart email_triggerer service
+      become: yes
+      become_user: root
+      systemd:
+        name: email_triggerer.service
+        state: restarted
+      tags: email
     
     # Getting Let's Encrypt working.
     - name: Install Certbot
