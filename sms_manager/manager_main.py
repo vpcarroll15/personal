@@ -13,8 +13,8 @@ import time
 import pytz
 from twilio.rest import Client as TwilioClient
 
-from ..api_client import RestApiClient, CredentialsNotFoundException
-from ..platform_info import install_environment_variables
+from api_client import RestApiClient, CredentialsNotFoundException
+from platform_info import install_environment_variables
 from sms_types import User
 
 
