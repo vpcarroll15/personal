@@ -9,7 +9,7 @@ Restart=always
 RestartSec=1
 # We expect email_triggerer to install its own environment variables.
 WorkingDirectory=/home/{{ username }}/source/email_triggerer
-ExecStart=/home/{{ username }}/venv/bin/python /home/{{ username }}/source/email_triggerer/email_triggerer.py
+ExecStart=/home/{{ username }}/venv/bin/python /home/{{ username }}/source/email_triggerer/trigger_main.py
 
 [Install]
 WantedBy=multi-user.target
