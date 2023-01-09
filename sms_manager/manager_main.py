@@ -13,8 +13,8 @@ import time
 import pytz
 from twilio.rest import Client as TwilioClient
 
-from utils.api_client import RestApiClient, CredentialsNotFoundException
-from utils import platform_info
+from ..api_client import RestApiClient, CredentialsNotFoundException
+from ..platform_info import install_environment_variables
 from sms_types import User
 
 
@@ -110,7 +110,7 @@ def run_cycle():
 
 
 if __name__ == "__main__":
-    platform_info.install_environment_variables()
+    install_environment_variables()
     while True:
         try:
             run_cycle()
