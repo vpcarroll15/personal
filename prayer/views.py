@@ -19,7 +19,7 @@ class EmailTriggererView(APIView):
             html_prayer = schema.render()
 
             mail.send_mail(
-                subject="Prayer",
+                subject=schema.name,
                 message=strip_tags(html_prayer),
                 html_message=html_prayer,
                 from_email=None,
