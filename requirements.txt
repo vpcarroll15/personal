@@ -1,5 +1,5 @@
 ansible==6.7.0
-ansible-core==2.13.3
+ansible-core==2.13.7
 appdirs==1.4.4
 arrow==1.2.2
 asgiref==3.5.2
