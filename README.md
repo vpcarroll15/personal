@@ -16,3 +16,11 @@ exit
 # Restart everything.
 ansible-playbook -i web_servers bringup_web_server.yaml --extra-vars "code_branch=master" --skip-tags django,vault
 ```
+
+The current requirements.txt assumes you want Python 3.11. To install this on MacOS:
+
+```
+brew install python@3.11
+brew services start postgresql@14
+```
+
