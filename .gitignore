@@ -10,4 +10,4 @@
 
 .env/
 .env-3.11/
-static/
+/static/
