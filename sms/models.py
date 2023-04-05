@@ -16,8 +16,7 @@ The collection of callback functions that could be called when we receive an SMS
 """
 
 
-@callbacks_pool.register
-def create_prayer_snippet(data_point):
+def create_prayer_snippet(prayer_type, data_point):
     """
     Create a prayer snippet from a DataPoint.
 
@@ -38,9 +37,25 @@ def create_prayer_snippet(data_point):
             defaults=dict(
                 user=data_point.user.logged_in_user,
                 text=data_point.text,
+                type=prayer_type,
                 dynamic_weight=dynamic_weight,
             )
         )
+
+
+@callbacks_pool.register
+def create_gratitude_prayer_snippet(data_point):
+    create_prayer_snippet('GRATITUDE', data_point)
+
+
+@callbacks_pool.register
+def create_request_prayer_snippet(data_point):
+    create_prayer_snippet('REQUEST', data_point)
+
+
+@callbacks_pool.register
+def create_praise_prayer_snippet(data_point):
+    create_prayer_snippet('PRAISE', data_point)
 
 
 class Question(models.Model):
