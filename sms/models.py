@@ -3,9 +3,44 @@ Models for the SMS app.
 """
 from datetime import timedelta
 
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from class_pool.pool import Pool
+
+
+callbacks_pool = Pool()
+"""
+The collection of callback functions that could be called when we receive an SMS.
+"""
+
+
+@callbacks_pool.register
+def create_prayer_snippet(data_point):
+    """
+    Create a prayer snippet from a DataPoint.
+
+    A very simple callback function that loads the PrayerSnippet model and maps
+    fields from the DataPoint to the PrayerSnippet. We have to load the model because
+    otherwise we have a circular dependency between models.py files.
+    """
+    if data_point.text:
+        prayer_snippet_model = apps.get_model('prayer', 'PrayerSnippet')
+
+        # Clamp dynamic weight to the appropriate range.
+        dynamic_weight = data_point.score if data_point.score else 1
+        dynamic_weight = min(max(dynamic_weight, 10), 1)
+
+        prayer_snippet_model.objects.update_or_create(
+            # the sms_data_point is the unique key that should never create more than one message.
+            sms_data_point=data_point,
+            defaults=dict(
+                user=data_point.user.logged_in_user,
+                text=data_point.text,
+                dynamic_weight=dynamic_weight,
+            )
+        )
 
 
 class Question(models.Model):
@@ -19,6 +54,15 @@ class Question(models.Model):
 
     min_score = models.SmallIntegerField(default=0)
     max_score = models.SmallIntegerField(default=10)
+
+    callback = models.CharField(
+        max_length=100, blank=True, null=True,
+        choices=[(id, id) for id, _ in callbacks_pool],
+        help_text=(
+            "If defined, then this represents a callback function that we should trigger when we create "
+            "a DataPoint for this question. The signature of the callback is `callback(data_point: DataPoint)`."
+        ),
+    )
 
     def __str__(self):
         return self.text
@@ -101,6 +145,13 @@ class DataPoint(models.Model):
     # This short ID is given to us by Twilio when we get a message response.
     # It is guaranteed to be less than 40 chars long.
     response_message_id = models.CharField(max_length=40, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        """Make sure that we trigger the callback if it's defined."""
+        super().save(*args, **kwargs)
+        if self.question.callback:
+            callback = callbacks_pool.get(self.question.callback)
+            callback(self)
 
     def __str__(self):
         return f"{self.user.phone_number}, {self.question.text}, {self.score}"

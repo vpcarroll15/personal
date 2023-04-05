@@ -5,6 +5,7 @@ from django.test import Client, TestCase
 import pytz
 from rest_framework.test import APITestCase
 
+from prayer.models import PrayerSnippet
 from sms.models import DataPoint, Question
 from sms.models import User as SmsUser
 
@@ -104,6 +105,38 @@ class AccountTests(APITestCase):
         )
         assert response.status_code == 201
         assert "data_point" in response.data
+
+    def test_create_data_point_with_prayer_snippet(self):
+        user = User.objects.get(username="manager")
+        self.client.force_authenticate(user=user)
+
+        # Create a new question with a callback.
+        question = Question.objects.create(text="This creates prayer snippets.", callback="create_prayer_snippet")
+        sms_user = SmsUser.objects.get(phone_number="+13033033003")
+
+        response = self.client.post(
+            "/sms/data_point/",
+            {"question_id": question.id, "user_id": sms_user.id},
+            format="json",
+        )
+        assert response.status_code == 201
+
+        # No text means no prayer snippet.
+        assert PrayerSnippet.objects.count() == 0
+
+        # Try text and a score.
+        snippet_text = "This is a prayer snippet."
+        response = self.client.post(
+            "/sms/data_point/",
+            {"question_id": question.id, "user_id": sms_user.id, "text": snippet_text, "score": 3},
+            format="json",
+        )
+        assert response.status_code == 201
+        assert "data_point" in response.data
+        data_point_id = response.data["data_point"]["id"]
+        snippet = PrayerSnippet.objects.get(sms_data_point_id=data_point_id)
+        assert snippet_text == snippet.text
+
 
     def test_webhook(self):
         user = User.objects.get(username="webhooker")

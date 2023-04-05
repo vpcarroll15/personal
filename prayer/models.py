@@ -11,6 +11,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.html import escape
 import markdown2
 
+from sms.models import DataPoint
+
 
 class SnippetType(models.TextChoices):
     GRATITUDE = "GRATITUDE", "GRATITUDE"
@@ -186,6 +188,13 @@ class PrayerSnippet(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    sms_data_point = models.ForeignKey(
+        DataPoint,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="If this was created from an SMS message, we want to record it.",
+    )
 
     def sample(self):
         """Sample the snippet according to its weighting and return a score from 0 to 1."""
