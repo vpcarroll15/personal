@@ -12,5 +12,5 @@ at slow time signatures.
 
 I considered giving this album a 3. I don't think it's brilliant--there weren't many moments
 that made me suck in my breath. But the effect of listening to an hour of this thing, at its
-methodical pace, makes an impression. It's quaking with emotion, and that emotion is deeply
-expressed. And I keep coming back to it.
+methodical pace, made an impression. It's quaking with emotion, and that emotion is deeply
+expressed. I keep coming back to it.
