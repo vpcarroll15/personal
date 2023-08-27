@@ -1,12 +1,12 @@
 At last, music that reminds me of Aphex Twin that I actually
 like. This album has two striking elements that,
-combined, are really doing it for me. 
+combined, are really doing it for me.
 
 First, a strong classical influence. Venetian Snares is constantly
 sampling classical music: Paganini, Stravinsky, Telemann, Elgar.
 You can read the full list on Wikipedia if you're interested.
 The classical music gives the album a formal, dignified
-mood. 
+mood.
 
 This combines well with the second element: hard cuts and transitions.
 This music isn't mushy. Its lines are dagger sharp. Sometimes highly

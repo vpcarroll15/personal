@@ -7,7 +7,7 @@ its vibe is brutal.
 The vocalist and lyrics will alienate most people who listen to this, at least on
 their first listen. They did for me. The theme is mental illness. Here is a sample from my
 favorite track, "The Crimson Corridor": "A signal is born from a crooked womb /
-Into the hands of the chemical sea / It writhes forward towards the Pharos / To 
+Into the hands of the chemical sea / It writhes forward towards the Pharos / To
 infect the corpus and revive the fear." This is not light or fun listening; this is harsh,
 occasionally oppressive stuff.
 

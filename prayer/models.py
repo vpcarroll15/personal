@@ -30,7 +30,8 @@ class PrayerSchema(models.Model):
     """
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
     )
     name = models.TextField(help_text="The name of the prayer.")
 
@@ -39,7 +40,6 @@ class PrayerSchema(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
     schema = models.TextField(
         help_text=(
@@ -57,24 +57,37 @@ class PrayerSchema(models.Model):
 
     def update_next_generation_time(self):
         """Update the time that we next generate the model."""
-        self.next_generation_time = datetime.now(tz=timezone.utc) + self.generation_cadence
+        self.next_generation_time = (
+            datetime.now(tz=timezone.utc) + self.generation_cadence
+        )
         self.save()
-    
-    def _get_snippets_by_type(self, use_sentinels=False) -> Dict[SnippetType, Iterator[str]]:
+
+    def _get_snippets_by_type(
+        self, use_sentinels=False
+    ) -> Dict[SnippetType, Iterator[str]]:
         # Next, retrieve all the snippets for this user if we aren't using sentinels.
         # If we are using sentinels, supply a convincing iterator instead.
         snippet_type_to_snippet: Dict[SnippetType, Iterator[str]] = {}
 
         for snippet_type in SnippetType:
             if use_sentinels:
-                snippet_type_to_snippet[snippet_type] = itertools.repeat(f"{snippet_type.name}_SNIPPET_HERE")
+                snippet_type_to_snippet[snippet_type] = itertools.repeat(
+                    f"{snippet_type.name}_SNIPPET_HERE"
+                )
             else:
                 # We can resolve the whole list because it should be small.
-                snippets = list(PrayerSnippet.objects.filter(
-                    user=self.user,
-                    type=snippet_type,
-                ))
-                snippets = [snippet for snippet in snippets if snippet.expires_at is None or snippet.expires_at > datetime.now(tz=timezone.utc)]
+                snippets = list(
+                    PrayerSnippet.objects.filter(
+                        user=self.user,
+                        type=snippet_type,
+                    )
+                )
+                snippets = [
+                    snippet
+                    for snippet in snippets
+                    if snippet.expires_at is None
+                    or snippet.expires_at > datetime.now(tz=timezone.utc)
+                ]
                 # Sort. Make sure that the highest-weighted snippets go first.
                 snippets.sort(key=lambda x: x.sample(), reverse=True)
                 # Now convert each snippet into text. Escape the user input.
@@ -102,30 +115,41 @@ class PrayerSchema(models.Model):
         # into:
         # ['Start with this: ', '{{ test }}', ' and then this ', '{{ test2, 3 }}', ' finally']
         # From here, it is easy to parse and reassemble the output string.
-        regex = r'({{.*?}})'
+        regex = r"({{.*?}})"
         split_schema = re.split(regex, parsed_schema)
-        
-        reassembled_schema = ''
+
+        reassembled_schema = ""
         for elem in split_schema:
-            if elem.startswith('{{') and elem.endswith('}}'):
+            if elem.startswith("{{") and elem.endswith("}}"):
                 # This is a snippet, so we need to parse it.
                 try:
-                    snippet_type, snippet_count = elem[2:-2].split(',')
+                    snippet_type, snippet_count = elem[2:-2].split(",")
                     snippet_type = SnippetType[snippet_type.strip()]
                     snippet_count = int(snippet_count.strip())
                 except Exception:
-                    raise ValueError(f"Failed to parse snippet type or count from {elem}")
-                
+                    raise ValueError(
+                        f"Failed to parse snippet type or count from {elem}"
+                    )
+
                 # If the user just wants a single element, we don't create a list.
                 if snippet_count == 1:
                     begin, end, element_begin, element_end = "", "", "", ""
                 else:
-                    begin, end, element_begin, element_end = "<ul>", "</ul>", "<li>", "</li>"
-                
+                    begin, end, element_begin, element_end = (
+                        "<ul>",
+                        "</ul>",
+                        "<li>",
+                        "</li>",
+                    )
+
                 snippet_html = begin
                 for _ in range(snippet_count):
                     try:
-                        snippet_html += element_begin + next(snippets_by_type[snippet_type]) + element_end
+                        snippet_html += (
+                            element_begin
+                            + next(snippets_by_type[snippet_type])
+                            + element_end
+                        )
                     except StopIteration:
                         # If we are out of snippets, just keep going and insert nothing. There is nothing else
                         # we can do.
@@ -135,7 +159,7 @@ class PrayerSchema(models.Model):
             else:
                 reassembled_schema += elem
         return reassembled_schema
-    
+
     def clean(self):
         """
         Validate the schema before saving it.
@@ -152,26 +176,25 @@ class PrayerSchema(models.Model):
         """
         self.clean()
         super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return f"{self.name} by {self.user}"
 
 
 class PrayerSnippet(models.Model):
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
     )
 
-    text = models.TextField(help_text="The content of the snippet, which becomes part of the prayer.")
+    text = models.TextField(
+        help_text="The content of the snippet, which becomes part of the prayer."
+    )
     type = models.CharField(
-        max_length=20,
-        choices=SnippetType.choices,
-        help_text="The type of snippet."
+        max_length=20, choices=SnippetType.choices, help_text="The type of snippet."
     )
     expires_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When this snippet expires."
+        null=True, blank=True, help_text="When this snippet expires."
     )
     dynamic_weight = models.SmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)],

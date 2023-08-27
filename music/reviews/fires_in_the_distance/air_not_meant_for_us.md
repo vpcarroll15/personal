@@ -7,7 +7,7 @@ find meaning. Somehow it's uplifting? Don't ask me to explain.
 
 Online I see a few people classifying this album as doom. That doesn't seem right to me but
 I see how they got there. It has the walking pace of doom albums--no pushing the
-pace, no highly technical explosions. There's syncopation, but always 
+pace, no highly technical explosions. There's syncopation, but always
 at slow time signatures.
 
 I considered giving this album a 3. I don't think it's brilliant--there weren't many moments

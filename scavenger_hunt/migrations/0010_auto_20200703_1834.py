@@ -4,13 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("scavenger_hunt", "0009_auto_20200703_1819"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name="location", name="clue", field=models.TextField(blank=True),
+            model_name="location",
+            name="clue",
+            field=models.TextField(blank=True),
         ),
     ]

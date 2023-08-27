@@ -1,5 +1,5 @@
 A worthy successor to *Stone's Reach,* for which I gave a
-[glowing review](https://paulcarroll.site/music/music/140) last month. This album feels 
+[glowing review](https://paulcarroll.site/music/music/140) last month. This album feels
 similar to me, so I won't say much about it. The band's consistency is remarkable.
 
 This album might be a touch more dramatic and less moody. More of a classic hero, less

@@ -10,5 +10,5 @@ The music has essentially two layers: a drone and some guitar. The drone is warm
 long arcs. The guitar will play a little phrase, or repeat a note several times, and then stay quiet for a while.
 
 I don't know, there really isn't that much to say about this, and I don't think that it is a masterpiece, but it does
-evoke the feeling of waking up very well. It succeeds richly in its narrow domain. If you're looking for something 
+evoke the feeling of waking up very well. It succeeds richly in its narrow domain. If you're looking for something
 calm, this might be a good fit.

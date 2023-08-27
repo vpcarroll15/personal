@@ -5,4 +5,3 @@ The song that works best for me, and which I think is close to a masterpiece, is
 Not every song on this album works for me. In fact, I find most of them a little dull. For an album with so much energy, it might be lacking a little tension. This is an imperfect comparison, but I’m reminded of [*Nightmare Logic* by Power Trip](https://paulcarroll.site/music/music/62), another high-energy over-the-top album that I liked more because of its dissonances and surprising twists in song composition.
 
 Still, for “Pride of the North” alone, this album merits a place on my website.
-

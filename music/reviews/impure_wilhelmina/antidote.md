@@ -2,7 +2,7 @@ Repeated listens of this album over several months haven't helped me to figure o
 whether this album is great or boring. The truth must be somewhere in the middle.
 
 *Antidote* has the attention to detail that I expect from very good albums. There
-are lots of details that feel polished and musically smart. "Dismantling" has great 
+are lots of details that feel polished and musically smart. "Dismantling" has great
 syncopation that livens a simple melody, and the climax
 works well for me. "Midlife Hollow" is a slamming track with a great opening hook; I've
 listened to it dozens of times. Sometimes Impure Wilhelmina get noisy in an expert,

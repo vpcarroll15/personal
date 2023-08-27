@@ -10,4 +10,3 @@ value? It sounds muddy and undifferentiated. The first half of the "The Wolves T
 for me to pay attention to.
 
 If you like black metal with a dash of lo-fi punk, this could be a great fit for you.
-

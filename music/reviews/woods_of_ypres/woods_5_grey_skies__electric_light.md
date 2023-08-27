@@ -13,15 +13,15 @@ without faith.
 
 Two songs in particular on this album will stick with me. The opener, "Lightning & Snow," is
 perfectly constructed. David sings about the final moments of a man who has been struck by lightning. The choice
-to use the first-person voice is brilliant: "With a look of disbelief \ Alone and numb to the cold \ I knew the last
-moment had passed \ Before enduring years of sorrow." This also works as a piece of music--the guitars and drums
+to use the first-person voice is brilliant: "With a look of disbelief \\ Alone and numb to the cold \\ I knew the last
+moment had passed \\ Before enduring years of sorrow." This also works as a piece of music--the guitars and drums
 conjure an atmosphere of a stormy night in an uncaring world. The one criticism that I would have of this album
 is that not every song manages to do this...sometimes the instrumentals seem less inspired.
 
 The other song that I'd like to mention is "Traveling Alone," a bitter rebuke of the
 prosperity gospel. The singer says that he is too poor to believe that a benevolent God exists. Gold addresses the
 song to a nameless "you," who appears to be a wealthy member of the Christian faith: "I see your evidence of God
-\ All around me \ You have so therefore you are \ But I have not." These are scathing, memorable words, delivered in
+\\ All around me \\ You have so therefore you are \\ But I have not." These are scathing, memorable words, delivered in
 deep gothic tones.
 
 I can't give this album my highest honors, because I care so much about instrumentals and sometimes they fall a little

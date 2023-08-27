@@ -17,7 +17,7 @@ and it's gloomy, but it's also beautiful, and the beauty can make it uplifting t
 (I'm sure that I would feel differently if I could understand the lyrics.)
 
 The standout on this album, without question, are the vocals. These vocals are really, really good. Like another album
-that I loved this year (*This Onward Reach* by Eneferens), the vocalist sometimes uses "doom vocals" and sometimes 
+that I loved this year (*This Onward Reach* by Eneferens), the vocalist sometimes uses "doom vocals" and sometimes
 his regular unaffected voice. His "doom voice" is spellbinding and epic. His regular voice is entrancingly fluid...
 after this, I feel a conviction that Faroese is a fluid, beautiful language, but that could be an illusion created
 by this man's talent.
@@ -30,4 +30,3 @@ tradeoff.
 
 In the beginning of the album, the vocals are controlled, brief, tight--by the end of the album, they have broken wide
 open. I can't listen to this transition without getting chills. Wow, this is great stuff.
-

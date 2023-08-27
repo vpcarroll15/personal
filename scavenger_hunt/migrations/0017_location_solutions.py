@@ -5,15 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('scavenger_hunt', '0016_auto_20220314_0846'),
+        ("scavenger_hunt", "0016_auto_20220314_0846"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='location',
-            name='solutions',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=200), blank=True, help_text='If provided, the user must input one of these in order to move on to the next section.', null=True, size=None),
+            model_name="location",
+            name="solutions",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=200),
+                blank=True,
+                help_text="If provided, the user must input one of these in order to move on to the next section.",
+                null=True,
+                size=None,
+            ),
         ),
     ]

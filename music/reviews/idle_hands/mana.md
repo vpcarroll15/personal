@@ -1,6 +1,6 @@
 Classic 80's style heavy rock.
 
-Propulsive three-minute songs make this album a pleasure to listen to. Lots of good hooks and great 
+Propulsive three-minute songs make this album a pleasure to listen to. Lots of good hooks and great
 energy. The male vocalist articulates clearly and his voice has an interesting timbre.
 
 I didn't find this album an emotional experience, and honestly, listening to it straight through, I felt

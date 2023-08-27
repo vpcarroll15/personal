@@ -6,7 +6,7 @@ and centered on a voice that rumbles like thunder. These tracks often move at a 
 
 As for the voice...well, this album has an assortment of voices. We get screamy vocals, but also a lot of ordinary
 choral vocals. I think at least three people are singing on
-this album. I found the switches in voice jarring at first, and the vocals on this album still aren't my 
+this album. I found the switches in voice jarring at first, and the vocals on this album still aren't my
 favorite, but I've softened on them over time. They give the album a lot of variety.
 
 The highlight of the album, for me, is the slowest track: "Broken Hymn." This thing is terrific, and when I heard it, I
@@ -18,11 +18,10 @@ At the four minute mark, we get some catharsis. The instruments speed up, we get
 rush of sound, and the vocals transition from doom metal to normal. The track
 ends by returning to the throbbing, pulsing nightmare. It sounds as though nothing really was
 accomplished--no resolution found. The exasperated noise that the vocalist makes
-at 7:20 is the perfect capstone. 
+at 7:20 is the perfect capstone.
 
 In general, I prefer the tracks in the second half of the album, although *Iris* is strong throughout. "Voices of
 Winter" makes terrific use of its string instruments, including a moving middle section. "Child of Light" opens like a
 shoegaze track, but has an emotional, memorable build. "Isolation" opens the album in a peaceful, contemplative way.
 
 Overall, really good stuff.
-

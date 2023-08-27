@@ -29,7 +29,8 @@ class Musician(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(
-        db_index=True, auto_now=True,  # Updates each time save() is called
+        db_index=True,
+        auto_now=True,  # Updates each time save() is called
     )
 
     name = models.CharField(max_length=100, unique=True)
@@ -44,7 +45,8 @@ class Music(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(
-        db_index=True, auto_now=True,  # Updates each time save() is called
+        db_index=True,
+        auto_now=True,  # Updates each time save() is called
     )
     album_released_date = models.DateTimeField(null=True, blank=True)
     reviewed_at = models.DateTimeField(default=datetime.now)
@@ -129,7 +131,10 @@ class Comment(models.Model):
     """A user comment on an album."""
 
     text = models.TextField()
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
     album = models.ForeignKey(Music, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -21,4 +21,3 @@ it were a bit sharper. Not every album needs to wake me up and make me feel aliv
 but the slow burns need to be rigorous in their attention to detail, to reward careful listening. I also would've
 appreciated more of a variety in atmosphere. But the vision of the album, top to bottom, still
 managed to move me.
-

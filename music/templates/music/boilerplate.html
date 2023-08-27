@@ -4,12 +4,12 @@
     <div class="toolbar">
         {% if user.is_authenticated %}
         <span class="hide-on-small-screens" style="padding-right: 10px;">
-            Welcome {{ user.username }}! 
+            Welcome {{ user.username }}!
         </span>
         {% endif %}
         <span style="padding-right: 10px;">
             {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}">Logout</a> 
+            <a href="{% url 'logout' %}">Logout</a>
             {% else %}
             <a href="{% url 'login' %}">Login</a>
             {% endif %}

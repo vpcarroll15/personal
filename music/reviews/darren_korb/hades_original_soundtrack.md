@@ -17,7 +17,7 @@ Video game scores don't have this problem--well, mostly not. They still operate 
 is that the music can't grab too much of the listener's attention. It has to be part of a seamless whole.
 But it doesn't have to compete with dialogue, nor does it have to be carefully synchronized to images
 on screen. And even the constraint that I mentioned, that it has to enhance the listener's ability to pay
-attention, is a constraint that is compatible with interesting music. 
+attention, is a constraint that is compatible with interesting music.
 
 *Hades* fits this description perfectly. It doesn't have any epic riffs, or weird harmonies, or
 complicated arrhythmic sections. It has to be a gentleman and share the spotlight. Nevertheless, it manages

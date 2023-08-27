@@ -23,4 +23,3 @@ turned from being a formal, automatic writing technique into a creative, psyched
 hallucinations." I hope that Caterina is as embarrassed by this as I am.
 
 Definitely worth a listen!
-

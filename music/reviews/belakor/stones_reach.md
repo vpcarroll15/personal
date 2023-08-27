@@ -17,7 +17,7 @@ place, exploring variations on a badass melody, before gently coming to rest. Th
 is a driving percussion section, a soulful guitar section, a haunted piano section,
 and plenty of opportunities for the vocalist to growl. "Held In Hollows" opens
 with a intellectual puzzle: can you figure out the time signature for this
-syncopated beat? 
+syncopated beat?
 
 The album is also remarkably consistent. There isn't a track that I didn't enjoy or
 wouldn't recommend. The craftsmanship is praiseworthy.

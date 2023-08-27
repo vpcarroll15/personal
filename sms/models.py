@@ -25,7 +25,7 @@ def create_prayer_snippet(prayer_type, data_point):
     otherwise we have a circular dependency between models.py files.
     """
     if data_point.text:
-        prayer_snippet_model = apps.get_model('prayer', 'PrayerSnippet')
+        prayer_snippet_model = apps.get_model("prayer", "PrayerSnippet")
 
         # Clamp dynamic weight to the appropriate range.
         dynamic_weight = data_point.score if data_point.score else 1
@@ -39,23 +39,23 @@ def create_prayer_snippet(prayer_type, data_point):
                 text=data_point.text,
                 type=prayer_type,
                 dynamic_weight=dynamic_weight,
-            )
+            ),
         )
 
 
 @callbacks_pool.register
 def create_gratitude_prayer_snippet(data_point):
-    create_prayer_snippet('GRATITUDE', data_point)
+    create_prayer_snippet("GRATITUDE", data_point)
 
 
 @callbacks_pool.register
 def create_request_prayer_snippet(data_point):
-    create_prayer_snippet('REQUEST', data_point)
+    create_prayer_snippet("REQUEST", data_point)
 
 
 @callbacks_pool.register
 def create_praise_prayer_snippet(data_point):
-    create_prayer_snippet('PRAISE', data_point)
+    create_prayer_snippet("PRAISE", data_point)
 
 
 class Question(models.Model):
@@ -71,7 +71,9 @@ class Question(models.Model):
     max_score = models.SmallIntegerField(default=10)
 
     callback = models.CharField(
-        max_length=100, blank=True, null=True,
+        max_length=100,
+        blank=True,
+        null=True,
         choices=[(id, id) for id, _ in callbacks_pool],
         help_text=(
             "If defined, then this represents a callback function that we should trigger when we create "
@@ -95,7 +97,8 @@ class User(models.Model):
     """Represents one user of the app."""
 
     logged_in_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
     )
 
     phone_number = PhoneNumberField(unique=True)
@@ -106,7 +109,9 @@ class User(models.Model):
 
     # How long the user has to reply to texts before replies will be
     # rejected.
-    expire_message_after = models.DurationField(default=timedelta(minutes=15),)
+    expire_message_after = models.DurationField(
+        default=timedelta(minutes=15),
+    )
 
     # Don't text this user before this time in the morning.
     start_text_hour = models.SmallIntegerField(default=7)

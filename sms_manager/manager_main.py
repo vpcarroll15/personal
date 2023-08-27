@@ -32,7 +32,6 @@ class SmsApiClient(RestApiClient):
         return username, password
 
 
-
 def set_next_contact_time(user, api_client):
     logging.info(f"Setting next contact time for user {user.id}")
 

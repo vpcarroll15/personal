@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('scavenger_hunt', '0015_scavengerhunttemplate_skip_all_checks'),
+        ("scavenger_hunt", "0015_scavengerhunttemplate_skip_all_checks"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='location',
-            name='post_solve',
-            field=models.TextField(blank=True, help_text='We show the user this text if they successfully solve the clue, before progressing to the next clue.', null=True),
+            model_name="location",
+            name="post_solve",
+            field=models.TextField(
+                blank=True,
+                help_text="We show the user this text if they successfully solve the clue, before progressing to the next clue.",
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='scavengerhunt',
-            name='post_location_phase',
+            model_name="scavengerhunt",
+            name="post_location_phase",
             field=models.BooleanField(default=False),
         ),
     ]

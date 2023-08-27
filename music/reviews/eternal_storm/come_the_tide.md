@@ -17,4 +17,3 @@ engaging. Listening to the album for the first time, I enjoyed the feeling of fl
 
 Overall, this album is somewhere between a 1 and a 2, but I'll give it a 2 because of how pleasant these vocals were to
 listen to loud in my car. Try listening to the middle tracks: "Detachment," "The Mountain," and "Of Winter and Treason."
-

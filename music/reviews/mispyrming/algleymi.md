@@ -8,7 +8,7 @@ At the 2:00 mark, we have the "wandering guitar," which evolves into a
 "hard rock guitar." The end of the track is moody and atmospheric. Mispyrming
 has a talent for creating ambient soundscapes that allow the album to decompress.
 
-There are lots of tracks to applaud here. "Island, Steingelda Krummaskud" is so triumphant 
+There are lots of tracks to applaud here. "Island, Steingelda Krummaskud" is so triumphant
 that I think that it should have been kept as the closer. The
 shorter and simpler tracks also pack a punch. The instrumentals don't do much on
 "Og Er Haustid Lidur Undir Lok," but the vocals on that track might be the most memorable
