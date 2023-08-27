@@ -73,6 +73,7 @@ phonenumbers==8.13.6
 pickleshare==0.7.5
 Pillow==9.4.0
 platformdirs==3.0.0
+pre-commit==3.3.3
 prompt-toolkit==3.0.36
 psycopg2==2.9.5
 ptyprocess==0.7.0
