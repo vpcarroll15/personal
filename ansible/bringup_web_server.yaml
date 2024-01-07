@@ -21,7 +21,7 @@
         validate_certs: no
         update_cache: yes
       tags: basics
-  
+
     - name: Install basic packages
       become: yes
       apt:
@@ -71,7 +71,7 @@
         src: encrypted_environment.env
         dest: /home/{{ username }}/environment.env
       tags: vault
-    
+
     - name: Copy file that makes it easy to migrate Django
       copy:
         src: migrate_environment
@@ -128,7 +128,7 @@
         dest: /etc/nginx/sites-enabled/paulcarroll.site
         state: link
       tags: nginx
-    
+
       # We want to get that A security rating!
       # https://www.ssllabs.com/ssltest/analyze.html
     - name: Disallow TLS 1.0 and 1.1, which are allowed by default.
@@ -170,7 +170,7 @@
         name: sms_manager.service
         state: restarted
       tags: sms
- 
+
     - name: Copy email triggerer service
       become: yes
       become_user: root
@@ -195,7 +195,7 @@
         name: email_triggerer.service
         state: restarted
       tags: email
-    
+
     # Getting Let's Encrypt working.
     - name: Install Certbot
       become: yes

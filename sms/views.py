@@ -165,7 +165,7 @@ class TooManySmsUsersException(Exception):
 
 def get_sms_account(logged_in_user):
     """Returns the SMS user, given the logged-in user.
-    
+
     Throws TooManySmsUsersException is more than one SMS
     user is somehow associated with a particular account.
     May return None."""
@@ -238,7 +238,7 @@ def error(request):
 @login_required
 def data_points(request):
     """Returns a JSON object consisting of a serialized list of DataPoints.
-    
+
     Required params: question_id, parseable as int
     Optional params:
         - start_date (inclusive): in the format 2017-12-31

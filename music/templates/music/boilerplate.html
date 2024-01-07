@@ -4,12 +4,12 @@
     <div class="toolbar">
         {% if user.is_authenticated %}
         <span class="hide-on-small-screens" style="padding-right: 10px;">
-            Welcome {{ user.username }}! 
+            Welcome {{ user.username }}!
         </span>
         {% endif %}
         <span style="padding-right: 10px;">
             {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}">Logout</a> 
+            <a href="{% url 'logout' %}">Logout</a>
             {% else %}
             <a href="{% url 'login' %}">Login</a>
             {% endif %}
@@ -27,6 +27,7 @@
             <a href="{% url 'music:best_of' name=2020 %}" style="padding-left: 10px;">Best of 2020</a>
             <a href="{% url 'music:best_of' name=2021 %}" style="padding-left: 10px;">Best of 2021</a>
             <a href="{% url 'music:best_of' name=2022 %}" style="padding-left: 10px;">Best of 2022</a>
+            <a href="{% url 'music:best_of' name=2023 %}" style="padding-left: 10px;">Best of 2023</a>
         </span>
 
         <span style="float: right;">

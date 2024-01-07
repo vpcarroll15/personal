@@ -2,7 +2,7 @@ Completing the trilogy of Be'lakor albums that I am going to review, now the new
 *Coherence*.
 
 People have had mixed feelings about this album online, but I think that this is
-because of the band's previous successes and the high standard that it has set for itself. 
+because of the band's previous successes and the high standard that it has set for itself.
 Taken on its own, I thought that this was an enjoyable ride. The last three minutes of
 "Locus" are slamming, and "Hidden Window" is a heavy gem. Be'lakor still has the knack
 of mixing in clever syncopation or rhythms to liven up a track.

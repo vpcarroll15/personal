@@ -8,7 +8,7 @@ and jagged lines of his earlier work with psychedelic loops and spirals. His mus
 now, and in places almost poppy. Somehow, incredibly, his music and Tame Impala's are getting
 closer to each other. I never would have predicted that a decade ago.
 
-But while Tame Impala has clear vocals and crisp beats, Oneohtrix can't resist making things 
+But while Tame Impala has clear vocals and crisp beats, Oneohtrix can't resist making things
 messy. Listening to this album end-to-end feels like scanning channels on a radio:
 static, distorted voices, sudden transitions. Oneohtrix makes heavy use of transition tracks on
 this album, which I rarely liked; but they at least contributed to the messy, free-flowing

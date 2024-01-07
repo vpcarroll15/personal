@@ -23,4 +23,3 @@ The current requirements.txt assumes you want Python 3.11. To install this on Ma
 brew install python@3.11
 brew services start postgresql@14
 ```
-

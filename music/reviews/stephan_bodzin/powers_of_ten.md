@@ -4,5 +4,4 @@ The tracks are long, averaging about eight minutes. Bodzin is capable of finding
 
 My only complaint about the album is that it feels a bit too professional and a bit too smooth. It’s difficult to feel affectionate about it--easier to admire it. I have a hunch that this is a flaw in the art. Still, a great album to listen to if you want to get some work done or drive somewhere in style.
 
-
 Best tracks: “Zulu,” “Wir,” “Birth”

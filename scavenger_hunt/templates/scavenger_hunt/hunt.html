@@ -13,7 +13,7 @@ function addInputField(form, name, value) {
 function submitLocation() {
     /*
     Submits the location form.
-    
+
     We append our location to the form if the form needs it.
     */
     const form = document.getElementById('advance_form');
@@ -55,7 +55,7 @@ function retrieveHeading() {
 
                 var update_elem = document.createElement("div");
                 var update_str = ("You are " + distance_string + " away from the object of your quest.<br>" +
-                    "You must travel " + heading_content["direction"] + ".<br>" + 
+                    "You must travel " + heading_content["direction"] + ".<br>" +
                     "You must be within " + heading_content["required_distance"] + "m of your target to advance."
                 );
                 update_elem.innerHTML = update_str;

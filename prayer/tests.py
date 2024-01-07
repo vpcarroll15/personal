@@ -30,11 +30,11 @@ class PrayerSchemaTests(TestCase):
                         user=user,
                         text=f"I am snippet {i} of type {snippet_type.name} for user {user.username}.",
                         type=snippet_type,
-                        fixed_weight = i / 10,
+                        fixed_weight=i / 10,
                         # Make sure that a few snippets are expired.
                         expires_at=DATETIME_NOW + timedelta(days=7 - i),
                     )
-    
+
     def test_render_no_snippets(self):
         schema = PrayerSchema.objects.create(
             user=self.user1,
@@ -54,8 +54,14 @@ class PrayerSchemaTests(TestCase):
         )
         with_sentinels = schema.render(use_sentinels=True)
         without_sentinels = schema.render(use_sentinels=False)
-        self.assertEquals(with_sentinels, '<p><em>I am grateful for this.</em> GRATITUDE_SNIPPET_HERE I want this: <ul><li>REQUEST_SNIPPET_HERE</li><li>REQUEST_SNIPPET_HERE</li></ul></p>')
-        self.assertEquals(without_sentinels, '<p><em>I am grateful for this.</em> I am snippet 6 of type GRATITUDE for user paul. I want this: <ul><li>I am snippet 6 of type REQUEST for user paul.</li><li>I am snippet 5 of type REQUEST for user paul.</li></ul></p>')
+        self.assertEquals(
+            with_sentinels,
+            "<p><em>I am grateful for this.</em> GRATITUDE_SNIPPET_HERE I want this: <ul><li>REQUEST_SNIPPET_HERE</li><li>REQUEST_SNIPPET_HERE</li></ul></p>",
+        )
+        self.assertEquals(
+            without_sentinels,
+            "<p><em>I am grateful for this.</em> I am snippet 6 of type GRATITUDE for user paul. I want this: <ul><li>I am snippet 6 of type REQUEST for user paul.</li><li>I am snippet 5 of type REQUEST for user paul.</li></ul></p>",
+        )
 
     def test_render_broken_snippets_fails(self):
         # This works.
@@ -91,7 +97,7 @@ class PrayerSchemaTests(TestCase):
         )
         # Just check that this doesn't throw an error.
         schema.render(use_sentinels=False)
- 
+
     def test_render_escaped_html(self):
         PrayerSnippet.objects.create(
             user=self.user1,
@@ -105,7 +111,7 @@ class PrayerSchemaTests(TestCase):
             schema="{{ GRATITUDE, 1 }}",
         )
         without_sentinels = schema.render(use_sentinels=False)
-        self.assertEquals(without_sentinels, '<p>&lt;h1&gt;Escape this!&lt;/h1&gt;</p>')
+        self.assertEquals(without_sentinels, "<p>&lt;h1&gt;Escape this!&lt;/h1&gt;</p>")
 
     def test_generation_time(self):
         schema = PrayerSchema.objects.create(

@@ -44,4 +44,3 @@ album.
 
 You should definitely try listening to this, but don't be surprised if you hate it at first. If you have a
 strong emotional reaction, it's probably a good album for you.
-

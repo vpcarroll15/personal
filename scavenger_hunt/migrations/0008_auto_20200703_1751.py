@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("scavenger_hunt", "0007_location_path_to_static_img_asset"),
     ]

@@ -37,5 +37,3 @@ to each note enables a powerful artistic mood that would not have been possible 
 Strongly recommended. If you like "Land of the Dead," try "Return of the Darkness," "Another Journey Begins," or really
 anything from either of his other albums. The nice thing about finding an artist who makes a lot of similar-sounding
 music is that if you like one track, you will probably like them all.
-
-

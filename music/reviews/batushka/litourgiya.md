@@ -22,4 +22,3 @@ My one criticism would be that there isn't much variety between the tracks. You 
 enjoy it tremendously, and then not feel much of a need to go back to it. The tracks are all numbered (Yektinya I,
 Yektinya II, etc.), and frankly I am not sure which of the Yektinyas to recommend as most worthy of your time. Just
 start at the beginning, I think, and enjoy the ride?
-

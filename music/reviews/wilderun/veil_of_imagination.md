@@ -13,4 +13,3 @@ by it. Almost every minute of every song introduces a new idea.
 
 I won't dwell on this album for too long, because I don't think that I "get it." If you like prog more than I do,
 though, or if you're a fan of poetry readings, you might think that this is a masterpiece.
-

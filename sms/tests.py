@@ -111,7 +111,10 @@ class AccountTests(APITestCase):
         self.client.force_authenticate(user=user)
 
         # Create a new question with a callback.
-        question = Question.objects.create(text="This creates prayer snippets.", callback="create_gratitude_prayer_snippet")
+        question = Question.objects.create(
+            text="This creates prayer snippets.",
+            callback="create_gratitude_prayer_snippet",
+        )
         sms_user = SmsUser.objects.get(phone_number="+13033033003")
 
         response = self.client.post(
@@ -128,7 +131,12 @@ class AccountTests(APITestCase):
         snippet_text = "This is a prayer snippet."
         response = self.client.post(
             "/sms/data_point/",
-            {"question_id": question.id, "user_id": sms_user.id, "text": snippet_text, "score": 3},
+            {
+                "question_id": question.id,
+                "user_id": sms_user.id,
+                "text": snippet_text,
+                "score": 3,
+            },
             format="json",
         )
         assert response.status_code == 201
@@ -137,7 +145,6 @@ class AccountTests(APITestCase):
         snippet = PrayerSnippet.objects.get(sms_data_point_id=data_point_id)
         assert snippet_text == snippet.text
         assert snippet.type == "GRATITUDE"
-
 
     def test_webhook(self):
         user = User.objects.get(username="webhooker")

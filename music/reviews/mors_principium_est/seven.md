@@ -3,7 +3,7 @@ syncopation and flawless guitar work of the first track makes it clear that ever
 of this album was poured over.
 
 What we have here is a rollicking ride in the style of Aephanemer's
-[*Prokopton*](https://paulcarroll.site/music/music/81), an album that I fell in love with in 2019. 
+[*Prokopton*](https://paulcarroll.site/music/music/81), an album that I fell in love with in 2019.
 The growly voice, the orchestral soundboard, the catchy hooks, and the brilliant arrangements are
 obvious similarities, but there are some interesting differences too. Aephanemer seems to
 take its inspiration from fantasy: the hero's journey, the broken sword, etc. Mors Principium Est
@@ -16,7 +16,7 @@ music when I feel like a guitarist is just showing off. These guitarists are sho
 it doesn't bother me because the amazing stuff that they're doing is subordinated to the orchestration.
 They have room to breathe, but not too much. The whole album is tight--just forty-eight polished minutes.
 If you want an example of the amazing guitars, try "Lost in a Starless Aeon." They will blast you off
-your feet right away. 
+your feet right away.
 
 This has everything I want in a top-class album--solid top to bottom, with some stunning tracks
 that uniquely belong to the band and seem like they could have been made by no one else. I haven't talked

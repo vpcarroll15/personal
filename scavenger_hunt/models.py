@@ -29,7 +29,11 @@ class Location(models.Model):
 
     clue = models.TextField(blank=True)
     hint = models.TextField(null=True, blank=True)
-    post_solve = models.TextField(null=True, blank=True, help_text="We show the user this text if they successfully solve the clue, before progressing to the next clue.")
+    post_solve = models.TextField(
+        null=True,
+        blank=True,
+        help_text="We show the user this text if they successfully solve the clue, before progressing to the next clue.",
+    )
 
     name = models.CharField(
         max_length=200,
@@ -91,7 +95,8 @@ class ScavengerHuntTemplate(models.Model):
     description = models.TextField(blank=True)
 
     finished_message = models.TextField(
-        blank=True, help_text="The user will read this if they complete your hunt.",
+        blank=True,
+        help_text="The user will read this if they complete your hunt.",
     )
 
     path_to_static_img_asset = models.CharField(
@@ -130,7 +135,7 @@ class ScavengerHunt(models.Model):
         return "{}, {}".format(self.hunt_template, self.current_location)
 
     def distance_and_direction_to_current_location(self, latitude, longitude):
-        """"
+        """ "
         Returns the distance in meters to the current location, and the direction as a string: "WEST," "NORTHWEST," etc.
         """
         assert self.current_location is not None

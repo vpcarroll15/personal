@@ -14,7 +14,6 @@ settings that remind me of a pure pop band is the defining feature of the album 
 
 There are also some great heavy guitar hooks. I would be remiss if I didn't mention that.
 
-
 This album probably deserves a 3, but I'm giving it a 2 because it didn't hit me
 in the gut. I think I prefer heavier, messier stuff. Also, I think that it has
 received enough praise this year.

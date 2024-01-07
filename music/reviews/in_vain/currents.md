@@ -17,6 +17,3 @@ if it has lovely choir vocals.
 
 All in all, I was close between a 1 and a 2. I settled on a 1 because the back half of the album wasn't as interesting
 to me, but this is definitely worth a listen.
-
-
-

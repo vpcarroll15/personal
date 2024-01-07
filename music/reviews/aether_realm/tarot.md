@@ -5,7 +5,7 @@ couple years late.
 
 Many of the albums that I've been recommending this year have been atmospheric and simple: one-man acts that pack an emotional
 punch. *Tarot* is different because it really is quite technical. The guitar work is extremely precise and
-way out of bounds for casual magicians. I often dislike technical guitar work. 
+way out of bounds for casual musicians. I often dislike technical guitar work.
 On some albums, the guitar player sounds like he is
 rocking out to impress us, or to entertain himself. On *Tarot,* the virtuosic performances are ruthlessly
 subjugated to the melody that is being produced. No solo drags on for too long; Aether Realm wedges

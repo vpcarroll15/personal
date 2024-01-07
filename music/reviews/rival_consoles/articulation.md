@@ -1,5 +1,5 @@
 Albums usually start get off to a good start and then fade. This one tilts in the
-opposite direction. 
+opposite direction.
 
 I found the first few tracks to be mildly boring or irritating. "Vibrations on
 a String" is fine, but "Forwardism" is a weird electronic Prussian march,

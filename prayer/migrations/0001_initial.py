@@ -9,7 +9,6 @@ import prayer.models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -18,30 +17,116 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='PrayerSnippet',
+            name="PrayerSnippet",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('text', models.TextField(help_text='The content of the snippet, which becomes part of the prayer.')),
-                ('type', models.CharField(choices=[('GRATITUDE', 'GRATITUDE'), ('REQUEST', 'REQUEST'), ('PRAISE', 'PRAISE')], help_text='The type of snippet.', max_length=20)),
-                ('expires_at', models.DateTimeField(blank=True, help_text='When this snippet expires.', null=True)),
-                ('dynamic_weight', models.SmallIntegerField(blank=True, default=1, help_text='The dynamic weight of this snippet. Heigher weights are more likely to be sampled.', validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(10)])),
-                ('fixed_weight', models.FloatField(blank=True, help_text='If supplied, then we ignore the dynamic weight and always use this weight. Between 0 and 1.', null=True, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)])),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "text",
+                    models.TextField(
+                        help_text="The content of the snippet, which becomes part of the prayer."
+                    ),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("GRATITUDE", "GRATITUDE"),
+                            ("REQUEST", "REQUEST"),
+                            ("PRAISE", "PRAISE"),
+                        ],
+                        help_text="The type of snippet.",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "expires_at",
+                    models.DateTimeField(
+                        blank=True, help_text="When this snippet expires.", null=True
+                    ),
+                ),
+                (
+                    "dynamic_weight",
+                    models.SmallIntegerField(
+                        blank=True,
+                        default=1,
+                        help_text="The dynamic weight of this snippet. Heigher weights are more likely to be sampled.",
+                        validators=[
+                            django.core.validators.MinValueValidator(1),
+                            django.core.validators.MaxValueValidator(10),
+                        ],
+                    ),
+                ),
+                (
+                    "fixed_weight",
+                    models.FloatField(
+                        blank=True,
+                        help_text="If supplied, then we ignore the dynamic weight and always use this weight. Between 0 and 1.",
+                        null=True,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='PrayerSchema',
+            name="PrayerSchema",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.TextField(help_text='The name of the prayer.')),
-                ('next_generation_time', models.DateTimeField(blank=True, default=prayer.models._get_time_now)),
-                ('generation_cadence', models.DurationField(blank=True, default=datetime.timedelta(days=1))),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('schema', models.TextField(help_text='The schema that we use to generate the prayer. The schema consists of Markdown with special markers in it to indicate where we should insert a prayer snippet. Write: {{ GRATITUDE, 3 }} to indicate that we should indicate three gratitude snippets. You must follow this syntax exactly of snippet type, comma, number of snippets. Otherwise a ValueError will be raised when we try to save the schema.')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.TextField(help_text="The name of the prayer.")),
+                (
+                    "next_generation_time",
+                    models.DateTimeField(
+                        blank=True, default=prayer.models._get_time_now
+                    ),
+                ),
+                (
+                    "generation_cadence",
+                    models.DurationField(
+                        blank=True, default=datetime.timedelta(days=1)
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "schema",
+                    models.TextField(
+                        help_text="The schema that we use to generate the prayer. The schema consists of Markdown with special markers in it to indicate where we should insert a prayer snippet. Write: {{ GRATITUDE, 3 }} to indicate that we should indicate three gratitude snippets. You must follow this syntax exactly of snippet type, comma, number of snippets. Otherwise a ValueError will be raised when we try to save the schema."
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

@@ -12,7 +12,7 @@ voice to remind us that this is a metal album. And what do we make of the guitar
 beginning of "Selene"? *The Bleakness of Our Constant* moves between soaring metal intensity and the
 tranquility of a post-rock album.
 
-It's also a bit of a bummer. The Bandcamp page warns: "This record was created during a difficult time. 
+It's also a bit of a bummer. The Bandcamp page warns: "This record was created during a difficult time.
 To those who have experienced trying times, hardship, loss, or feel the
 struggle in this wandering existence, this record is for you." Sometimes, the vocalist just seems to be
 growling, and the lyrics can't be understood. But then he begins
@@ -27,4 +27,3 @@ Constant* pulls it off because it is so damn beautiful. It sounds like a landsca
 It isn't defiant, but it is contemplative. It won't grab your attention, but it also won't lose it.
 
 Highly recommended.
-
