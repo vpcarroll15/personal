@@ -16,9 +16,9 @@
     <div class="best-of-description">{{ best_of.description }}</div>
     <div>
         <div class="best-of-control-panel">
-            <p>Uncheck any category of music that you aren't interested in.</p>
+            <p>Select a category of music to filter by.</p>
             {% for tag, quantity in tags_with_quantity %}
-            <input class="hide-with-checkboxes" type="checkbox" name="{{ tag.classname }}" value="{{ tag.name }}" checked>
+            <input class="filter-best-of" type="radio" name="filter-best-of" value="{{ tag.classname }}" >
             {{tag.name}} ({{quantity}} album{{quantity | pluralize}}) <br />
             {% endfor %}
         </div>
