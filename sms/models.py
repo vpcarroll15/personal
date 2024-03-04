@@ -10,6 +10,9 @@ from phonenumber_field.modelfields import PhoneNumberField
 from class_pool.pool import Pool
 
 
+THREE_MONTHS_IN_DAYS = 3 * 30
+
+
 callbacks_pool = Pool()
 """
 The collection of callback functions that could be called when we receive an SMS.
@@ -39,6 +42,9 @@ def create_prayer_snippet(prayer_type, data_point):
                 text=data_point.text,
                 type=prayer_type,
                 dynamic_weight=dynamic_weight,
+                # Make sure to set some expiration time because otherwise the contents of these prayers
+                # become painfully outdated after a while.
+                expires_at=data_point.created_at + timedelta(days=THREE_MONTHS_IN_DAYS),
             ),
         )
 
