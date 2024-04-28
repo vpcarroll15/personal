@@ -10,6 +10,7 @@ INSTALLED_APPS = [
     "scavenger_hunt.apps.ScavengerHuntConfig",
     "sms.apps.SmsConfig",
     "prayer.apps.PrayerConfig",
+    "daily_goals.apps.DailyGoalsConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

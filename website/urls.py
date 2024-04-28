@@ -30,6 +30,7 @@ urlpatterns = [
     path("music/", include("music.urls")),
     path("scavenger_hunt/", include("scavenger_hunt.urls")),
     path("sms/", include("sms.urls")),
+    path("daily_goals/", include("daily_goals.urls")),
     path("prayer/", include("prayer.urls")),
     path("admin/", admin.site.urls),
 ]
