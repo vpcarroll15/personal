@@ -47,7 +47,7 @@ def send_sms_and_create_checkin(
     # Now that we have created the data point, let's send the SMS.
     logging.info(f"Sending SMS to user {user.id}")
 
-    sms_body = "Choose some goals for today! Some defaults:\n\n"
+    sms_body = "Choose your focus for today. Some defaults:\n\n"
 
     focus_area_strs = []
     for i, focus_area in enumerate(user.possible_focus_areas):
@@ -56,8 +56,8 @@ def send_sms_and_create_checkin(
     sms_body += "\n".join(focus_area_strs)
 
     sms_body += (
-        "\n\nReply with the numbers of the goals you want to focus on today, "
-        "or write in your own. Comma-separate multiple goals. Your response must start with 'g'."
+        "\n\nReply with the numbers of what you'd like to focus on today, "
+        "or write in your own. Comma-separate multiple focus areas. Your response must start with 'g'."
     )
 
     twilio_client.messages.create(
