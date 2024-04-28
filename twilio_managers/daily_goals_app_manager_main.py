@@ -12,7 +12,7 @@ from twilio.rest import Client as TwilioClient
 
 from api_client import TwilioManagerApiClient
 from platform_info import install_environment_variables
-from twilio_managers.daily_goals_app_types import User
+from .daily_goals_app_types import User
 
 
 def set_last_start_text_sent_date(user: User, api_client: TwilioManagerApiClient):

@@ -15,7 +15,7 @@ from twilio.rest import Client as TwilioClient
 
 from api_client import TwilioManagerApiClient
 from platform_info import install_environment_variables
-from twilio_managers.sms_app_types import User
+from .sms_app_types import User
 
 
 def set_next_contact_time(user, api_client):
