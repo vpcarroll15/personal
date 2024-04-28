@@ -87,7 +87,7 @@ def get_relevant_daily_checkin(phone_number: str) -> DailyCheckin:
 
 def parse_chosen_focus_areas(body: str, checkin: DailyCheckin) -> list[str]:
     # Remove the leading "g" if it exists.
-    if body.startswith("g"):
+    if body.lower().startswith("g"):
         body = body[1:]
 
     body_pieces = body.split(",")

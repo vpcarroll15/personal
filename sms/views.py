@@ -136,7 +136,7 @@ class WebhookView(SmsWebhookView):
         # A really dumb hack that we have to add because Twilio won't let me register more than one
         # phone number. We return an error sometimes so that Twilio is forced to use the backup webhook,
         # which points to the other app.
-        if body.startswith("g"):
+        if body.lower().startswith("g"):
             return HttpResponseBadRequest("Rerouting request to the other Django app.")
 
         try:
