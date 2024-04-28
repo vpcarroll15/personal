@@ -12,7 +12,17 @@ import pytz
 
 
 def date_converter(value):
-    return date.fromisoformat(value)
+    if isinstance(value, str):
+        return date.fromisoformat(value)
+    else:
+        return value
+
+
+def timezone_converter(value):
+    if isinstance(value, str):
+        return pytz.timezone(value)
+    else:
+        return value
 
 
 @dataclass
@@ -21,10 +31,15 @@ class User:
     phone_number: str
     start_text_hour: int
     end_text_hour: int
-    last_start_text_sent_date: date = field(metadata={"converter": date_converter})
-    last_end_text_sent_date: date = field(metadata={"converter": date_converter})
-    timezone: pytz.timezone = field(metadata={"converter": pytz.timezone})
+    last_start_text_sent_date: date
+    last_end_text_sent_date: date
+    timezone: pytz.timezone
     possible_focus_areas: list[str]
+
+    def __post_init__(self):
+        self.last_start_text_sent_date = date_converter(self.last_start_text_sent_date)
+        self.last_end_text_sent_date = date_converter(self.last_end_text_sent_date)
+        self.timezone = timezone_converter(self.timezone)
 
     @property
     def now(self) -> datetime:
