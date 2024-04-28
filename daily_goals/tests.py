@@ -1,3 +1,4 @@
+from datetime import date
 from django.contrib.auth.models import User, Group
 from rest_framework.test import APITestCase
 
@@ -33,6 +34,10 @@ class AccountTests(APITestCase):
         self.client.force_authenticate(user=user)
         response = self.client.get("/daily_goals/users/", {})
         assert response.status_code == 403
+        response = self.client.get("/daily_goals/user/", {})
+        assert response.status_code == 403
+        response = self.client.post("/daily_goals/checkin/", {})
+        assert response.status_code == 403
 
     def test_get_users(self):
         user = User.objects.get(username="manager")
@@ -42,3 +47,39 @@ class AccountTests(APITestCase):
         assert response.status_code == 200
         assert "users" in response.data
         assert len(response.data["users"]) == 1
+
+    def test_put_user(self):
+        user = User.objects.get(username="manager")
+        self.client.force_authenticate(user=user)
+
+        daily_goals_user = DailyGoalsUser.objects.get(phone_number="+13033033003")
+
+        response = self.client.put(
+            "/daily_goals/user/",
+            {
+                "id": daily_goals_user.id,
+                "last_start_text_sent_date": str(date(year=2023, month=1, day=1)),
+                "last_end_text_sent_date": str(date(year=2023, month=1, day=1)),
+            },
+            format="json",
+        )
+        assert response.status_code == 200
+        assert "user" in response.data
+        assert response.data["user"]["last_start_text_sent_date"] == "2023-01-01"
+        assert response.data["user"]["last_end_text_sent_date"] == "2023-01-01"
+
+    def test_create_checkin(self):
+        user = User.objects.get(username="manager")
+        self.client.force_authenticate(user=user)
+
+        daily_goals_user = DailyGoalsUser.objects.get(phone_number="+13033033003")
+        focus_areas = ["health", "productivity", "happiness"]
+
+        response = self.client.post(
+            "/daily_goals/checkin/",
+            {"possible_focus_areas": focus_areas, "user_id": daily_goals_user.id},
+            format="json",
+        )
+        assert response.status_code == 201
+        assert "checkin" in response.data
+        assert response.data["checkin"]["possible_focus_areas"] == focus_areas
