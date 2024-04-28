@@ -74,7 +74,7 @@ def run_cycle():
 
     api_client = TwilioManagerApiClient()
     serialized_users = api_client.invoke("daily_goals/users")
-    users = [User(serialized_user) for serialized_user in serialized_users["users"]]
+    users = [User(**serialized_user) for serialized_user in serialized_users["users"]]
 
     for user in users:
         if user.should_start_checkin:
