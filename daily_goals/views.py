@@ -24,7 +24,10 @@ class UsersView(DailyGoalsManagerView):
 class UserView(DailyGoalsManagerView):
     def put(self, request):
         for key in ["last_start_text_sent_date", "last_end_text_sent_date"]:
-            request.data[key] = datetime.strptime(request.data[key], "%Y-%m-%d").date()
+            if key in request.data:
+                request.data[key] = datetime.strptime(
+                    request.data[key], "%Y-%m-%d"
+                ).date()
 
         # Figure out if we're creating a new object...then do it.
         user_id = request.data.pop("id", None)
