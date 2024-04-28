@@ -69,6 +69,13 @@ class DailyCheckin(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     possible_focus_areas = ArrayField(
         base_field=models.TextField(),
+        help_text="The focus areas the user could choose from (suggested by default).",
+    )
+    chosen_focus_areas = ArrayField(
+        base_field=models.TextField(),
+        null=True,
+        blank=True,
+        help_text="The focus areas the user chose to focus on today.",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

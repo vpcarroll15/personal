@@ -38,6 +38,16 @@ class UnparseableMessageException(Exception):
     pass
 
 
+class RerouteToDailyGoalsApp(Exception):
+    """
+    A really dumb hack that we have to add because Twilio won't let me register more than one
+    phone number. We return an error sometimes so that Twilio is forced to use the backup webhook,
+    which points to the other app.
+    """
+
+    pass
+
+
 def get_relevant_data_point(phone_number_str):
     users = User.objects.filter(phone_number=phone_number_str)
     if len(users) != 1:
@@ -60,7 +70,9 @@ def get_relevant_data_point(phone_number_str):
     return data_point
 
 
-def parse_message_body(message_body_str, reference_question):
+def parse_message_body(message_body_str: str, reference_question: Question):
+    if message_body_str.startswith("g"):
+        raise RerouteToDailyGoalsApp
     message_body = message_body_str.split()
     if not message_body:
         raise UnparseableMessageException
@@ -134,6 +146,8 @@ class WebhookView(SmsWebhookView):
         phone_number = request.POST["From"]
         try:
             data_point = get_relevant_data_point(phone_number)
+        except RerouteToDailyGoalsApp:
+            return HttpResponseBadRequest("Rerouting request to the other Django app.")
         except NoRelevantDataPointException:
             return HttpResponseBadRequest(
                 f"No relevant DataPoint for this phone number: {phone_number}"

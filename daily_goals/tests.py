@@ -2,7 +2,7 @@ from datetime import date
 from django.contrib.auth.models import User, Group
 from rest_framework.test import APITestCase
 
-from daily_goals.models import User as DailyGoalsUser
+from daily_goals.models import DailyCheckin, User as DailyGoalsUser
 
 
 class AccountTests(APITestCase):
@@ -83,3 +83,73 @@ class AccountTests(APITestCase):
         assert response.status_code == 201
         assert "checkin" in response.data
         assert response.data["checkin"]["possible_focus_areas"] == focus_areas
+
+    def test_webhook(self):
+        user = User.objects.get(username="webhooker")
+        self.client.force_authenticate(user=user)
+        # No phone number provided.
+        response = self.client.post("/daily_goals/webhook/", {})
+        assert response.status_code == 400
+
+        # Garbage phone number provided.
+        response = self.client.post(
+            "/daily_goals/webhook/", {"From": "+19999999999", "Body": "3"}
+        )
+        assert response.status_code == 400
+
+        # Good phone number, but there isn't a DataPoint yet in the backend.
+        response = self.client.post(
+            "/daily_goals/webhook/", {"From": "+13033033003", "Body": "3"}
+        )
+        assert response.status_code == 400
+
+        daily_goals_user = DailyGoalsUser.objects.get(phone_number="+13033033003")
+
+        # Create a DailyCheckin with already chosen focus areas.
+        checkin, _ = DailyCheckin.objects.get_or_create(
+            user=daily_goals_user,
+            possible_focus_areas=["health", "productivity"],
+            chosen_focus_areas=["health", "productivity"],
+        )
+        response = self.client.post(
+            "/daily_goals/webhook/", {"From": "+13033033003", "Body": "3"}
+        )
+        assert response.status_code == 204
+
+        checkin.chosen_focus_areas = None
+        checkin.save()
+
+        # Now let's pass in some messages that can't be parsed.
+        response = self.client.post(
+            "/daily_goals/webhook/", {"From": "+13033033003", "Body": ""}
+        )
+        assert response.status_code == 204
+        response = self.client.post(
+            "/daily_goals/webhook/", {"From": "+13033033003", "Body": "-1"}
+        )
+        assert response.status_code == 204
+        response = self.client.post(
+            "/daily_goals/webhook/", {"From": "+13033033003", "Body": "3"}
+        )
+
+        # Finally we post a good message!
+        response = self.client.post(
+            "/daily_goals/webhook/",
+            {"From": "+13033033003", "Body": "g 2, 1, happiness"},
+        )
+        assert response.status_code == 200
+        # Reload from DB.
+        checkin = DailyCheckin.objects.get(id=checkin.id)
+        assert checkin.chosen_focus_areas == ["productivity", "health", "happiness"]
+
+        # Handle duplicates in a somewhat sane way.
+        checkin.chosen_focus_areas = None
+        checkin.save()
+        response = self.client.post(
+            "/daily_goals/webhook/",
+            {"From": "+13033033003", "Body": "g 2, 1, 2, happiness"},
+        )
+        assert response.status_code == 200
+        # Reload from DB.
+        checkin = DailyCheckin.objects.get(id=checkin.id)
+        assert checkin.chosen_focus_areas == ["productivity", "health", "happiness"]

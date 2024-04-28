@@ -20,3 +20,10 @@ class UserInDailyGoalsManagerGroup(BasePermission):
 
     def has_permission(self, request, view):
         return is_in_group(request.user, "DailyGoalsManager")
+
+
+class UserInDailyGoalsWebhookCaller(BasePermission):
+    message = AUTH_FAILURE_MESSAGE
+
+    def has_permission(self, request, view):
+        return is_in_group(request.user, "DailyGoalsWebhookCaller")

@@ -57,7 +57,7 @@ def send_sms_and_create_checkin(
 
     sms_body += (
         "\n\nReply with the numbers of the goals you want to focus on today, "
-        "or write in your own. Comma-separate multiple goals."
+        "or write in your own. Comma-separate multiple goals. Your response must start with 'g'."
     )
 
     twilio_client.messages.create(
