@@ -1,5 +1,5 @@
 """
-The types used by manager_main.py.
+The types used by sms_app_manager_main.py.
 
 This will strongly resemble what is defined in sms/models.py, but without
 dependencies on Django or web stuff. We will often serialize into or

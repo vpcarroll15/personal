@@ -1,5 +1,5 @@
 """
-This is a wrapper that helps the sms manager to determine where it should get/post data.
+This is a wrapper that helps the manager to determine where it should get/post data.
 """
 import os
 

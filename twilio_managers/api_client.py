@@ -51,3 +51,17 @@ class RestApiClient:
         """
         Returns a tuple consisting of the username and password.
         """
+
+
+class TwilioManagerApiClient(RestApiClient):
+    def get_auth(self):
+        """
+        Returns a tuple consisting of the username and password.
+        """
+        try:
+            username = os.environ["SMS_SENDER_API_USERNAME"]
+            password = os.environ["SMS_SENDER_API_PASSWORD"]
+        except KeyError as e:
+            raise CredentialsNotFoundException(e)
+
+        return username, password

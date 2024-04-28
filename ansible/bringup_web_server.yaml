@@ -171,6 +171,31 @@
         state: restarted
       tags: sms
 
+    - name: Copy daily goals manager service
+      become: yes
+      become_user: root
+      template:
+        src: daily_goals_manager.service
+        dest: /etc/systemd/system/
+      tags: sms
+
+    - name: Enable and load daily goals service
+      become: yes
+      become_user: root
+      systemd:
+        name: /etc/systemd/system/daily_goals_manager.service
+        enabled: yes
+        daemon_reload: yes
+      tags: sms
+
+    - name: Restart daily goals service
+      become: yes
+      become_user: root
+      systemd:
+        name: daily_goals_manager.service
+        state: restarted
+      tags: sms
+
     - name: Copy email triggerer service
       become: yes
       become_user: root
