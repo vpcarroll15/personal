@@ -51,7 +51,8 @@ def send_sms_and_create_checkin(
 
     focus_area_strs = []
     for i, focus_area in enumerate(user.possible_focus_areas):
-        focus_area_strs.append(f"{i}. {focus_area}")
+        # Make sure to 1-index the list for readability.
+        focus_area_strs.append(f"{i + 1}. {focus_area}")
     sms_body += "\n".join(focus_area_strs)
 
     sms_body += (
