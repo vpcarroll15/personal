@@ -49,5 +49,5 @@ class User:
     def should_start_checkin(self) -> bool:
         return (
             self.last_start_text_sent_date < self.now.date()
-            and self.start_text_hour < self.now.hour
+            and self.start_text_hour <= self.now.hour
         )
