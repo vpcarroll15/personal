@@ -124,7 +124,7 @@ def update_user_focus_areas(user: User, anthropic_client: Anthropic) -> None:
     )
 
     pattern = r"<goal>(.*?)</goal>"
-    goals = re.findall(pattern, response.content, re.DOTALL)
+    goals = re.findall(pattern, response.content[0].text, re.DOTALL)
     user.possible_focus_areas = goals
 
 
