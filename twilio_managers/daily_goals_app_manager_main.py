@@ -110,7 +110,17 @@ def update_user_focus_areas(user: User, anthropic_client: Anthropic) -> None:
         max_tokens=1024,
         temperature=1,
         system=SYSTEM_PROMPT,
-        prompt=user.ai_prompt,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": user.ai_prompt,
+                    }
+                ],
+            },
+        ],
     )
 
     pattern = r"<goal>(.*?)</goal>"
