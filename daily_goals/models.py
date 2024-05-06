@@ -40,6 +40,8 @@ class User(models.Model):
         base_field=models.TextField(),
     )
 
+    ai_prompt = models.TextField(default="")
+
     def __str__(self):
         return str(self.phone_number)
 
@@ -53,6 +55,7 @@ class User(models.Model):
             last_end_text_sent_date=str(self.last_end_text_sent_date),
             timezone=self.timezone,
             possible_focus_areas=self.possible_focus_areas,
+            ai_prompt=self.ai_prompt,
         )
 
 

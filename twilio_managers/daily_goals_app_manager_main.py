@@ -6,13 +6,46 @@ This should remain fairly compact, and complicated logic should be pushed to hel
 
 import logging
 import os
+import re
 import time
 
+from anthropic import Anthropic
 from twilio.rest import Client as TwilioClient
 
 from api_client import TwilioManagerApiClient
 from platform_info import install_environment_variables
 from daily_goals_app_types import User
+
+
+# Let's use opus for now, just for fun.
+AI_MODEL_TO_USE = "claude-3-opus-20240229"
+
+
+SYSTEM_PROMPT: str = """
+You are an AI assistant that suggests daily goals to users. Each suggestion should have these properties:
+
+1. Between five and fifteen words.
+2. Address exactly one topic. Don't try to combine multiple goals into the same suggestion.
+3. Use the context provided by the user.
+4. The goals should be creative and memorable.
+5. The goals should be simply written. Don't use too many adjectives or adverbs.
+6. Each goal should be placed within XML tags: <goal></goal>.
+7. Goals shouldn't be inspirational. They should just be practical and thought-provoking.
+
+Here are examples of good goals.
+
+<goal>Be sweaty at the end of a workout in which you really push yourself.</goal>
+<goal>Make dinner reservations somewhere that Grace doesn't expect.</goal>
+<goal>Reach out to Norman and see what he's up to.</goal>
+
+Here are examples of bad goals.
+
+<goal>Embrace the unknown, fearlessly taking on new challenges.</goal> This goal is too wordy, vague, nonspecific, and inspirational.
+<goal>Stretch your limits, unlocking flexibility and freedom. </goal> Same problem as above. Generic goals are bad.
+<goal>Sculpt strength and endurance with fierce intensity.</goal> Wordy, poetic language is wrong.
+
+When the user gives you context on who they are, use that information to suggest five good goals that obey the above rules.
+"""
 
 
 def set_last_start_text_sent_date(user: User, api_client: TwilioManagerApiClient):
@@ -65,6 +98,26 @@ def send_sms_and_create_checkin(
     )
 
 
+def update_user_focus_areas(user: User, anthropic_client: Anthropic) -> None:
+    if user.possible_focus_areas:
+        return
+
+    if not user.ai_prompt:
+        return
+
+    response = anthropic_client.messages.create(
+        model=AI_MODEL_TO_USE,
+        max_tokens=1024,
+        temperature=1,
+        system=SYSTEM_PROMPT,
+        prompt=user.ai_prompt,
+    )
+
+    pattern = r"<goal>(.*?)</goal>"
+    goals = re.findall(pattern, response.content, re.DOTALL)
+    user.possible_focus_areas = goals
+
+
 def run_cycle():
     # This will crash if these variables aren't found in our environment, which
     # is perfect.
@@ -74,12 +127,15 @@ def run_cycle():
     twilio_client = TwilioClient(account_sid, auth_token)
 
     api_client = TwilioManagerApiClient()
+    anthropic_client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     serialized_users = api_client.invoke("daily_goals/users")
     users = [User(**serialized_user) for serialized_user in serialized_users["users"]]
 
     for user in users:
         if user.should_start_checkin:
             try:
+                # Use AI if necessary to update the user's focus areas.
+                update_user_focus_areas(user, anthropic_client)
                 # Set the next contact time FIRST, so that we don't spam Twilio if something goes
                 # wrong with this request.
                 set_last_start_text_sent_date(user, api_client)

@@ -35,6 +35,7 @@ class User:
     last_end_text_sent_date: date
     timezone: pytz.timezone
     possible_focus_areas: list[str]
+    ai_prompt: str = ""
 
     def __post_init__(self):
         self.last_start_text_sent_date = date_converter(self.last_start_text_sent_date)
