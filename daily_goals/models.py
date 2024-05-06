@@ -36,9 +36,7 @@ class User(models.Model):
 
     timezone = models.TextField(default="America/Los_Angeles")
 
-    possible_focus_areas = ArrayField(
-        base_field=models.TextField(),
-    )
+    possible_focus_areas = ArrayField(base_field=models.TextField(), blank=True)
 
     ai_prompt = models.TextField(default="")
 
