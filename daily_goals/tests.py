@@ -84,6 +84,31 @@ class AccountTests(APITestCase):
         assert "checkin" in response.data
         assert response.data["checkin"]["possible_focus_areas"] == focus_areas
 
+        # Also check that we can fetch checkins.
+        response = self.client.get(
+            "/daily_goals/checkin/",
+            {"user_id": daily_goals_user.id, "created_at__gte": "2023-01-01T00:00:00Z"},
+        )
+        assert response.status_code == 200
+        assert len(response.data["checkins"]) == 1
+        response = self.client.get(
+            "/daily_goals/checkin/",
+            {"user_id": 100, "created_at__gte": "2023-01-01T00:00:00Z"},
+        )
+        assert response.status_code == 200
+        assert len(response.data["checkins"]) == 0
+        response = self.client.get(
+            "/daily_goals/checkin/",
+            {"user_id": daily_goals_user.id, "created_at__gte": "3023-01-01T00:00:00Z"},
+        )
+        assert response.status_code == 200
+        assert len(response.data["checkins"]) == 0
+        response = self.client.get(
+            "/daily_goals/checkin/",
+            {"user_id": daily_goals_user.id, "created_at__gte": "notparseable"},
+        )
+        assert response.status_code == 400
+
     def test_webhook(self):
         user = User.objects.get(username="webhooker")
         self.client.force_authenticate(user=user)

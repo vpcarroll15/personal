@@ -4,6 +4,7 @@ The main logic that drives sending of daily goals to users.
 This should remain fairly compact, and complicated logic should be pushed to helper libraries.
 """
 
+from datetime import timedelta
 import logging
 import os
 import re
@@ -14,7 +15,7 @@ from twilio.rest import Client as TwilioClient
 
 from api_client import TwilioManagerApiClient
 from platform_info import install_environment_variables
-from daily_goals_app_types import User
+from daily_goals_app_types import DailyCheckin, User
 
 
 # Let's use opus for now, just for fun.
@@ -98,12 +99,35 @@ def send_sms_and_create_checkin(
     )
 
 
-def update_user_focus_areas(user: User, anthropic_client: Anthropic) -> None:
+def update_user_focus_areas(
+    user: User, api_client: TwilioManagerApiClient, anthropic_client: Anthropic
+) -> None:
     if user.possible_focus_areas:
         return
 
     if not user.ai_prompt:
         return
+
+    # Fetch all the goals created in the past seven days for this user.
+    serialized_checkins = api_client.invoke(
+        resource="daily_goals/checkin",
+        request_type="get",
+        params={"user_id": user.id, "created_at__gte": user.now - timedelta(days=7)},
+    )
+    checkins = [
+        DailyCheckin(**serialized_checkin)
+        for serialized_checkin in serialized_checkins["checkins"]
+    ]
+    used_goals = [goal for checkin in checkins for goal in checkin.possible_focus_areas]
+
+    used_goals_str = (
+        "\n\nHere are goals that have been created recently for this user:\n\n"
+    )
+    for goal in used_goals:
+        used_goals_str += f"<goal>{goal}</goal>\n"
+    used_goals_str += "\nPlease do not reuse any of these goals. Try to create goals that are meaningfully different."
+
+    adjusted_prompt = user.ai_prompt + used_goals_str
 
     response = anthropic_client.messages.create(
         model=AI_MODEL_TO_USE,
@@ -116,7 +140,7 @@ def update_user_focus_areas(user: User, anthropic_client: Anthropic) -> None:
                 "content": [
                     {
                         "type": "text",
-                        "text": user.ai_prompt,
+                        "text": adjusted_prompt,
                     }
                 ],
             },

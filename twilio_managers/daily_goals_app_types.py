@@ -18,6 +18,13 @@ def date_converter(value):
         return value
 
 
+def datetime_converter(value):
+    if isinstance(value, str):
+        return datetime.fromisoformat(value)
+    else:
+        return value
+
+
 def timezone_converter(value):
     if isinstance(value, str):
         return pytz.timezone(value)
@@ -52,3 +59,18 @@ class User:
             self.last_start_text_sent_date < self.now.date()
             and self.start_text_hour <= self.now.hour
         )
+
+
+@dataclass
+class DailyCheckin:
+    id: int
+    user_id: int
+    response_message_id: str | None
+    created_at: datetime
+    updated_at: datetime
+    possible_focus_areas: list[str]
+    chosen_focus_areas: list[str] | None = None
+
+    def __post_init__(self):
+        self.created_at = datetime_converter(self.created_at)
+        self.updated_at = datetime_converter(self.updated_at)

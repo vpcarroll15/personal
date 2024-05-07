@@ -51,6 +51,20 @@ class DailyCheckinView(DailyGoalsManagerView):
             status=status.HTTP_201_CREATED,
         )
 
+    def get(self, request):
+        checkins = DailyCheckin.objects.all()
+        if "user_id" in request.GET:
+            checkins = checkins.filter(user_id=request.GET["user_id"])
+        if "created_at__gte" in request.GET:
+            try:
+                start_datetime = datetime.fromisoformat(request.GET["created_at__gte"])
+            except ValueError:
+                return HttpResponseBadRequest("Invalid datetime format.")
+            checkins = checkins.filter(created_at__gte=start_datetime)
+        return Response(
+            dict(checkins=[checkin.to_dict_for_api() for checkin in checkins])
+        )
+
 
 class DailyGoalsWebhookView(APIView):
     permission_classes = [IsAuthenticated, UserInDailyGoalsWebhookCaller]

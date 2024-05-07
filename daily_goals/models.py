@@ -97,4 +97,5 @@ class DailyCheckin(models.Model):
             created_at=self.created_at.isoformat(),
             updated_at=self.updated_at.isoformat(),
             possible_focus_areas=self.possible_focus_areas,
+            chosen_focus_areas=self.chosen_focus_areas,
         )
