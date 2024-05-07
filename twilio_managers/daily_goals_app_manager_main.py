@@ -169,7 +169,7 @@ def run_cycle():
         if user.should_start_checkin:
             try:
                 # Use AI if necessary to update the user's focus areas.
-                update_user_focus_areas(user, anthropic_client)
+                update_user_focus_areas(user, api_client, anthropic_client)
                 # Set the next contact time FIRST, so that we don't spam Twilio if something goes
                 # wrong with this request.
                 set_last_start_text_sent_date(user, api_client)
