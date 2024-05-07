@@ -118,7 +118,7 @@ def update_user_focus_areas(
         DailyCheckin(**serialized_checkin)
         for serialized_checkin in serialized_checkins["checkins"]
     ]
-    used_goals = [goal for checkin in checkins for goal in checkin.possible_focus_areas]
+    used_goals = {goal for checkin in checkins for goal in checkin.possible_focus_areas}
 
     used_goals_str = (
         "\n\nHere are goals that have been created recently for this user:\n\n"
