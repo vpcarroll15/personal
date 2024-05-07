@@ -45,7 +45,7 @@ Here are examples of bad goals.
 <goal>Stretch your limits, unlocking flexibility and freedom. </goal> Same problem as above. Generic goals are bad.
 <goal>Sculpt strength and endurance with fierce intensity.</goal> Wordy, poetic language is wrong.
 
-When the user gives you context on who they are, use that information to suggest five good goals that obey the above rules.
+When the user gives you context on who they are, use that information to suggest three good goals that obey the above rules.
 """
 
 
