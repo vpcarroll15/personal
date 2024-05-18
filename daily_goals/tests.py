@@ -160,7 +160,7 @@ class AccountTests(APITestCase):
         # Finally we post a good message!
         response = self.client.post(
             "/daily_goals/webhook/",
-            {"From": "+13033033003", "Body": "g 2, 1, happiness"},
+            {"From": "+13033033003", "Body": "g 2; 1; happiness"},
         )
         assert response.status_code == 200
         # Reload from DB.
@@ -172,7 +172,7 @@ class AccountTests(APITestCase):
         checkin.save()
         response = self.client.post(
             "/daily_goals/webhook/",
-            {"From": "+13033033003", "Body": "g 2, 1, 2, happiness"},
+            {"From": "+13033033003", "Body": "g 2; 1; 2; happiness"},
         )
         assert response.status_code == 200
         # Reload from DB.

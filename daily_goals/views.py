@@ -104,7 +104,7 @@ def parse_chosen_focus_areas(body: str, checkin: DailyCheckin) -> list[str]:
     if body.lower().startswith("g"):
         body = body[1:]
 
-    body_pieces = body.split(",")
+    body_pieces = body.split(";")
     unpacked_body_pieces = []
 
     for piece in body_pieces:
