@@ -34,7 +34,7 @@ django-extensions==3.2.1
 django-jquery==3.1.0
 django-phonenumber-field==7.0.2
 django-ses==3.5.0
-djangorestframework==3.14.0
+djangorestframework==3.15.2
 docker==6.0.1
 docker-pycreds==0.4.0
 dockerpty==0.4.1
