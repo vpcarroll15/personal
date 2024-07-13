@@ -89,7 +89,7 @@ pytoolconfig==1.2.5
 pytz==2022.7.1
 PyYAML==6.0
 regex==2022.10.31
-requests==2.31.0
+requests==2.32.0
 resolvelib==0.8.1
 rope==1.7.0
 s3transfer==0.6.0
