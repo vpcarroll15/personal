@@ -10,8 +10,7 @@ the focus; it just brackets the smothering atmosphere.
 I feel like Endonomos is completely in control here--like my attention is drawn
 to exactly where they want it to be. It's striking to listen to something this
 intentional and polished. Peak Hamferd is like this, though Hamferd reminds me of
-a bleak wasteland in northern Europe, and Endonomos feels a bit more like a city--
-perhaps the inside of a cathedral where something horrible has happened. Hamferd
+a bleak wasteland in northern Europe, and Endonomos feels a bit more like a city--perhaps the inside of a cathedral where something horrible has happened. Hamferd
 has more raw emotion, and this is mathier. But both have the same brutal, spare
 chilliness.
 
