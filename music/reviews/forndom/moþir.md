@@ -1,4 +1,4 @@
-Very similar to [*Faþir,*](https://paulcarroll.site/music/music/109),
+Very similar to [*Faþir*](https://paulcarroll.site/music/music/109),
 which I liked so much in 2020. But this time, perhaps because I've
 changed or because the band is changed, it didn't make quite as much
 of an impact.
