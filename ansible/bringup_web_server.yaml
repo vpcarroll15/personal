@@ -53,12 +53,13 @@
         version: "{{ code_branch }}"
       tags: django
 
-    - name: Install Django, gunicorn, other requirements
-      pip:
-        requirements: /home/{{ username }}/source/requirements.txt
-        virtualenv: /home/{{ username }}/venv
-        virtualenv_python: python3.11
-      tags: django
+    # TODO: upgrade postgres and add this back in.
+    # - name: Install Django, gunicorn, other requirements
+    #   pip:
+    #     requirements: /home/{{ username }}/source/requirements.txt
+    #     virtualenv: /home/{{ username }}/venv
+    #     virtualenv_python: python3.11
+    #   tags: django
 
     - name: Copy .bash_aliases to remote machine
       copy:
