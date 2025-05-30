@@ -30,7 +30,6 @@ cffi==1.17.1
 cfgv==3.4.0
 chardet==5.2.0
 charset-normalizer==3.4.2
-class-pool==0.7rc1
 click==8.2.1
 colorama==0.4.6
 comm==0.2.2

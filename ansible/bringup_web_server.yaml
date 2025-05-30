@@ -14,35 +14,15 @@
         name: web-server
       tags: basics
 
-    - name: Get apt repo necessary for python 3.11 right now
-      become: yes
-      apt_repository:
-        repo: ppa:deadsnakes/ppa
-        validate_certs: no
-        update_cache: yes
-      tags: basics
-
     - name: Install basic packages
       become: yes
       apt:
         name:
-          - python3.11
-          - python3.11-dev
-          - python3.11-venv
-          - python3.11-distutils
           - nginx
           - curl
           - libpq-dev
           - postgresql
           - postgresql-contrib
-      tags: basics
-
-    - name: Define python to be python3.11
-      become: yes
-      file:
-        src: /usr/bin/python3.11
-        dest: /usr/bin/python
-        state: link
       tags: basics
 
     # Getting Django app working.
@@ -53,13 +33,18 @@
         version: "{{ code_branch }}"
       tags: django
 
-    # TODO: upgrade postgres and add this back in.
-    # - name: Install Django, gunicorn, other requirements
-    #   pip:
-    #     requirements: /home/{{ username }}/source/requirements.txt
-    #     virtualenv: /home/{{ username }}/venv
-    #     virtualenv_python: python3.11
-    #   tags: django
+    - name: Install virtualenv
+      package:
+        name: python3-virtualenv
+        state: present
+      become: yes
+      tags: basics
+
+    - name: Install Django, gunicorn, other requirements
+      pip:
+        requirements: /home/{{ username }}/source/requirements.txt
+        virtualenv: /home/{{ username }}/venv
+      tags: django
 
     - name: Copy .bash_aliases to remote machine
       copy:

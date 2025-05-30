@@ -7,16 +7,9 @@ from django.apps import apps
 from django.conf import settings
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-from class_pool.pool import Pool
 
 
 THREE_MONTHS_IN_DAYS = 3 * 30
-
-
-callbacks_pool = Pool()
-"""
-The collection of callback functions that could be called when we receive an SMS.
-"""
 
 
 def create_prayer_snippet(prayer_type, data_point):
@@ -49,19 +42,23 @@ def create_prayer_snippet(prayer_type, data_point):
         )
 
 
-@callbacks_pool.register
 def create_gratitude_prayer_snippet(data_point):
     create_prayer_snippet("GRATITUDE", data_point)
 
 
-@callbacks_pool.register
 def create_request_prayer_snippet(data_point):
     create_prayer_snippet("REQUEST", data_point)
 
 
-@callbacks_pool.register
 def create_praise_prayer_snippet(data_point):
     create_prayer_snippet("PRAISE", data_point)
+
+
+callbacks_pool = {
+    "create_gratitude_prayer_snippet": create_gratitude_prayer_snippet,
+    "create_request_prayer_snippet": create_request_prayer_snippet,
+    "create_praise_prayer_snippet": create_praise_prayer_snippet,
+}
 
 
 class Question(models.Model):
@@ -80,7 +77,7 @@ class Question(models.Model):
         max_length=100,
         blank=True,
         null=True,
-        choices=[(id, id) for id, _ in callbacks_pool],
+        choices=[(id, id) for id in callbacks_pool.keys()],
         help_text=(
             "If defined, then this represents a callback function that we should trigger when we create "
             "a DataPoint for this question. The signature of the callback is `callback(data_point: DataPoint)`."
