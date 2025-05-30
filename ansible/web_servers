@@ -1,5 +1,5 @@
 [all]
-34.217.122.88
+44.230.244.94
 
 [all:vars]
 ansible_user=ubuntu
