@@ -42,7 +42,7 @@ decorator==5.2.1
 dill==0.4.0
 distlib==0.3.9
 distro==1.9.0
-Django==5.2.1
+Django==5.2.8
 django-extensions==4.1
 django-jquery==3.1.0
 django-phonenumber-field==8.1.0
