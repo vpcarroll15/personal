@@ -10,6 +10,88 @@ from sms.models import DataPoint, Question
 from sms.models import User as SmsUser
 
 
+class ModelTests(TestCase):
+    """Tests for model methods."""
+
+    def test_question_str(self):
+        """Test the __str__ method of Question."""
+        question = Question.objects.create(text="What is the meaning of life?")
+        self.assertEqual(str(question), "What is the meaning of life?")
+
+    def test_sms_user_str(self):
+        """Test the __str__ method of SmsUser."""
+        user = User.objects.create_user("testuser", "test@test.com", "password")
+        sms_user = SmsUser.objects.create(
+            phone_number="+15555555555",
+            logged_in_user=user,
+        )
+        self.assertEqual(str(sms_user), "+15555555555")
+
+    def test_data_point_str(self):
+        """Test the __str__ method of DataPoint."""
+        user = User.objects.create_user("testuser", "test@test.com", "password")
+        sms_user = SmsUser.objects.create(
+            phone_number="+15555555555",
+            logged_in_user=user,
+        )
+        question = Question.objects.create(text="Test question?")
+        data_point = DataPoint.objects.create(
+            user=sms_user,
+            question=question,
+            score=5,
+        )
+        result = str(data_point)
+        self.assertIn("+15555555555", result)
+        self.assertIn("Test question?", result)
+        self.assertIn("5", result)
+
+    def test_create_request_prayer_snippet(self):
+        """Test create_request_prayer_snippet callback."""
+        user = User.objects.create_user("testuser", "test@test.com", "password")
+        sms_user = SmsUser.objects.create(
+            phone_number="+15555555555",
+            logged_in_user=user,
+        )
+        question = Question.objects.create(
+            text="Request test",
+            callback="create_request_prayer_snippet",
+        )
+        data_point = DataPoint.objects.create(
+            user=sms_user,
+            question=question,
+            text="Please help me",
+            score=4,
+        )
+        # The callback should have been triggered by save()
+        snippet = PrayerSnippet.objects.get(sms_data_point=data_point)
+        self.assertEqual(snippet.type, "REQUEST")
+        self.assertEqual(snippet.text, "Please help me")
+        self.assertEqual(snippet.user, user)
+
+    def test_create_praise_prayer_snippet(self):
+        """Test create_praise_prayer_snippet callback."""
+        user = User.objects.create_user("testuser", "test@test.com", "password")
+        sms_user = SmsUser.objects.create(
+            phone_number="+15555555555",
+            logged_in_user=user,
+        )
+        question = Question.objects.create(
+            text="Praise test",
+            callback="create_praise_prayer_snippet",
+        )
+        data_point = DataPoint.objects.create(
+            user=sms_user,
+            question=question,
+            text="Thank you God",
+            score=5,
+        )
+        # The callback should have been triggered by save()
+        snippet = PrayerSnippet.objects.get(sms_data_point=data_point)
+        self.assertEqual(snippet.type, "PRAISE")
+        self.assertEqual(snippet.text, "Thank you God")
+        self.assertEqual(snippet.user, user)
+
+
 class AccountTests(APITestCase):
     def setUp(self):
         webhooker = User.objects.create_user(
@@ -67,6 +149,26 @@ class AccountTests(APITestCase):
         assert response.status_code == 200
         assert "users" in response.data
         assert len(response.data["users"]) == 1
+
+    def test_superuser_can_access_manager_endpoints(self):
+        """Test that a superuser can access manager endpoints without being in the group."""
+        superuser = User.objects.create_superuser(
+            "admin", "admin@carroll.com", "adminpassword"
+        )
+        self.client.force_authenticate(user=superuser)
+        response = self.client.get("/sms/users/", {})
+        assert response.status_code == 200
+
+    def test_superuser_can_access_webhook_endpoints(self):
+        """Test that a superuser can access webhook endpoints without being in the group."""
+        superuser = User.objects.create_superuser(
+            "admin", "admin@carroll.com", "adminpassword"
+        )
+        self.client.force_authenticate(user=superuser)
+        # Webhook endpoint requires POST data, but superuser should pass permission check
+        response = self.client.post("/sms/webhook/", {})
+        # Will fail with 400 because of missing data, not 403 (permission denied)
+        assert response.status_code == 400
 
     def test_put_user(self):
         user = User.objects.get(username="manager")

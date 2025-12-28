@@ -3,16 +3,23 @@ Models for the SMS app.
 """
 
 from datetime import timedelta
+from typing import Any
 
 from django.apps import apps
 from django.conf import settings
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
+# Constants
 THREE_MONTHS_IN_DAYS = 3 * 30
+ASCII_SMS_MAX_LENGTH = 160
+CALLBACK_NAME_MAX_LENGTH = 100
+TWILIO_MESSAGE_ID_MAX_LENGTH = 40
+DEFAULT_START_TEXT_HOUR = 7
+DEFAULT_END_TEXT_HOUR = 22
 
 
-def create_prayer_snippet(prayer_type, data_point):
+def create_prayer_snippet(prayer_type: str, data_point: "DataPoint") -> None:
     """
     Create a prayer snippet from a DataPoint.
 
@@ -42,15 +49,15 @@ def create_prayer_snippet(prayer_type, data_point):
         )
 
 
-def create_gratitude_prayer_snippet(data_point):
+def create_gratitude_prayer_snippet(data_point: "DataPoint") -> None:
     create_prayer_snippet("GRATITUDE", data_point)
 
 
-def create_request_prayer_snippet(data_point):
+def create_request_prayer_snippet(data_point: "DataPoint") -> None:
     create_prayer_snippet("REQUEST", data_point)
 
 
-def create_praise_prayer_snippet(data_point):
+def create_praise_prayer_snippet(data_point: "DataPoint") -> None:
     create_prayer_snippet("PRAISE", data_point)
 
 
@@ -64,8 +71,13 @@ callbacks_pool = {
 class Question(models.Model):
     """Represents one question that we might want to ask a user."""
 
+    class Meta:
+        ordering = ["text"]
+        verbose_name = "Question"
+        verbose_name_plural = "Questions"
+
     # This is the max length of an ASCII SMS.
-    text = models.CharField(max_length=160)
+    text = models.CharField(max_length=ASCII_SMS_MAX_LENGTH)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -74,7 +86,7 @@ class Question(models.Model):
     max_score = models.SmallIntegerField(default=10)
 
     callback = models.CharField(
-        max_length=100,
+        max_length=CALLBACK_NAME_MAX_LENGTH,
         blank=True,
         null=True,
         choices=[(id, id) for id in callbacks_pool.keys()],
@@ -84,10 +96,10 @@ class Question(models.Model):
         ),
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.text
 
-    def to_dict_for_api(self):
+    def to_dict_for_api(self) -> dict[str, Any]:
         return dict(
             id=self.id,
             text=self.text,
@@ -98,6 +110,11 @@ class Question(models.Model):
 
 class User(models.Model):
     """Represents one user of the app."""
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "SMS User"
+        verbose_name_plural = "SMS Users"
 
     logged_in_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -117,19 +134,19 @@ class User(models.Model):
     )
 
     # Don't text this user before this time in the morning.
-    start_text_hour = models.SmallIntegerField(default=7)
+    start_text_hour = models.SmallIntegerField(default=DEFAULT_START_TEXT_HOUR)
     # Don't text this user after this time at night.
-    end_text_hour = models.SmallIntegerField(default=22)
+    end_text_hour = models.SmallIntegerField(default=DEFAULT_END_TEXT_HOUR)
     # This should be the name of a pytz timezone.
     timezone = models.CharField(max_length=100, default="America/Los_Angeles")
     text_every_n_days = models.SmallIntegerField(default=1)
 
     questions = models.ManyToManyField(Question)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.phone_number)
 
-    def to_dict_for_api(self):
+    def to_dict_for_api(self) -> dict[str, Any]:
         return dict(
             id=self.id,
             phone_number=str(self.phone_number),
@@ -146,6 +163,9 @@ class DataPoint(models.Model):
     """Represents one collected response to one Question."""
 
     class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Data Point"
+        verbose_name_plural = "Data Points"
         # We expect to be doing a lot of queries like "give me the most
         # recent DataPoints for this user."
         indexes = [
@@ -166,8 +186,10 @@ class DataPoint(models.Model):
     text = models.TextField(blank=True, null=True)
 
     # This short ID is given to us by Twilio when we get a message response.
-    # It is guaranteed to be less than 40 chars long.
-    response_message_id = models.CharField(max_length=40, blank=True, null=True)
+    # It is guaranteed to be less than TWILIO_MESSAGE_ID_MAX_LENGTH chars long.
+    response_message_id = models.CharField(
+        max_length=TWILIO_MESSAGE_ID_MAX_LENGTH, blank=True, null=True
+    )
 
     def save(self, *args, **kwargs):
         """Make sure that we trigger the callback if it's defined."""
@@ -177,10 +199,10 @@ class DataPoint(models.Model):
             if callback is not None:
                 callback(self)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user.phone_number}, {self.question.text}, {self.score}"
 
-    def to_dict_for_api(self):
+    def to_dict_for_api(self) -> dict[str, Any]:
         return dict(
             id=self.id,
             question_id=self.question_id,

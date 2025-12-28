@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render, reverse
 
 from .models import (
@@ -9,7 +9,9 @@ from .models import (
 )
 
 
-def _get_next_location(location_ids, current_location=None):
+def _get_next_location(
+    location_ids: list[int], current_location: Location | None = None
+) -> tuple[Location | HttpResponse | None, bool]:
     """
     Get the next Location that we should visit, given a sequence of location ids and the current location.
 
@@ -59,7 +61,7 @@ def _get_next_location(location_ids, current_location=None):
     return next_location, True
 
 
-def hunt_templates(request):
+def hunt_templates(request: HttpRequest) -> HttpResponse:
     """Renders a view of all the scavenger hunt templates that can be instantiated."""
     hunt_templates = ScavengerHuntTemplate.objects.all().order_by("-updated_at")
     return render(
@@ -69,7 +71,7 @@ def hunt_templates(request):
     )
 
 
-def hunt_template(request, id):
+def hunt_template(request: HttpRequest, id: int) -> HttpResponse:
     """Renders a single hunt template detailed view."""
     hunt_template = get_object_or_404(ScavengerHuntTemplate, pk=id)
     return render(
@@ -77,7 +79,7 @@ def hunt_template(request, id):
     )
 
 
-def hunt(request, id):
+def hunt(request: HttpRequest, id: int) -> HttpResponse:
     """Renders a single hunt detailed view."""
     hunt = get_object_or_404(ScavengerHunt, pk=id)
     if request.method == "GET":
@@ -118,7 +120,7 @@ def hunt(request, id):
     return HttpResponseNotAllowed(["GET", "POST"])
 
 
-def create_new_hunt(request, template_id):
+def create_new_hunt(request: HttpRequest, template_id: int) -> HttpResponse:
     """Creates a new hunt and redirects the user so that he/she can find it.
 
     Only accepts POST requests.
@@ -144,7 +146,7 @@ def create_new_hunt(request, template_id):
     return redirect(url)
 
 
-def hunt_heading(request, id):
+def hunt_heading(request: HttpRequest, id: int) -> HttpResponse | JsonResponse:
     """
     Returns a JSON dictionary consisting of a heading for the hunt with id.
     """

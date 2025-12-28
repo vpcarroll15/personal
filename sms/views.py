@@ -6,6 +6,7 @@ import dateutil.parser
 import pytz
 from django.contrib.auth.decorators import login_required
 from django.http import (
+    HttpRequest,
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseNotAllowed,
@@ -38,7 +39,7 @@ class UnparseableMessageException(Exception):
     pass
 
 
-def get_relevant_data_point(phone_number_str):
+def get_relevant_data_point(phone_number_str: str) -> DataPoint:
     users = User.objects.filter(phone_number=phone_number_str)
     if len(users) != 1:
         raise NoRelevantDataPointException

@@ -1,8 +1,11 @@
+from typing import Any
+
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
 from geographiclib.geodesic import Geodesic
 
+# Constants for heading calculations
 HEADING_LABELS = [
     "north",
     "northeast",
@@ -15,6 +18,14 @@ HEADING_LABELS = [
 ]
 DEGREES_PER_LABEL = 360 / len(HEADING_LABELS)
 
+# Field length constants
+NAME_MAX_LENGTH = 200
+PATH_TO_STATIC_IMG_ASSET_MAX_LENGTH = 200
+SOLUTION_MAX_LENGTH = 200
+
+# Location defaults
+DEFAULT_RADIUS_METERS = 30
+
 
 class UnknownLocationException(Exception):
     """We throw this if someone tries to compute distance to a location with unspecified coordinates."""
@@ -22,6 +33,11 @@ class UnknownLocationException(Exception):
 
 class Location(models.Model):
     """Represents one target in a scavenger hunt."""
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Location"
+        verbose_name_plural = "Locations"
 
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -35,12 +51,12 @@ class Location(models.Model):
     )
 
     name = models.CharField(
-        max_length=200,
+        max_length=NAME_MAX_LENGTH,
         help_text="This will never be displayed to the user. It is only used in the admin.",
     )
 
     radius = models.IntegerField(
-        default=30,
+        default=DEFAULT_RADIUS_METERS,
         help_text=(
             "How close the user needs to be in meters to the coordinate in order to advance. This will have no meaning if lat/lng aren't provided."
         ),
@@ -49,7 +65,7 @@ class Location(models.Model):
     path_to_static_img_asset = models.CharField(
         null=True,
         blank=True,
-        max_length=200,
+        max_length=PATH_TO_STATIC_IMG_ASSET_MAX_LENGTH,
         help_text="This should point to a static image asset. Optional.",
     )
 
@@ -59,7 +75,7 @@ class Location(models.Model):
     )
 
     solutions = ArrayField(
-        models.CharField(max_length=200),
+        models.CharField(max_length=SOLUTION_MAX_LENGTH),
         null=True,
         blank=True,
         help_text="If provided, the user must input one of these in order to move on to the next section.",
@@ -68,10 +84,10 @@ class Location(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def clean(self):
+    def clean(self) -> None:
         if not self.solutions and self.latitude is None:
             raise ValidationError("Either a coordinate or a solution must be provided.")
         if not self.clue and not self.path_to_static_img_asset:
@@ -87,10 +103,15 @@ class Location(models.Model):
 class ScavengerHuntTemplate(models.Model):
     """A description of a scavenger hunt that someone could start."""
 
+    class Meta:
+        ordering = ["-updated_at"]
+        verbose_name = "Scavenger Hunt Template"
+        verbose_name_plural = "Scavenger Hunt Templates"
+
     # The list of location ids, in order, that we are supposed to visit on this hunt.
     location_ids = ArrayField(models.IntegerField(), default=list)
 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=NAME_MAX_LENGTH)
     description = models.TextField(blank=True)
 
     finished_message = models.TextField(
@@ -101,7 +122,7 @@ class ScavengerHuntTemplate(models.Model):
     path_to_static_img_asset = models.CharField(
         null=True,
         blank=True,
-        max_length=200,
+        max_length=PATH_TO_STATIC_IMG_ASSET_MAX_LENGTH,
         help_text="This should point to a static image asset. Optional.",
     )
     skip_all_checks = models.BooleanField(default=False)
@@ -109,12 +130,17 @@ class ScavengerHuntTemplate(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
 class ScavengerHunt(models.Model):
     """Represents a scavenger hunt in progress."""
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Scavenger Hunt"
+        verbose_name_plural = "Scavenger Hunts"
 
     hunt_template = models.ForeignKey("ScavengerHuntTemplate", on_delete=models.CASCADE)
 
@@ -130,10 +156,12 @@ class ScavengerHunt(models.Model):
     post_location_phase = models.BooleanField(default=False)
     is_finished = models.BooleanField(default=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "{}, {}".format(self.hunt_template, self.current_location)
 
-    def distance_and_direction_to_current_location(self, latitude, longitude):
+    def distance_and_direction_to_current_location(
+        self, latitude: float, longitude: float
+    ) -> tuple[float, str]:
         """ "
         Returns the distance in meters to the current location, and the direction as a string: "WEST," "NORTHWEST," etc.
         """
@@ -163,7 +191,9 @@ class ScavengerHunt(models.Model):
         index_in_heading_labels = int(offset_heading / DEGREES_PER_LABEL)
         return distance_m, HEADING_LABELS[index_in_heading_labels]
 
-    def location_is_completed(self, latitude, longitude, solution):
+    def location_is_completed(
+        self, latitude: float, longitude: float, solution: str
+    ) -> bool:
         """
         Return True if, according to our coordinates and the user-provided solution, we should advance to the next location.
         """
