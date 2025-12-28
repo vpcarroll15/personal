@@ -4,10 +4,14 @@ from .models import Tag, Music, Musician, BestOf
 
 
 class MusicianAdmin(admin.ModelAdmin):
+    """Admin interface for musicians, ordered alphabetically by name."""
+
     ordering = ["name"]
 
 
 class TagAdmin(admin.ModelAdmin):
+    """Admin interface for tags, ordered alphabetically by name."""
+
     ordering = ["name"]
 
 

@@ -1,17 +1,20 @@
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
+from typing import Any
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.db.utils import IntegrityError
-from django.http import HttpResponse
-from django.http import HttpResponseNotAllowed
+from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, render, redirect, reverse
 from feedgen.feed import FeedGenerator
-from .models import Music, BestOf, Comment
+from .models import Music, BestOf, Comment, Tag
 from .constants import URL_ROOT, MY_NAME, MY_EMAIL
 
 
-def update_context_with_album(context, album, show_comments=True):
+def update_context_with_album(
+    context: dict[str, Any], album: Music, show_comments: bool = True
+) -> None:
+    """Updates the template context with album, tags, and optionally comments."""
     context["album"] = album
     context["tags"] = album.musician.tags.all()
     context["show_comments"] = show_comments
@@ -19,7 +22,8 @@ def update_context_with_album(context, album, show_comments=True):
         context["comments"] = album.comment_set.all().order_by("created_at")
 
 
-def apply_common_preselects_music(music_queryset):
+def apply_common_preselects_music(music_queryset: QuerySet[Music]) -> QuerySet[Music]:
+    """Applies select_related and prefetch_related optimizations to avoid N+1 queries."""
     return (
         music_queryset.select_related("musician")
         .prefetch_related("musician__tags", "comment_set")
@@ -27,13 +31,14 @@ def apply_common_preselects_music(music_queryset):
     )
 
 
-def get_recent_music(quantity=10):
+def get_recent_music(quantity: int = 10) -> QuerySet[Music]:
+    """Returns the most recently reviewed albums with optimized preselects."""
     return apply_common_preselects_music(Music.objects.order_by("-reviewed_at"))[
         :quantity
     ]
 
 
-def home(request):
+def home(request: HttpRequest) -> HttpResponse:
     """Renders the homepage for the music app."""
     recent_music = get_recent_music()
     context = {"albums": recent_music, "truncate": True}
@@ -48,18 +53,18 @@ def home(request):
     return render(request, "music/home.html", context)
 
 
-def music(request, music_id):
+def music(request: HttpRequest, music_id: int) -> HttpResponse:
     """Displays a detailed view of a piece of music."""
     music = get_object_or_404(Music, pk=music_id)
 
-    context = {}
+    context: dict[str, Any] = {}
     update_context_with_album(context, music)
 
     return render(request, "music/music.html", context)
 
 
 @login_required
-def comment(request, music_id):
+def comment(request: HttpRequest, music_id: int) -> HttpResponse:
     """Adds a comment to a piece of music."""
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -77,7 +82,7 @@ def comment(request, music_id):
     return redirect(url)
 
 
-def search(request):
+def search(request: HttpRequest) -> HttpResponse:
     """Searches for a particular search term in our set of musicians, music, and tags."""
     search_term = request.GET["search_term"]
 
@@ -93,13 +98,13 @@ def search(request):
     return render(request, "music/search.html", context)
 
 
-def ratings(request):
+def ratings(request: HttpRequest) -> HttpResponse:
     """Displays the page that explains my ratings philosophy."""
-    context = {}
+    context: dict[str, Any] = {}
     return render(request, "music/ratings.html", context)
 
 
-def rss(_):
+def rss(_: HttpRequest) -> HttpResponse:
     """Returns the XML content of my RSS feed for the music part of the website.
 
     NOTE: We are doing no caching here at all right now, because this function is very fast and the website has
@@ -135,7 +140,7 @@ def rss(_):
     return HttpResponse(generator.rss_str())
 
 
-def best_of(request, name):
+def best_of(request: HttpRequest, name: str) -> HttpResponse:
     """Searches for a particular search term in our set of musicians, music, and tags."""
     best_of = get_object_or_404(BestOf, name=name)
     relevant_albums = apply_common_preselects_music(
@@ -145,7 +150,7 @@ def best_of(request, name):
             exclude_from_best_of_list=False,
         )
     )
-    albums_by_score = defaultdict(list)
+    albums_by_score: defaultdict[int, list[Music]] = defaultdict(list)
     # Partition by rating.
     for album in relevant_albums:
         albums_by_score[album.rating].append(album)
@@ -155,7 +160,7 @@ def best_of(request, name):
     albums_with_photos = albums_by_score[3] + albums_by_score[2] + albums_by_score[1]
     albums_with_photos = [album for album in albums_with_photos if album.image_src()]
 
-    tag_counter = Counter()
+    tag_counter: Counter[Tag] = Counter()
     for album in relevant_albums:
         for tag in album.musician.tags.all():
             tag_counter[tag] += 1
