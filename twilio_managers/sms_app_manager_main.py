@@ -11,13 +11,17 @@ import time
 from datetime import datetime, timedelta, timezone
 
 import pytz
-from api_client import TwilioManagerApiClient
-from platform_info import install_environment_variables
-from sms_app_types import User
 from twilio.rest import Client as TwilioClient
 
+from twilio_managers.api_client import TwilioManagerApiClient
+from twilio_managers.platform_info import install_environment_variables
+from twilio_managers.sms_app_types import User
 
-def set_next_contact_time(user, api_client):
+# Constants
+CYCLE_SLEEP_SECONDS = 60 * 15  # 15 minutes
+
+
+def set_next_contact_time(user: User, api_client: TwilioManagerApiClient) -> None:
     logging.info(f"Setting next contact time for user {user.id}")
 
     # I hate timezones so much. Get the current time in the user's timezone.
@@ -45,8 +49,11 @@ def set_next_contact_time(user, api_client):
 
 
 def send_sms_and_create_data_point(
-    user, api_client, twilio_client, twilio_phone_number
-):
+    user: User,
+    api_client: TwilioManagerApiClient,
+    twilio_client: TwilioClient,
+    twilio_phone_number: str,
+) -> None:
     # First we create the DataPoint...just in case the user responds to our text really really fast. :)
     # There is also no cost to creating a DataPoint and never sending a text, if that fails.
     logging.info(f"Creating DataPoint for user {user.id}")
@@ -67,7 +74,7 @@ def send_sms_and_create_data_point(
     )
 
 
-def run_cycle():
+def run_cycle() -> None:
     # This will crash if these variables aren't found in our environment, which
     # is perfect.
     account_sid = os.environ["TWILIO_ACCOUNT_SID"]
@@ -77,7 +84,7 @@ def run_cycle():
 
     api_client = TwilioManagerApiClient()
     serialized_users = api_client.invoke("sms/users")
-    users = [User(serialized_user) for serialized_user in serialized_users["users"]]
+    users = [User(**serialized_user) for serialized_user in serialized_users["users"]]
 
     for user in users:
         if user.send_message_at_time < datetime.now(tz=timezone.utc):
@@ -102,4 +109,4 @@ if __name__ == "__main__":
             # Catch all "normal" errors and don't crash. Do log though.
             logging.error(f"Couldn't run SMS manager cycle: {repr(e)}")
 
-        time.sleep(60 * 15)
+        time.sleep(CYCLE_SLEEP_SECONDS)

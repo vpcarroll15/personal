@@ -23,6 +23,6 @@ repos:
     hooks:
     -   id: mypy
         args: [--config-file=mypy.ini]
-        files: ^(music|prayer|daily_goals|scavenger_hunt|sms)/.*\.py$
+        files: ^(music|prayer|daily_goals|scavenger_hunt|sms|twilio_managers)/.*\.py$
         exclude: (migrations/|test_.*\.py$)
-        additional_dependencies: [types-python-dateutil, types-pytz]
+        additional_dependencies: [types-python-dateutil, types-pytz, types-requests]

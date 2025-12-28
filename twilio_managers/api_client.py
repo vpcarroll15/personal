@@ -4,9 +4,11 @@ Facilitates requests to the sms API by handling stuff like auth, URL composition
 
 import abc
 import os
+from typing import Any
 
-import platform_info
 import requests
+
+from twilio_managers import platform_info
 
 
 class CredentialsNotFoundException(Exception):
@@ -20,13 +22,20 @@ class RestApiClient:
     Client for invoking endpoints in this app with basic auth.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         platform_info.install_environment_variables()
-        self.api_base = "{}://{}".format(
-            platform_info.get_protocol(), platform_info.get_api_domain()
+        self.api_base = (
+            f"{platform_info.get_protocol()}://{platform_info.get_api_domain()}"
         )
 
-    def invoke(self, resource, request_type="get", payload=None, timeout=10, **kwargs):
+    def invoke(
+        self,
+        resource: str,
+        request_type: str = "get",
+        payload: dict[str, Any] | None = None,
+        timeout: int = 10,
+        **kwargs: Any,
+    ) -> dict[str, Any]:
         """
         Makes a request to the resource (example: sms/webhook) with the specified request_type and payload dict.
         """
@@ -47,14 +56,14 @@ class RestApiClient:
         return dict(response_dict)
 
     @abc.abstractmethod
-    def get_auth(self):
+    def get_auth(self) -> tuple[str, str]:
         """
         Returns a tuple consisting of the username and password.
         """
 
 
 class TwilioManagerApiClient(RestApiClient):
-    def get_auth(self):
+    def get_auth(self) -> tuple[str, str]:
         """
         Returns a tuple consisting of the username and password.
         """

@@ -157,7 +157,7 @@ class ScavengerHunt(models.Model):
     is_finished = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return "{}, {}".format(self.hunt_template, self.current_location)
+        return f"{self.hunt_template}, {self.current_location}"
 
     def distance_and_direction_to_current_location(
         self, latitude: float, longitude: float

@@ -112,9 +112,10 @@ def hunt(request: HttpRequest, id: int) -> HttpResponse:
             hunt.save()
         else:
             success = False
-        url = reverse(
-            "scavenger_hunt:hunt", kwargs={"id": hunt.id}
-        ) + "?success={}".format(success)
+        url = (
+            reverse("scavenger_hunt:hunt", kwargs={"id": hunt.id})
+            + f"?success={success}"
+        )
         return redirect(url)
 
     return HttpResponseNotAllowed(["GET", "POST"])

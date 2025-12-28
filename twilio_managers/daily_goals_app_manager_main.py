@@ -11,13 +11,18 @@ import time
 from datetime import timedelta
 
 from anthropic import Anthropic
-from api_client import TwilioManagerApiClient
-from daily_goals_app_types import DailyCheckin, User
-from platform_info import install_environment_variables
 from twilio.rest import Client as TwilioClient
 
-# Let's use opus for now, just for fun.
+from twilio_managers.api_client import TwilioManagerApiClient
+from twilio_managers.daily_goals_app_types import DailyCheckin, User
+from twilio_managers.platform_info import install_environment_variables
+
+# Constants
 AI_MODEL_TO_USE = "claude-3-opus-20240229"
+AI_MAX_TOKENS = 1024
+AI_TEMPERATURE = 1
+RECENT_GOALS_LOOKBACK_DAYS = 7
+CYCLE_SLEEP_SECONDS = 60 * 15  # 15 minutes
 
 
 SYSTEM_PROMPT: str = """
@@ -47,7 +52,9 @@ When the user gives you context on who they are, use that information to suggest
 """
 
 
-def set_last_start_text_sent_date(user: User, api_client: TwilioManagerApiClient):
+def set_last_start_text_sent_date(
+    user: User, api_client: TwilioManagerApiClient
+) -> None:
     logging.info(f"Setting last start text sent date for user {user.id}")
 
     # Save this to the DB.
@@ -67,7 +74,7 @@ def send_sms_and_create_checkin(
     api_client: TwilioManagerApiClient,
     twilio_client: TwilioClient,
     twilio_phone_number: str,
-):
+) -> None:
     logging.info(f"Creating checkin for user {user.id}")
 
     api_client.invoke(
@@ -110,7 +117,10 @@ def update_user_focus_areas(
     serialized_checkins = api_client.invoke(
         resource="daily_goals/checkin",
         request_type="get",
-        params={"user_id": user.id, "created_at__gte": user.now - timedelta(days=7)},
+        params={
+            "user_id": user.id,
+            "created_at__gte": user.now - timedelta(days=RECENT_GOALS_LOOKBACK_DAYS),
+        },
     )
     checkins = [
         DailyCheckin(**serialized_checkin)
@@ -129,8 +139,8 @@ def update_user_focus_areas(
 
     response = anthropic_client.messages.create(
         model=AI_MODEL_TO_USE,
-        max_tokens=1024,
-        temperature=1,
+        max_tokens=AI_MAX_TOKENS,
+        temperature=AI_TEMPERATURE,
         system=SYSTEM_PROMPT,
         messages=[
             {
@@ -150,7 +160,7 @@ def update_user_focus_areas(
     user.possible_focus_areas = goals
 
 
-def run_cycle():
+def run_cycle() -> None:
     # This will crash if these variables aren't found in our environment, which
     # is perfect.
     account_sid = os.environ["TWILIO_ACCOUNT_SID"]
@@ -188,4 +198,4 @@ if __name__ == "__main__":
             # Catch all "normal" errors and don't crash. Do log though.
             logging.error(f"Couldn't run Daily Goals manager cycle: {repr(e)}")
 
-        time.sleep(60 * 15)
+        time.sleep(CYCLE_SLEEP_SECONDS)

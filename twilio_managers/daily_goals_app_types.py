@@ -6,31 +6,29 @@ dependencies on Django or web stuff. We will often serialize into or
 deserialize from these classes.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date, datetime
+from typing import Any
 
 import pytz
 
 
-def date_converter(value):
+def date_converter(value: str | date) -> date:
     if isinstance(value, str):
         return date.fromisoformat(value)
-    else:
-        return value
+    return value
 
 
-def datetime_converter(value):
+def datetime_converter(value: str | datetime) -> datetime:
     if isinstance(value, str):
         return datetime.fromisoformat(value)
-    else:
-        return value
+    return value
 
 
-def timezone_converter(value):
+def timezone_converter(value: str | Any) -> Any:
     if isinstance(value, str):
         return pytz.timezone(value)
-    else:
-        return value
+    return value
 
 
 @dataclass
@@ -41,7 +39,7 @@ class User:
     end_text_hour: int
     last_start_text_sent_date: date
     last_end_text_sent_date: date
-    timezone: pytz.timezone
+    timezone: Any  # pytz timezone object
     possible_focus_areas: list[str]
     ai_prompt: str = ""
 

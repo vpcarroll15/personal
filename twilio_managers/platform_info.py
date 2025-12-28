@@ -10,15 +10,15 @@ import dotenv
 ENV_FILE_PATH = "/home/ubuntu/environment.env"
 
 
-def get_protocol():
+def get_protocol() -> str:
     return os.environ.get("API_PROTOCOL", "http")
 
 
-def get_api_domain():
+def get_api_domain() -> str:
     return os.environ.get("API_DOMAIN", "localhost:8000")
 
 
-def install_environment_variables(path=ENV_FILE_PATH):
+def install_environment_variables(path: str = ENV_FILE_PATH) -> bool:
     """
     Add variables from this .env file to Python's os.environ.
     Doesn't complain if the file doesn't exist.
