@@ -1,1 +1,3 @@
-Electronic. I feel like Four Tet’s music has gotten a bit too smooth...I find myself missing the arid, mathematical clarity of a track like “Jupiters.” Still, a great listen. Make sure that you listen to “Lush” at some point.
+Electronic. I feel like Four Tet’s music has gotten a bit too smooth...I find myself missing the
+arid, mathematical clarity of a track like “Jupiters.” Still, a great listen. Make sure that you
+listen to “Lush” at some point.

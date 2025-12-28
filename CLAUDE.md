@@ -1,12 +1,15 @@
 # Claude Code Guide for This Repository
 
-This file contains helpful context about this Django monorepo to help Claude (or other developers) work effectively with the codebase.
+This file contains helpful context about this Django monorepo to help Claude (or other developers)
+work effectively with the codebase.
 
 ## Project Overview
 
-This is a personal Django project containing multiple apps for tracking various aspects of life through SMS interactions, music reviews, prayer snippets, scavenger hunts, and daily goals.
+This is a personal Django project containing multiple apps for tracking various aspects of life
+through SMS interactions, music reviews, prayer snippets, scavenger hunts, and daily goals.
 
 **Tech Stack:**
+
 - Django (Python 3.12)
 - PostgreSQL (with ArrayField support)
 - Twilio (SMS integration)
@@ -58,22 +61,26 @@ This is a personal Django project containing multiple apps for tracking various 
 ## Code Quality Standards
 
 ### Type Hints
+
 - **Modern syntax**: Use `dict[str, Any]` instead of `Dict[str, Any]`
 - **Union syntax**: Use `str | None` instead of `Optional[str]`
 - **All functions** should have return type annotations
 - **All parameters** should have type annotations
 
 ### String Formatting
+
 - **Always use f-strings**: `f"User {user.id}"` ✓
 - **Never use .format()**: `"User {}".format(user.id)` ✗
 - **Never use %**: `"User %s" % user.id` ✗
 
 ### Constants
+
 - Extract magic numbers and strings to module-level constants
 - Use UPPER_CASE naming for constants
 - Group related constants together at the top of files
 
 Example:
+
 ```python
 # Constants
 DEFAULT_RADIUS_METERS = 30
@@ -81,13 +88,16 @@ CYCLE_SLEEP_SECONDS = 60 * 15  # 15 minutes
 ```
 
 ### Model Meta Classes
+
 All Django models should have a Meta class with:
+
 - `ordering`: Specify default query ordering
 - `verbose_name`: Human-readable singular name
 - `verbose_name_plural`: Human-readable plural name
 - `indexes`: Add indexes for common query patterns (if needed)
 
 Example:
+
 ```python
 class MyModel(models.Model):
     class Meta:
@@ -100,11 +110,13 @@ class MyModel(models.Model):
 ```
 
 ### Dataclasses
+
 - Use `@dataclass` for data transfer objects (DTOs)
 - Prefer dataclasses over regular classes when there's no complex behavior
 - Use `__post_init__` for type conversions and validation
 
 ### Imports
+
 - Standard library imports first
 - Third-party imports second
 - Local app imports last
@@ -114,6 +126,7 @@ class MyModel(models.Model):
 ## Testing
 
 ### Coverage Targets
+
 - **Target: 100% for all apps** (or very close)
 - Current status:
   - music: 100% ✓
@@ -124,6 +137,7 @@ class MyModel(models.Model):
   - twilio_managers: 0% (standalone scripts, not critical)
 
 ### Testing Patterns
+
 1. **Use `setUpTestData()` for class-level fixtures**
    - More efficient than `setUp()`
    - Data created once per test class
@@ -139,6 +153,7 @@ class MyModel(models.Model):
    - Example: `test_location_is_completed_correct_solution`
 
 4. **Use freezegun for datetime testing**
+
    ```python
    from freezegun import freeze_time
 
@@ -153,6 +168,7 @@ class MyModel(models.Model):
    - Use `APITestCase` for REST framework views
 
 ### Running Tests
+
 ```bash
 # Single app
 python manage.py test music
@@ -168,34 +184,58 @@ coverage report -m --include="music/*"
 ## Pre-commit Hooks
 
 Configured hooks (automatically run on commit):
+
 1. **trailing-whitespace**: Remove trailing whitespace
 2. **end-of-file-fixer**: Ensure files end with newline
 3. **check-yaml**: Validate YAML files
 4. **isort**: Sort imports (with `--profile=black`)
 5. **black**: Format code
-6. **mypy**: Type checking (for specified apps only)
+6. **prettier**: Format markdown files with consistent 100-char line wrapping
+7. **mypy**: Type checking (for specified apps only)
 
 ### Mypy Configuration
+
 - **File**: `mypy.ini`
 - **Philosophy**: Check all code by default, with Django-friendly settings
 - **Global settings**: `check_untyped_defs = True`
 - **Excludes**: Migrations, virtual env, test files
 - **Type stubs**: Added `types-python-dateutil`, `types-pytz`, `types-requests`
 
-**Important**: The mypy config is now **global by default** - no need to add per-module configuration for new files!
+**Important**: The mypy config is now **global by default** - no need to add per-module
+configuration for new files!
+
+### Prettier Configuration
+
+- **File**: `.prettierrc`
+- **Purpose**: Enforce consistent line wrapping in markdown files
+- **Line width**: 100 characters (configurable in `.prettierrc`)
+- **Prose wrap**: Always (reformats all prose to fit line width)
+- **Applies to**: All `.md` files, including music album reviews
+
+To change line width, edit `.prettierrc`:
+
+```json
+{
+  "printWidth": 100 // Change to your preferred width
+}
+```
 
 ## Django Patterns
 
 ### Model Methods
+
 Common methods to implement:
+
 - `__str__()`: String representation (always include, always type as `-> str`)
 - `to_dict_for_api()`: Serialization for API responses (type as `-> dict[str, Any]`)
 - `clean()`: Model validation (type as `-> None`)
 
 ### API Views
+
 - Use REST Framework's `APIView` for class-based views
 - Create permission classes in `permissions.py`
 - Common pattern:
+
   ```python
   class MyView(APIView):
       permission_classes = [IsAuthenticated, MyCustomPermission]
@@ -205,13 +245,16 @@ Common methods to implement:
   ```
 
 ### Callbacks Pattern
+
 SMS app uses a callback pattern for triggered actions:
+
 - Callbacks defined as module-level functions
 - Registered in `callbacks_pool` dict
 - Referenced by string name in database
 - Triggered in model `save()` method
 
 Example from `sms/models.py`:
+
 ```python
 def create_prayer_snippet(prayer_type: str, data_point: "DataPoint") -> None:
     # ... implementation
@@ -235,14 +278,18 @@ callbacks_pool = {
 ## File Patterns
 
 ### Imports in twilio_managers
+
 These are standalone scripts, so they use package-relative imports:
+
 ```python
 from twilio_managers.api_client import TwilioManagerApiClient
 from twilio_managers.platform_info import install_environment_variables
 ```
 
 ### Dataclass Converters
+
 Pattern for converting serialized data:
+
 ```python
 def datetime_converter(value: str | datetime) -> datetime:
     if isinstance(value, str):
@@ -262,12 +309,16 @@ class User:
 1. **Make changes** to code
 2. **Run tests**: `python manage.py test <app_name>`
 3. **Check coverage**: `coverage run --source=<app> manage.py test <app> && coverage report`
-4. **Commit**: Pre-commit hooks automatically run isort, black, and mypy
+4. **Commit**: Pre-commit hooks automatically run isort, black, prettier (for .md), and mypy
 5. **If hooks fail**: Fix issues and commit again
+
+**Note on markdown files**: Prettier will automatically reformat all `.md` files to have consistent
+80-character line wrapping. You never need to manually add line breaks!
 
 ## Key Files
 
 - `mypy.ini`: Type checking configuration (global settings only now)
+- `.prettierrc`: Prettier configuration (markdown line wrapping at 80 chars)
 - `.pre-commit-config.yaml`: Pre-commit hook configuration
 - `requirements.txt`: Python dependencies
 - `website/settings.py`: Django settings
@@ -276,6 +327,7 @@ class User:
 ## Environment Variables (for twilio_managers)
 
 The standalone scripts require these env vars:
+
 - `TWILIO_ACCOUNT_SID`
 - `TWILIO_AUTH_TOKEN`
 - `TWILIO_SMS_APP_PHONE_NUMBER`
@@ -291,6 +343,7 @@ Loaded from `/home/ubuntu/environment.env` in production.
 ## Recent Improvements
 
 All apps have been recently modernized with:
+
 - ✅ Comprehensive test coverage (target: 100%)
 - ✅ Modern type hints (Python 3.10+ syntax)
 - ✅ F-string migration (no more .format())
@@ -301,4 +354,5 @@ All apps have been recently modernized with:
 
 ## Questions?
 
-If you're Claude Code working on this repository, you now have all the context you need! Follow the patterns above, maintain the quality standards, and you'll do great. 🚀
+If you're Claude Code working on this repository, you now have all the context you need! Follow the
+patterns above, maintain the quality standards, and you'll do great. 🚀

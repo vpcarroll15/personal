@@ -18,8 +18,8 @@ GRANT ALL PRIVILEGES ON DATABASE mywebsite TO paul;
 \q
 ```
 
-Now you should be able to migrate, assuming you are using the requirements file and
-settings file from this project.
+Now you should be able to migrate, assuming you are using the requirements file and settings file
+from this project.
 
 ```
 ./manage.py migrate

@@ -1,13 +1,44 @@
-This is probably the most difficult album on this list. I’ll admit that, the first time that I listened to it, I disliked it. I also disliked it the second time.
+This is probably the most difficult album on this list. I’ll admit that, the first time that I
+listened to it, I disliked it. I also disliked it the second time.
 
-Part of the problem may have been my method of listening to new music. I like to try a new album at the beginning of each workday, when I’m settling into programming. I keep it playing for ten minutes, to give it a fair chance. If I find it abhorrent after ten minutes, or if it doesn’t catch my attention, then I move on to something else. If I like it, then I keep it rolling. If I really like it--as happened with Day of First Orange and Black Light--then I stop work and listen to it for a while.
+Part of the problem may have been my method of listening to new music. I like to try a new album at
+the beginning of each workday, when I’m settling into programming. I keep it playing for ten
+minutes, to give it a fair chance. If I find it abhorrent after ten minutes, or if it doesn’t catch
+my attention, then I move on to something else. If I like it, then I keep it rolling. If I really
+like it--as happened with Day of First Orange and Black Light--then I stop work and listen to it for
+a while.
 
-Love Streams certainly caught my attention on my first listen, but not in a good way. This is not friendly music. In Day of First Orange and Black Light, even in the most austere moments, there is usually a melody to grab onto. That is not the case in Love Streams. The opening track, “Obsidian Counterpoint,” contains several almost-melodies, but it’s really just a stream of beautiful noise. In “Violet Monumental I,” several distorted voices tangle with each other on top of one bouncing, droning note. I remember thinking dismissively that this was “intellectual music,” and I turned it off.
+Love Streams certainly caught my attention on my first listen, but not in a good way. This is not
+friendly music. In Day of First Orange and Black Light, even in the most austere moments, there is
+usually a melody to grab onto. That is not the case in Love Streams. The opening track, “Obsidian
+Counterpoint,” contains several almost-melodies, but it’s really just a stream of beautiful noise.
+In “Violet Monumental I,” several distorted voices tangle with each other on top of one bouncing,
+droning note. I remember thinking dismissively that this was “intellectual music,” and I turned it
+off.
 
-But I ended up listening to the beginning of the album again, and then again. Even though I disliked the album’s apparent lack of structure or melody, I loved Tim Hecker’s beautiful soundscapes. If the synth on Day of First Orange is watery and colorful, the synth here is more varied. There are sparks of hard light, and vistas of pure crystal. Hecker also makes stupendous use of the human voice. In the last minute of “Voice Crack,” harsh guitar effects give way to a dreamy choir of voices. Some ambient artists distort the human voice so much that it loses its human quality and becomes another instrument. Hecker preserves the humanness of his voices, and the effect is haunting--half-angels stranded in a tumultuous landscape. This album also has a lot of noise, usually in the form of a scraping effect, or a flash of sound, which raises the intensity of the album to a fantastic pitch.
+But I ended up listening to the beginning of the album again, and then again. Even though I disliked
+the album’s apparent lack of structure or melody, I loved Tim Hecker’s beautiful soundscapes. If the
+synth on Day of First Orange is watery and colorful, the synth here is more varied. There are sparks
+of hard light, and vistas of pure crystal. Hecker also makes stupendous use of the human voice. In
+the last minute of “Voice Crack,” harsh guitar effects give way to a dreamy choir of voices. Some
+ambient artists distort the human voice so much that it loses its human quality and becomes another
+instrument. Hecker preserves the humanness of his voices, and the effect is haunting--half-angels
+stranded in a tumultuous landscape. This album also has a lot of noise, usually in the form of a
+scraping effect, or a flash of sound, which raises the intensity of the album to a fantastic pitch.
 
-One morning, while writing unit tests for a piece of code, I became distracted and forgot to switch the album off when it entered its most dissonant phase (“Violet Monumental”). For the first time, I made it to the second half. And the second half of Love Streams, in addition to being as beautiful as the first half, helped the album to make sense in a way that it hadn’t before. I finally understood what it was doing.
+One morning, while writing unit tests for a piece of code, I became distracted and forgot to switch
+the album off when it entered its most dissonant phase (“Violet Monumental”). For the first time, I
+made it to the second half. And the second half of Love Streams, in addition to being as beautiful
+as the first half, helped the album to make sense in a way that it hadn’t before. I finally
+understood what it was doing.
 
-Love Streams does have melody and it does have structure. The problem from my point of view was that the melody and structure were spread across the tracks. A theme which was introduced in the beginning of the album would find some kind of resolution at the end. Track one is answered by track seven, track two by track eight, and track three by track nine. This is not an incoherent album, as I thought when I first listened to it. In fact, it’s the most coherent album on this list, a sonnet in music.
+Love Streams does have melody and it does have structure. The problem from my point of view was that
+the melody and structure were spread across the tracks. A theme which was introduced in the
+beginning of the album would find some kind of resolution at the end. Track one is answered by track
+seven, track two by track eight, and track three by track nine. This is not an incoherent album, as
+I thought when I first listened to it. In fact, it’s the most coherent album on this list, a sonnet
+in music.
 
-For this reason, it’s difficult to recommend particular tracks. I would suggest “Music of the Air” or “Bijie Dream” if you want a taste of the style, but ultimately, if you want to give it a fair chance, you’re going to have to listen to the whole thing. Ten minutes simply isn’t enough.
+For this reason, it’s difficult to recommend particular tracks. I would suggest “Music of the Air”
+or “Bijie Dream” if you want a taste of the style, but ultimately, if you want to give it a fair
+chance, you’re going to have to listen to the whole thing. Ten minutes simply isn’t enough.

@@ -1,1 +1,3 @@
-Metal/punk. The first time that I listened to “Executioner’s Tax,” I was sitting at work at my desk and had to go into another room because I was laughing too hard. So over-the-top, so totally unrestrained, it’s a delight to listen to. Old-school thrashy music.
+Metal/punk. The first time that I listened to “Executioner’s Tax,” I was sitting at work at my desk
+and had to go into another room because I was laughing too hard. So over-the-top, so totally
+unrestrained, it’s a delight to listen to. Old-school thrashy music.

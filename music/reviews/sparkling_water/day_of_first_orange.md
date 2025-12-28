@@ -1,9 +1,27 @@
-I’m frustrated by the paucity of our vocabulary when it comes to synth. There are hundreds of flavors of synth, and yet several times in this list I’ve been reduced to saying “the synth is great.” Wasn’t synth invented in the 1980’s? Why don’t we have better tools for talking about it?
+I’m frustrated by the paucity of our vocabulary when it comes to synth. There are hundreds of
+flavors of synth, and yet several times in this list I’ve been reduced to saying “the synth is
+great.” Wasn’t synth invented in the 1980’s? Why don’t we have better tools for talking about it?
 
-Sparkling Water describes its synth this way: “Soft, watery, colorful synthesizer & percussion splashing around the backyard in the bright sun.” I think that description is pretty apt. If the synth in Rehumanizer is propulsive, and the synth in Modern Country is tranquilizing, this synth is joyful. It reminds me of springtime, of things growing. The layering is extremely complex. You can listen to this album ten times and hear a different layer each time. At moments, it sounds chaotic and almost loses cohesion. But, again, this reminds me of springtime and the cornucopia of life growing up.
+Sparkling Water describes its synth this way: “Soft, watery, colorful synthesizer & percussion
+splashing around the backyard in the bright sun.” I think that description is pretty apt. If the
+synth in Rehumanizer is propulsive, and the synth in Modern Country is tranquilizing, this synth is
+joyful. It reminds me of springtime, of things growing. The layering is extremely complex. You can
+listen to this album ten times and hear a different layer each time. At moments, it sounds chaotic
+and almost loses cohesion. But, again, this reminds me of springtime and the cornucopia of life
+growing up.
 
-Sparkling Water is a pseudonym for Mark McGuire, a veteran synth musician. He was part of the band Emeralds, which made some great synth albums five years ago. He claims to have made this album in collaboration with his five-year-old daughter, who appears on the album cover. When I first read this, frankly, I was irritated. But after listening to this album a few times, I think I understand what he meant. This music radiates parental love. The synth is hopeful and gentle, and the theme of the album (if it has one) is discovering new things: Day of First Orange.
+Sparkling Water is a pseudonym for Mark McGuire, a veteran synth musician. He was part of the band
+Emeralds, which made some great synth albums five years ago. He claims to have made this album in
+collaboration with his five-year-old daughter, who appears on the album cover. When I first read
+this, frankly, I was irritated. But after listening to this album a few times, I think I understand
+what he meant. This music radiates parental love. The synth is hopeful and gentle, and the theme of
+the album (if it has one) is discovering new things: Day of First Orange.
 
-If there’s an album on this list which leaves me feeling good at the end, it’s this one. I kept waiting for it to take a dark turn, but it never happens. Electronic music has a predilection for being moody. When I think of an artist like Kiasmos or Stephan Bodzin, I imagine them sitting at their computer, composing late at night, wallowing in themselves. Day of First Orange feels much more social, like it was composed for someone. Of course, Mark McGuire tells us that this is so. It was composed for his daughter. This, in the end, is what sets it apart.
+If there’s an album on this list which leaves me feeling good at the end, it’s this one. I kept
+waiting for it to take a dark turn, but it never happens. Electronic music has a predilection for
+being moody. When I think of an artist like Kiasmos or Stephan Bodzin, I imagine them sitting at
+their computer, composing late at night, wallowing in themselves. Day of First Orange feels much
+more social, like it was composed for someone. Of course, Mark McGuire tells us that this is so. It
+was composed for his daughter. This, in the end, is what sets it apart.
 
 Best tracks: “Day Raga,” “Sunshine Raga”

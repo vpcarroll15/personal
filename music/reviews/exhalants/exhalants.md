@@ -1,1 +1,6 @@
-I didn’t listen to much punk music this year, but this is one of the albums that made an impression on me. The production style is heavy and dirty, which is a good match for the pounding guitars, although it can make the album exhausting to listen to. The vocals scream to escape from under layers of guitars and drums; I have no idea what he’s saying but it doesn’t really matter. Some of the quieter tracks like “Public Display of Failure” remind me strongly of early Sonic Youth. All in all: a promising debut. I’m hoping to hear more from them.
+I didn’t listen to much punk music this year, but this is one of the albums that made an impression
+on me. The production style is heavy and dirty, which is a good match for the pounding guitars,
+although it can make the album exhausting to listen to. The vocals scream to escape from under
+layers of guitars and drums; I have no idea what he’s saying but it doesn’t really matter. Some of
+the quieter tracks like “Public Display of Failure” remind me strongly of early Sonic Youth. All in
+all: a promising debut. I’m hoping to hear more from them.

@@ -1,1 +1,3 @@
-Rock. Male vocals, piano, synth, guitars. Not quite as compelling as their terrific 2014 album Lost in the Dream, but still very good. This band has the rare ability to take the listener on an emotional journey. The vocals are outstanding and the synthy beats are hypnotic.
+Rock. Male vocals, piano, synth, guitars. Not quite as compelling as their terrific 2014 album Lost
+in the Dream, but still very good. This band has the rare ability to take the listener on an
+emotional journey. The vocals are outstanding and the synthy beats are hypnotic.

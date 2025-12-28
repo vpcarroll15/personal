@@ -1,1 +1,7 @@
-A one-track album released by a label in Australia which apparently specializes in that sort of thing. This is an interesting collaboration between two Oakland composers: Marielle Jakobsons, who plays the organ and synthesizers on this album; and Chuck Johnson, who plays the pedal steel guitar. The piece develops slowly over its 17 minutes, but eventually earns a heartrending climax. Jakobsons strikes the keys hard at the end, as though she has won an important point. The pedal steel guitar, which bends all over the place, gives me visions of the Old West. Definitely worth a listen if you want something slow, ambient, and beautiful.
+A one-track album released by a label in Australia which apparently specializes in that sort of
+thing. This is an interesting collaboration between two Oakland composers: Marielle Jakobsons, who
+plays the organ and synthesizers on this album; and Chuck Johnson, who plays the pedal steel guitar.
+The piece develops slowly over its 17 minutes, but eventually earns a heartrending climax. Jakobsons
+strikes the keys hard at the end, as though she has won an important point. The pedal steel guitar,
+which bends all over the place, gives me visions of the Old West. Definitely worth a listen if you
+want something slow, ambient, and beautiful.

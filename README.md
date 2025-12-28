@@ -1,4 +1,5 @@
-The source code for my personal website, paulcarroll.site. Written in Python with Django. Served with Nginx and Gunicorn.
+The source code for my personal website, paulcarroll.site. Written in Python with Django. Served
+with Nginx and Gunicorn.
 
 If you're setting up a new server, make sure to `sudo apt update && sudo apt upgrade` first.
 
@@ -6,11 +7,12 @@ Other new server notes:
 
 - You'll need to run some basic commands to create the Postgres database and the right user.
 - Make a dump of the old Postgres database and transfer the dump to the new instance.
-- You won't need to run any Django migrations. (In fact you definitely don't want to.) Applying the dump will take care of everything.
+- You won't need to run any Django migrations. (In fact you definitely don't want to.) Applying the
+  dump will take care of everything.
 - Make sure that the Django owner ends up owning everything, not postgres.
 
-NOTE: last time you set up a new server, you had to do this to make sure that nginx could
-actually read and share the static assets:
+NOTE: last time you set up a new server, you had to do this to make sure that nginx could actually
+read and share the static assets:
 
 ```
 # Give nginx user access to your home directory and static files

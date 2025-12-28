@@ -1,3 +1,9 @@
-After finding a clip of a woman singing in Hindi on the Internet, Four Tet loops it about ten thousand times on top of some tasteful drumming, synth pulses, hard-hitting dance beats, spacey twinkles. When that becomes passe, he loops it on top of itself. All this is superbly executed. How Four Tet conceived of this, I have no idea, particularly in light of the fact that all his previous albums have been shit. It’s like if Justin Beiber suddenly composed the Moonlight Sonata.
+After finding a clip of a woman singing in Hindi on the Internet, Four Tet loops it about ten
+thousand times on top of some tasteful drumming, synth pulses, hard-hitting dance beats, spacey
+twinkles. When that becomes passe, he loops it on top of itself. All this is superbly executed. How
+Four Tet conceived of this, I have no idea, particularly in light of the fact that all his previous
+albums have been shit. It’s like if Justin Beiber suddenly composed the Moonlight Sonata.
 
-Experimental electronic/psych electronic. Morning Side is better but Evening Side has its moments too. Tasteful, delicate, hopeful. A little crystal figurine in a genre accustomed to producing gaudy plastic.
+Experimental electronic/psych electronic. Morning Side is better but Evening Side has its moments
+too. Tasteful, delicate, hopeful. A little crystal figurine in a genre accustomed to producing gaudy
+plastic.
