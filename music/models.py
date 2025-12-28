@@ -6,6 +6,14 @@ from django.utils.safestring import mark_safe, SafeString
 from django.conf import settings
 import markdown2
 
+from .constants import (
+    DESCRIPTION_MAX_LENGTH,
+    NO_REVIEW_PLACEHOLDER,
+    NO_TAGS_PLACEHOLDER,
+    REVIEWS_DIR,
+    BEST_OF_DIR,
+)
+
 
 def convert_name_to_directory_format(name: str) -> str:
     """Returns human-readable names to a format that is friendlier for Unix directories."""
@@ -36,6 +44,11 @@ class Musician(models.Model):
     name = models.CharField(max_length=100, unique=True)
     tags = models.ManyToManyField("Tag")
 
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Musician"
+        verbose_name_plural = "Musicians"
+
     def __str__(self) -> str:
         """Returns the musician name."""
         return self.name
@@ -62,9 +75,17 @@ class Music(models.Model):
 
     src = models.CharField(max_length=300, null=True, blank=True)
 
+    class Meta:
+        ordering = ["-reviewed_at"]
+        verbose_name = "Album"
+        verbose_name_plural = "Albums"
+        indexes = [
+            models.Index(fields=["-reviewed_at"]),
+        ]
+
     def __str__(self) -> str:
         """Returns the album name prefixed with the musician name."""
-        return str(self.musician) + ": " + str(self.name)
+        return f"{self.musician}: {self.name}"
 
     def review(self) -> SafeString | None:
         """Returns the album review as safe HTML, or None if no review file exists."""
@@ -74,7 +95,7 @@ class Music(models.Model):
         """Returns the raw markdown content of the album review, or None if file not found."""
         path_to_review = os.path.join(
             settings.BASE_DIR,
-            "music/reviews/",
+            REVIEWS_DIR,
             convert_name_to_directory_format(self.musician.name),
             convert_name_to_directory_format(self.name) + ".md",
         )
@@ -90,19 +111,19 @@ class Music(models.Model):
         # Our description of the album is the list of tags plus a shortened version of the review.
         tags = self.musician.tags.all()
         tag_names = [tag.name for tag in tags]
-        if len(tag_names):
-            tags_string = "(" + ", ".join(tag_names) + ")"
+        if tag_names:
+            tags_string = f"({', '.join(tag_names)})"
         else:
-            tags_string = "[no tags]"
+            tags_string = NO_TAGS_PLACEHOLDER
 
         review = self.review_txt()
         if review:
-            review_clipped = review[:500]
+            review_clipped = review[:DESCRIPTION_MAX_LENGTH]
             if len(review) != len(review_clipped):
                 review_clipped += "..."
         else:
-            review_clipped = "[no review]"
-        return tags_string + " " + review_clipped
+            review_clipped = NO_REVIEW_PLACEHOLDER
+        return f"{tags_string} {review_clipped}"
 
     def image_src(self) -> str | None:
         """Returns the relative path to the album image if it exists, otherwise None."""
@@ -114,8 +135,7 @@ class Music(models.Model):
         )
         if os.path.exists(os.path.join(settings.BASE_DIR, "music/static", path)):
             return path
-        else:
-            return None
+        return None
 
     def classes(self) -> list[str]:
         """Returns a list of CSS class names derived from the musician's tags."""
@@ -126,6 +146,11 @@ class Tag(models.Model):
     """Encapsulates a tag that can be applied to musicians to classify their work."""
 
     name = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Tag"
+        verbose_name_plural = "Tags"
 
     def __str__(self) -> str:
         """Returns the tag name."""
@@ -148,6 +173,11 @@ class Comment(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ["created_at"]
+        verbose_name = "Comment"
+        verbose_name_plural = "Comments"
+
     def __str__(self) -> str:
         """Returns a formatted string with comment ID and author username."""
         return f"#{self.id}, author={self.author.username}"
@@ -157,7 +187,7 @@ class Comment(models.Model):
         """Returns a formatted display name: 'First L.' if available, otherwise username."""
         # Matt Parker will format as Matt P.
         if self.author.first_name and self.author.last_name:
-            return self.author.first_name + " " + self.author.last_name[0] + "."
+            return f"{self.author.first_name} {self.author.last_name[0]}."
         return self.author.username
 
 
@@ -170,11 +200,16 @@ class BestOf(models.Model):
     name = models.CharField(max_length=100)
     include_on_home_page = models.BooleanField(default=True)
 
+    class Meta:
+        ordering = ["-end_date"]
+        verbose_name = "Best Of"
+        verbose_name_plural = "Best Of Lists"
+
     def description_txt(self) -> str | None:
         """Returns the raw markdown description from file, or None if not found."""
         path_to_description = os.path.join(
             settings.BASE_DIR,
-            "music/best_of/",
+            BEST_OF_DIR,
             convert_name_to_directory_format(self.name) + ".md",
         )
         try:
@@ -190,6 +225,4 @@ class BestOf(models.Model):
 
     def __str__(self) -> str:
         """Returns a formatted string with name and date range."""
-        return "{}: {} until {}".format(
-            self.name, self.start_date.isoformat(), self.end_date.isoformat()
-        )
+        return f"{self.name}: {self.start_date.isoformat()} until {self.end_date.isoformat()}"

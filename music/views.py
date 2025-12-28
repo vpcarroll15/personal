@@ -8,7 +8,14 @@ from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, render, redirect, reverse
 from feedgen.feed import FeedGenerator
 from .models import Music, BestOf, Comment, Tag
-from .constants import URL_ROOT, MY_NAME, MY_EMAIL
+from .constants import (
+    URL_ROOT,
+    MY_NAME,
+    MY_EMAIL,
+    MusicRating,
+    PHOTO_DISPLAY_LIMIT,
+    RSS_FEED_QUANTITY,
+)
 
 
 def update_context_with_album(
@@ -55,10 +62,10 @@ def home(request: HttpRequest) -> HttpResponse:
 
 def music(request: HttpRequest, music_id: int) -> HttpResponse:
     """Displays a detailed view of a piece of music."""
-    music = get_object_or_404(Music, pk=music_id)
+    album = get_object_or_404(Music, pk=music_id)
 
     context: dict[str, Any] = {}
-    update_context_with_album(context, music)
+    update_context_with_album(context, album)
 
     return render(request, "music/music.html", context)
 
@@ -86,7 +93,7 @@ def search(request: HttpRequest) -> HttpResponse:
     """Searches for a particular search term in our set of musicians, music, and tags."""
     search_term = request.GET["search_term"]
 
-    music = apply_common_preselects_music(
+    albums = apply_common_preselects_music(
         Music.objects.filter(
             Q(name__istartswith=search_term)
             | Q(musician__name__istartswith=search_term)
@@ -94,7 +101,7 @@ def search(request: HttpRequest) -> HttpResponse:
         )
     )
 
-    context = {"albums": music, "search_term": search_term}
+    context = {"albums": albums, "search_term": search_term}
     return render(request, "music/search.html", context)
 
 
@@ -117,31 +124,32 @@ def rss(_: HttpRequest) -> HttpResponse:
     generator.author(name=MY_NAME, email=MY_EMAIL)
     generator.contributor(name=MY_NAME, email=MY_EMAIL)
     # RSS requires that we point to our own feed here. Not sure why.
-    generator.link(href=(URL_ROOT + "rss"), rel="self")
-    favicon_path = URL_ROOT + "static/favicon.png"
+    generator.link(href=f"{URL_ROOT}rss", rel="self")
+    favicon_path = f"{URL_ROOT}static/favicon.png"
     generator.icon(favicon_path)
     generator.logo(favicon_path)
     generator.subtitle("A feed for anyone who wants to know what albums I'm liking.")
     generator.language("en")
 
-    albums = get_recent_music(quantity=30)
+    albums = get_recent_music(quantity=RSS_FEED_QUANTITY)
     for album in albums:
         entry = generator.add_entry()
         entry.title(album.name)
-        path_to_album = URL_ROOT + "music/music/{}".format(album.id)
+        relative_path = reverse("music:music_detailed", args=[album.id])
+        path_to_album = f"{URL_ROOT}{relative_path.lstrip('/')}"
         entry.guid(path_to_album, permalink=True)
         entry.description(album.description())
         entry.updated(album.reviewed_at)
         entry.published(album.reviewed_at)
         entry.author(name=MY_NAME, email=MY_EMAIL)
         entry.link(href=path_to_album, rel="alternate")
-        entry.category(term="score__{}".format(album.rating))
+        entry.category(term=f"score__{album.rating}")
 
     return HttpResponse(generator.rss_str())
 
 
 def best_of(request: HttpRequest, name: str) -> HttpResponse:
-    """Searches for a particular search term in our set of musicians, music, and tags."""
+    """Displays a curated list of albums for a specific time period."""
     best_of = get_object_or_404(BestOf, name=name)
     relevant_albums = apply_common_preselects_music(
         Music.objects.filter(
@@ -157,7 +165,11 @@ def best_of(request: HttpRequest, name: str) -> HttpResponse:
     # Sort according to review date.
     for value in albums_by_score.values():
         value.sort(key=lambda x: x.reviewed_at)
-    albums_with_photos = albums_by_score[3] + albums_by_score[2] + albums_by_score[1]
+    albums_with_photos = (
+        albums_by_score[MusicRating.BEST]
+        + albums_by_score[MusicRating.GREAT]
+        + albums_by_score[MusicRating.GOOD]
+    )
     albums_with_photos = [album for album in albums_with_photos if album.image_src()]
 
     tag_counter: Counter[Tag] = Counter()
@@ -171,10 +183,10 @@ def best_of(request: HttpRequest, name: str) -> HttpResponse:
 
     context = {
         "best_of": best_of,
-        "best_albums": albums_by_score[3],
-        "great_albums": albums_by_score[2],
-        "good_albums": albums_by_score[1],
+        "best_albums": albums_by_score[MusicRating.BEST],
+        "great_albums": albums_by_score[MusicRating.GREAT],
+        "good_albums": albums_by_score[MusicRating.GOOD],
         "tags_with_quantity": zip(tags_by_popularity, corresponding_values),
-        "albums_with_photos": albums_with_photos[:10],
+        "albums_with_photos": albums_with_photos[:PHOTO_DISPLAY_LIMIT],
     }
     return render(request, "music/best_of.html", context)
