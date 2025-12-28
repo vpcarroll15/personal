@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -20,14 +20,14 @@ class DailyGoalsManagerView(APIView):
 
 
 class UsersView(DailyGoalsManagerView):
-    def get(self, request):
+    def get(self, request: HttpRequest) -> Response:
         return Response(
             dict(users=[user.to_dict_for_api() for user in User.objects.all()])
         )
 
 
 class UserView(DailyGoalsManagerView):
-    def put(self, request):
+    def put(self, request: HttpRequest) -> Response:
         for key in ["last_start_text_sent_date", "last_end_text_sent_date"]:
             if key in request.data:
                 request.data[key] = datetime.strptime(
@@ -44,7 +44,7 @@ class UserView(DailyGoalsManagerView):
 
 
 class DailyCheckinView(DailyGoalsManagerView):
-    def post(self, request):
+    def post(self, request: HttpRequest) -> Response:
         checkin = DailyCheckin(**request.data)
         checkin.save()
         return Response(
@@ -52,7 +52,7 @@ class DailyCheckinView(DailyGoalsManagerView):
             status=status.HTTP_201_CREATED,
         )
 
-    def get(self, request):
+    def get(self, request: HttpRequest) -> Response | HttpResponseBadRequest:
         checkins = DailyCheckin.objects.all()
         if "user_id" in request.GET:
             checkins = checkins.filter(user_id=request.GET["user_id"])
@@ -133,7 +133,7 @@ def parse_chosen_focus_areas(body: str, checkin: DailyCheckin) -> list[str]:
 
 
 class WebhookView(DailyGoalsWebhookView):
-    def post(self, request):
+    def post(self, request: HttpRequest) -> HttpResponse | HttpResponseBadRequest:
         """
         Example:
         http POST daily_goals/webhook/ {...(data)...}

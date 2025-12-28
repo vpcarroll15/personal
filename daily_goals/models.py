@@ -3,11 +3,16 @@ Models for the daily_goals app.
 """
 
 from datetime import date
+from typing import Any
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+
+# Constants
+DEFAULT_LAST_TEXT_DATE = date(year=2021, month=1, day=1)
+TWILIO_MESSAGE_ID_MAX_LENGTH = 40
 
 
 class User(models.Model):
@@ -31,10 +36,8 @@ class User(models.Model):
         help_text="The time of day to send the goal recap text, in 24-hour format. 0-23"
     )
     # Keep track of which texts we have sent on which days.
-    last_start_text_sent_date = models.DateField(
-        default=date(year=2021, month=1, day=1)
-    )
-    last_end_text_sent_date = models.DateField(default=date(year=2021, month=1, day=1))
+    last_start_text_sent_date = models.DateField(default=DEFAULT_LAST_TEXT_DATE)
+    last_end_text_sent_date = models.DateField(default=DEFAULT_LAST_TEXT_DATE)
 
     timezone = models.TextField(default="America/Los_Angeles")
 
@@ -42,10 +45,15 @@ class User(models.Model):
 
     ai_prompt = models.TextField(default="")
 
-    def __str__(self):
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Daily Goals User"
+        verbose_name_plural = "Daily Goals Users"
+
+    def __str__(self) -> str:
         return str(self.phone_number)
 
-    def to_dict_for_api(self):
+    def to_dict_for_api(self) -> dict[str, Any]:
         return dict(
             id=self.id,
             phone_number=str(self.phone_number),
@@ -65,6 +73,9 @@ class DailyCheckin(models.Model):
     class Meta:
         # We expect to be doing a lot of queries like "give me the most
         # recent DailyCheckin for this user."
+        ordering = ["-created_at"]
+        verbose_name = "Daily Check-in"
+        verbose_name_plural = "Daily Check-ins"
         indexes = [
             models.Index(fields=["user", "-created_at"]),
         ]
@@ -85,13 +96,15 @@ class DailyCheckin(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     # This short ID is given to us by Twilio when we get a message response.
-    # It is guaranteed to be less than 40 chars long.
-    response_message_id = models.CharField(max_length=40, blank=True, null=True)
+    # It is guaranteed to be less than TWILIO_MESSAGE_ID_MAX_LENGTH chars long.
+    response_message_id = models.CharField(
+        max_length=TWILIO_MESSAGE_ID_MAX_LENGTH, blank=True, null=True
+    )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user.phone_number}, {self.created_at}"
 
-    def to_dict_for_api(self):
+    def to_dict_for_api(self) -> dict[str, Any]:
         return dict(
             id=self.id,
             user_id=self.user_id,

@@ -1,10 +1,45 @@
 from datetime import date
 
 from django.contrib.auth.models import Group, User
+from django.test import TestCase
 from rest_framework.test import APITestCase
 
 from daily_goals.models import DailyCheckin
 from daily_goals.models import User as DailyGoalsUser
+
+
+class ModelTests(TestCase):
+    """Tests for model methods."""
+
+    def test_user_str(self):
+        """Test the __str__ method of User."""
+        user = User.objects.create_user("testuser", "test@test.com", "password")
+        daily_goals_user = DailyGoalsUser.objects.create(
+            phone_number="+13033033003",
+            logged_in_user=user,
+            start_text_hour=6,
+            end_text_hour=20,
+            possible_focus_areas=["health"],
+        )
+        self.assertEqual(str(daily_goals_user), "+13033033003")
+
+    def test_daily_checkin_str(self):
+        """Test the __str__ method of DailyCheckin."""
+        user = User.objects.create_user("testuser", "test@test.com", "password")
+        daily_goals_user = DailyGoalsUser.objects.create(
+            phone_number="+13033033003",
+            logged_in_user=user,
+            start_text_hour=6,
+            end_text_hour=20,
+            possible_focus_areas=["health"],
+        )
+        checkin = DailyCheckin.objects.create(
+            user=daily_goals_user,
+            possible_focus_areas=["health", "productivity"],
+        )
+        result = str(checkin)
+        self.assertIn("+13033033003", result)
+        self.assertIn(str(checkin.created_at), result)
 
 
 class AccountTests(APITestCase):
@@ -69,6 +104,42 @@ class AccountTests(APITestCase):
         assert "user" in response.data
         assert response.data["user"]["last_start_text_sent_date"] == "2023-01-01"
         assert response.data["user"]["last_end_text_sent_date"] == "2023-01-01"
+
+    def test_create_new_user(self):
+        """Test creating a new user via PUT with no id."""
+        manager = User.objects.get(username="manager")
+        self.client.force_authenticate(user=manager)
+
+        # Create a logged_in_user for the daily goals user
+        new_logged_in_user = User.objects.create_user(
+            "newuser", "new@test.com", "password"
+        )
+
+        response = self.client.put(
+            "/daily_goals/user/",
+            {
+                "phone_number": "+15555555555",
+                "logged_in_user_id": new_logged_in_user.id,
+                "start_text_hour": 8,
+                "end_text_hour": 22,
+                "possible_focus_areas": ["test"],
+            },
+            format="json",
+        )
+        assert response.status_code == 200
+        assert "user" in response.data
+        assert response.data["user"]["phone_number"] == "+15555555555"
+        # Verify it was actually created
+        assert DailyGoalsUser.objects.filter(phone_number="+15555555555").exists()
+
+    def test_superuser_can_access(self):
+        """Test that a superuser can access even without being in the group."""
+        superuser = User.objects.create_superuser(
+            "admin", "admin@carroll.com", "adminpassword"
+        )
+        self.client.force_authenticate(user=superuser)
+        response = self.client.get("/daily_goals/users/", {})
+        assert response.status_code == 200
 
     def test_create_checkin(self):
         user = User.objects.get(username="manager")
