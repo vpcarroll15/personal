@@ -1,17 +1,18 @@
 """Views for the daily_goals app."""
 
 from datetime import datetime
+
 from django.http import HttpResponse, HttpResponseBadRequest
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
 
+from daily_goals.models import DailyCheckin, User
 from daily_goals.permissions import (
     UserInDailyGoalsManagerGroup,
     UserInDailyGoalsWebhookCaller,
 )
-from daily_goals.models import User, DailyCheckin
 
 
 class DailyGoalsManagerView(APIView):

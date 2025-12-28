@@ -1,7 +1,8 @@
 """Basic admin pages for the app."""
+
 from django.contrib import admin
 
-from .models import User, Question, DataPoint
+from .models import DataPoint, Question, User
 
 admin.site.register(User)
 admin.site.register(Question)

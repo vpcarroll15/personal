@@ -1,8 +1,9 @@
 """Views for the sms app."""
 
 from datetime import datetime, timezone
-import dateutil.parser
 
+import dateutil.parser
+import pytz
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse,
@@ -10,16 +11,15 @@ from django.http import (
     HttpResponseNotAllowed,
     JsonResponse,
 )
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-import pytz
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
 
+from sms.models import DataPoint, Question, User
 from sms.permissions import UserInSmsManagerGroup, UserInSmsWebhookCaller
-from sms.models import User, DataPoint, Question
 
 
 class NoRelevantDataPointException(Exception):

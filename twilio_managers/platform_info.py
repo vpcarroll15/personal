@@ -1,6 +1,7 @@
 """
 This is a wrapper that helps the manager to determine where it should get/post data.
 """
+
 import os
 
 import dotenv

@@ -12,7 +12,7 @@ from prayer.permissions import UserInEmailTriggererGroup
 class EmailTriggererView(APIView):
     permission_classes = [IsAuthenticated, UserInEmailTriggererGroup]
 
-    def post(self, request):
+    def post(self, request) -> Response:
         for schema in PrayerSchema.objects.all():
             if not schema.should_generate():
                 continue

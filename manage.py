@@ -5,7 +5,6 @@ import sys
 
 import dotenv
 
-
 ENVIRONMENT_FILE_PATH = os.path.expanduser("~/environment.env")
 
 

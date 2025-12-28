@@ -4,19 +4,17 @@ The main logic that drives sending of daily goals to users.
 This should remain fairly compact, and complicated logic should be pushed to helper libraries.
 """
 
-from datetime import timedelta
 import logging
 import os
 import re
 import time
+from datetime import timedelta
 
 from anthropic import Anthropic
-from twilio.rest import Client as TwilioClient
-
 from api_client import TwilioManagerApiClient
-from platform_info import install_environment_variables
 from daily_goals_app_types import DailyCheckin, User
-
+from platform_info import install_environment_variables
+from twilio.rest import Client as TwilioClient
 
 # Let's use opus for now, just for fun.
 AI_MODEL_TO_USE = "claude-3-opus-20240229"

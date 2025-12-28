@@ -4,7 +4,6 @@ Defines common permissions for the daily_goals app.
 
 from rest_framework.permissions import BasePermission
 
-
 AUTH_FAILURE_MESSAGE = "Forbidden"
 
 

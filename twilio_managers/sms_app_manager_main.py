@@ -4,18 +4,17 @@ The main logic that drives sending of SMS's to users.
 This should remain fairly compact, and complicated logic should be pushed to helper libraries.
 """
 
-from datetime import datetime, timezone, timedelta
 import logging
 import os
 import random
 import time
+from datetime import datetime, timedelta, timezone
 
 import pytz
-from twilio.rest import Client as TwilioClient
-
 from api_client import TwilioManagerApiClient
 from platform_info import install_environment_variables
 from sms_app_types import User
+from twilio.rest import Client as TwilioClient
 
 
 def set_next_contact_time(user, api_client):

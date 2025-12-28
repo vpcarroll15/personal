@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ScavengerHunt, ScavengerHuntTemplate, Location
+from .models import Location, ScavengerHunt, ScavengerHuntTemplate
 
 
 class ScavengerHuntAdmin(admin.ModelAdmin):

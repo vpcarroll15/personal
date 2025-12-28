@@ -1,14 +1,13 @@
 from datetime import datetime, timedelta, timezone
 
+from django.contrib.auth.models import Group, User
 from django.core import mail
-from django.test import TestCase
-from django.contrib.auth.models import User, Group
 from django.core.exceptions import ValidationError
+from django.test import TestCase
 from freezegun import freeze_time
 from rest_framework.test import APITestCase
 
 from prayer.models import PrayerSchema, PrayerSnippet, SnippetType
-
 
 DATETIME_NOW = datetime(2022, 1, 30, 12, 0, 0, tzinfo=timezone.utc)
 
@@ -24,7 +23,7 @@ class PrayerSchemaTests(TestCase):
         )
 
         for user in [cls.user1, cls.user2]:
-            for snippet_type in SnippetType:
+            for snippet_type in SnippetType:  # type: ignore[attr-defined]
                 for i in range(10):
                     PrayerSnippet.objects.create(
                         user=user,
@@ -43,8 +42,8 @@ class PrayerSchemaTests(TestCase):
         )
         with_sentinels = schema.render(use_sentinels=True)
         without_sentinels = schema.render(use_sentinels=False)
-        self.assertEquals(with_sentinels, "<p>No snippets here.</p>")
-        self.assertEquals(without_sentinels, "<p>No snippets here.</p>")
+        self.assertEqual(with_sentinels, "<p>No snippets here.</p>")
+        self.assertEqual(without_sentinels, "<p>No snippets here.</p>")
 
     def test_render_with_snippets(self):
         schema = PrayerSchema.objects.create(
@@ -54,11 +53,11 @@ class PrayerSchemaTests(TestCase):
         )
         with_sentinels = schema.render(use_sentinels=True)
         without_sentinels = schema.render(use_sentinels=False)
-        self.assertEquals(
+        self.assertEqual(
             with_sentinels,
             "<p><em>I am grateful for this.</em> GRATITUDE_SNIPPET_HERE I want this: <ul><li>REQUEST_SNIPPET_HERE</li><li>REQUEST_SNIPPET_HERE</li></ul></p>",
         )
-        self.assertEquals(
+        self.assertEqual(
             without_sentinels,
             "<p><em>I am grateful for this.</em> I am snippet 6 of type GRATITUDE for user paul. I want this: <ul><li>I am snippet 6 of type REQUEST for user paul.</li><li>I am snippet 5 of type REQUEST for user paul.</li></ul></p>",
         )
@@ -111,7 +110,7 @@ class PrayerSchemaTests(TestCase):
             schema="{{ GRATITUDE, 1 }}",
         )
         without_sentinels = schema.render(use_sentinels=False)
-        self.assertEquals(without_sentinels, "<p>&lt;h1&gt;Escape this!&lt;/h1&gt;</p>")
+        self.assertEqual(without_sentinels, "<p>&lt;h1&gt;Escape this!&lt;/h1&gt;</p>")
 
     def test_generation_time(self):
         schema = PrayerSchema.objects.create(
@@ -123,6 +122,43 @@ class PrayerSchemaTests(TestCase):
         assert schema.should_generate()
         schema.update_next_generation_time()
         assert schema.next_generation_time == DATETIME_NOW + timedelta(days=1)
+
+    def test_prayer_schema_str(self):
+        """Test the __str__ method of PrayerSchema."""
+        schema = PrayerSchema.objects.create(
+            user=self.user1,
+            name="My Morning Prayer",
+            schema="{{ GRATITUDE, 1 }}",
+        )
+        expected = "My Morning Prayer by paul"
+        self.assertEqual(str(schema), expected)
+
+    def test_prayer_snippet_str(self):
+        """Test the __str__ method of PrayerSnippet."""
+        snippet = PrayerSnippet.objects.create(
+            user=self.user1,
+            text="This is a long prayer snippet that exceeds twenty-five characters",
+            type="GRATITUDE",
+            fixed_weight=0.5,
+        )
+        # Should truncate to 25 chars
+        expected = "This is a long prayer sni... by paul"
+        self.assertEqual(str(snippet), expected)
+
+    def test_prayer_snippet_sample_dynamic_weight(self):
+        """Test the sample() method when using dynamic_weight."""
+        snippet = PrayerSnippet.objects.create(
+            user=self.user1,
+            text="Test snippet",
+            type="GRATITUDE",
+            dynamic_weight=3,
+            # fixed_weight is None by default
+        )
+        # The sample() method should return a value between 0 and 1
+        score = snippet.sample()
+        self.assertIsInstance(score, float)
+        self.assertGreaterEqual(score, 0.0)
+        self.assertLessEqual(score, 1.0)
 
 
 @freeze_time(DATETIME_NOW)
@@ -159,3 +195,12 @@ class EmailTriggererTests(APITestCase):
         self.client.force_authenticate(user=self.user1)
         response = self.client.post("/prayer/trigger/", {})
         self.assertEqual(response.status_code, 403)
+
+    def test_superuser_can_trigger(self):
+        """Test that a superuser can trigger emails even without being in the group."""
+        superuser = User.objects.create_superuser(
+            "admin", "admin@carroll.com", "adminpassword"
+        )
+        self.client.force_authenticate(user=superuser)
+        response = self.client.post("/prayer/trigger/", {})
+        self.assertEqual(response.status_code, 200)

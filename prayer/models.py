@@ -1,17 +1,20 @@
-from datetime import datetime, timedelta, timezone
 import itertools
 import random
 import re
-from typing import Dict, Iterator
+from collections.abc import Iterator
+from datetime import datetime, timedelta, timezone
 
-from django.db import models
+import markdown2
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 from django.utils.html import escape
-import markdown2
 
 from sms.models import DataPoint
+
+# Constants
+SNIPPET_PREVIEW_LENGTH = 25
 
 
 class SnippetType(models.TextChoices):
@@ -20,7 +23,7 @@ class SnippetType(models.TextChoices):
     PRAISE = "PRAISE", "PRAISE"
 
 
-def _get_time_now():
+def _get_time_now() -> datetime:
     return datetime.now(tz=timezone.utc)
 
 
@@ -52,10 +55,15 @@ class PrayerSchema(models.Model):
         )
     )
 
-    def should_generate(self):
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Prayer Schema"
+        verbose_name_plural = "Prayer Schemas"
+
+    def should_generate(self) -> bool:
         return self.next_generation_time <= datetime.now(tz=timezone.utc)
 
-    def update_next_generation_time(self):
+    def update_next_generation_time(self) -> None:
         """Update the time that we next generate the model."""
         self.next_generation_time = (
             datetime.now(tz=timezone.utc) + self.generation_cadence
@@ -63,13 +71,13 @@ class PrayerSchema(models.Model):
         self.save()
 
     def _get_snippets_by_type(
-        self, use_sentinels=False
-    ) -> Dict[SnippetType, Iterator[str]]:
+        self, use_sentinels: bool = False
+    ) -> dict[SnippetType, Iterator[str]]:
         # Next, retrieve all the snippets for this user if we aren't using sentinels.
         # If we are using sentinels, supply a convincing iterator instead.
-        snippet_type_to_snippet: Dict[SnippetType, Iterator[str]] = {}
+        snippet_type_to_snippet: dict[SnippetType, Iterator[str]] = {}
 
-        for snippet_type in SnippetType:
+        for snippet_type in SnippetType:  # type: ignore[attr-defined]
             if use_sentinels:
                 snippet_type_to_snippet[snippet_type] = itertools.repeat(
                     f"{snippet_type.name}_SNIPPET_HERE"
@@ -96,7 +104,7 @@ class PrayerSchema(models.Model):
 
         return snippet_type_to_snippet
 
-    def render(self, use_sentinels=False):
+    def render(self, use_sentinels: bool = False) -> str:
         """
         Render the schema and return the HTML prayer that we should send as an email.
 
@@ -124,7 +132,7 @@ class PrayerSchema(models.Model):
                 # This is a snippet, so we need to parse it.
                 try:
                     snippet_type, snippet_count = elem[2:-2].split(",")
-                    snippet_type = SnippetType[snippet_type.strip()]
+                    snippet_type = SnippetType[snippet_type.strip()]  # type: ignore[misc]
                     snippet_count = int(snippet_count.strip())
                 except Exception:
                     raise ValueError(
@@ -145,11 +153,7 @@ class PrayerSchema(models.Model):
                 snippet_html = begin
                 for _ in range(snippet_count):
                     try:
-                        snippet_html += (
-                            element_begin
-                            + next(snippets_by_type[snippet_type])
-                            + element_end
-                        )
+                        snippet_html += f"{element_begin}{next(snippets_by_type[snippet_type])}{element_end}"
                     except StopIteration:
                         # If we are out of snippets, just keep going and insert nothing. There is nothing else
                         # we can do.
@@ -160,7 +164,7 @@ class PrayerSchema(models.Model):
                 reassembled_schema += elem
         return reassembled_schema
 
-    def clean(self):
+    def clean(self) -> None:
         """
         Validate the schema before saving it.
         """
@@ -170,14 +174,14 @@ class PrayerSchema(models.Model):
             # Raising a ValidationError means that this error renders much better in the admin page.
             raise ValidationError(f"Failed to render schema: {repr(e)}")
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         """
         Validate the schema before saving it.
         """
         self.clean()
         super().save(*args, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name} by {self.user}"
 
 
@@ -200,7 +204,7 @@ class PrayerSnippet(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(10)],
         default=1,
         blank=True,
-        help_text="The dynamic weight of this snippet. Heigher weights are more likely to be sampled.",
+        help_text="The dynamic weight of this snippet. Higher weights are more likely to be sampled.",
     )
 
     fixed_weight = models.FloatField(
@@ -219,11 +223,16 @@ class PrayerSnippet(models.Model):
         help_text="If this was created from an SMS message, we want to record it.",
     )
 
-    def sample(self):
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Prayer Snippet"
+        verbose_name_plural = "Prayer Snippets"
+
+    def sample(self) -> float:
         """Sample the snippet according to its weighting and return a score from 0 to 1."""
         if self.fixed_weight is not None:
             return self.fixed_weight
         return max(random.random() for _ in range(self.dynamic_weight))
 
-    def __str__(self):
-        return f"{self.text[:25]}... by {self.user}"
+    def __str__(self) -> str:
+        return f"{self.text[:SNIPPET_PREVIEW_LENGTH]}... by {self.user}"

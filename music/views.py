@@ -5,17 +5,18 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q, QuerySet
 from django.db.utils import IntegrityError
 from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed
-from django.shortcuts import get_object_or_404, render, redirect, reverse
+from django.shortcuts import get_object_or_404, redirect, render, reverse
 from feedgen.feed import FeedGenerator
-from .models import Music, BestOf, Comment, Tag
+
 from .constants import (
-    URL_ROOT,
-    MY_NAME,
     MY_EMAIL,
-    MusicRating,
+    MY_NAME,
     PHOTO_DISPLAY_LIMIT,
     RSS_FEED_QUANTITY,
+    URL_ROOT,
+    MusicRating,
 )
+from .models import BestOf, Comment, Music, Tag
 
 
 def update_context_with_album(

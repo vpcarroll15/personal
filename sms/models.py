@@ -1,13 +1,13 @@
 """
 Models for the SMS app.
 """
+
 from datetime import timedelta
 
 from django.apps import apps
 from django.conf import settings
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-
 
 THREE_MONTHS_IN_DAYS = 3 * 30
 
@@ -174,7 +174,8 @@ class DataPoint(models.Model):
         super().save(*args, **kwargs)
         if self.question.callback:
             callback = callbacks_pool.get(self.question.callback)
-            callback(self)
+            if callback is not None:
+                callback(self)
 
     def __str__(self):
         return f"{self.user.phone_number}, {self.question.text}, {self.score}"

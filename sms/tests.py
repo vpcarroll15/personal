@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from django.contrib.auth.models import User, Group
-from django.test import Client, TestCase
 import pytz
+from django.contrib.auth.models import Group, User
+from django.test import Client, TestCase
 from rest_framework.test import APITestCase
 
 from prayer.models import PrayerSnippet

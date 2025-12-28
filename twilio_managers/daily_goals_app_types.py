@@ -5,6 +5,7 @@ This will strongly resemble what is defined in daily_goals/models.py, but withou
 dependencies on Django or web stuff. We will often serialize into or
 deserialize from these classes.
 """
+
 from dataclasses import dataclass, field
 from datetime import date, datetime
 

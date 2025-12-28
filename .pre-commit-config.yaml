@@ -7,6 +7,11 @@ repos:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
     -   id: check-yaml
+-   repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+    -   id: isort
+        args: [--profile=black]
 -   repo: https://github.com/psf/black
     rev: 25.12.0
     hooks:
@@ -20,3 +25,4 @@ repos:
         args: [--config-file=mypy.ini]
         files: ^(music|prayer|daily_goals|scavenger_hunt|sms)/.*\.py$
         exclude: (migrations/|test_.*\.py$)
+        additional_dependencies: [types-python-dateutil, types-pytz]

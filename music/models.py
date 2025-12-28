@@ -1,17 +1,17 @@
 import os
 from datetime import datetime
 
-from django.db import models
-from django.utils.safestring import mark_safe, SafeString
-from django.conf import settings
 import markdown2
+from django.conf import settings
+from django.db import models
+from django.utils.safestring import SafeString, mark_safe
 
 from .constants import (
+    BEST_OF_DIR,
     DESCRIPTION_MAX_LENGTH,
     NO_REVIEW_PLACEHOLDER,
     NO_TAGS_PLACEHOLDER,
     REVIEWS_DIR,
-    BEST_OF_DIR,
 )
 
 

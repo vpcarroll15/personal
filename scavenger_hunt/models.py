@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from geographiclib.geodesic import Geodesic
 
-
 HEADING_LABELS = [
     "north",
     "northeast",

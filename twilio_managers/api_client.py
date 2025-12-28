@@ -4,9 +4,9 @@ Facilitates requests to the sms API by handling stuff like auth, URL composition
 
 import abc
 import os
-import requests
 
 import platform_info
+import requests
 
 
 class CredentialsNotFoundException(Exception):

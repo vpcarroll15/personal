@@ -1,13 +1,13 @@
 """
 Trigger the service that generates prayer emails.
 """
+
 import logging
 import os
 import time
 
 import dotenv
 import requests
-
 
 ENV_FILE_PATH = "/home/ubuntu/environment.env"
 

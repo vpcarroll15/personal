@@ -1,10 +1,10 @@
-from django.shortcuts import render, get_object_or_404, redirect, reverse
-from django.http import HttpResponseNotAllowed, HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render, reverse
 
 from .models import (
-    ScavengerHuntTemplate,
-    ScavengerHunt,
     Location,
+    ScavengerHunt,
+    ScavengerHuntTemplate,
     UnknownLocationException,
 )
 

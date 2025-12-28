@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Tag, Music, Musician, BestOf
+from .models import BestOf, Music, Musician, Tag
 
 
 class MusicianAdmin(admin.ModelAdmin):

@@ -1,8 +1,10 @@
 from datetime import date
-from django.contrib.auth.models import User, Group
+
+from django.contrib.auth.models import Group, User
 from rest_framework.test import APITestCase
 
-from daily_goals.models import DailyCheckin, User as DailyGoalsUser
+from daily_goals.models import DailyCheckin
+from daily_goals.models import User as DailyGoalsUser
 
 
 class AccountTests(APITestCase):

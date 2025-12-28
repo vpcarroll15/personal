@@ -1,11 +1,13 @@
 """
 Models for the daily_goals app.
 """
+
 from datetime import date
+
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-from django.contrib.postgres.fields import ArrayField
 
 
 class User(models.Model):

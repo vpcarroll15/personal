@@ -1,4 +1,5 @@
 """Silly utility to test if the website if up."""
+
 import subprocess
 
 out = subprocess.run("ping -c 3 paulcarroll.site".split(), stdout=subprocess.PIPE)
