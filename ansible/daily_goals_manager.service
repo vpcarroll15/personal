@@ -8,6 +8,7 @@ User={{ username }}
 Restart=always
 RestartSec=1
 # We expect manager_main to install its own environment variables.
+Environment="PYTHONPATH=/home/{{ username }}/source"
 WorkingDirectory=/home/{{ username }}/source
 ExecStart=/home/{{ username }}/venv/bin/python /home/{{ username }}/source/twilio_managers/daily_goals_app_manager_main.py
 
