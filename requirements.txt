@@ -166,7 +166,7 @@ types-python-dateutil==2.9.0.20250516
 typing-inspection==0.4.1
 typing_extensions==4.13.2
 tzdata==2025.2
-urllib3==2.6.0
+urllib3==2.6.3
 virtualenv==20.31.2
 wcwidth==0.2.13
 websocket-client==1.8.0
