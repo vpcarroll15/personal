@@ -1,0 +1,51 @@
+{% extends "food_tracking/boilerplate.html" %}
+{% load static %}
+
+{% block extraheaders %}
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}">
+<script src="{% static 'food_tracking/js/tracking.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div style="padding: 20px;">
+    <h1>Food Tracking</h1>
+
+    <div class="food-grid">
+        {% for food in foods %}
+        <div class="food-item">
+            <div class="food-icon">{{ food.icon }}</div>
+            <div class="food-name">{{ food.name }}</div>
+            <div class="food-serving">{{ food.serving_size }}</div>
+            <div class="food-calories">{{ food.calories_per_serving|floatformat:0 }} cal</div>
+            <button class="log-button" onclick="logFood({{ food.id }})">Log</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2 style="margin-top: 40px;">Recent Consumption</h2>
+    {% if recent_consumption %}
+    <table class="checkered-blue">
+        <thead>
+            <tr>
+                <th>Food</th>
+                <th>Quantity</th>
+                <th>Calories</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for consumption in recent_consumption %}
+            <tr>
+                <td>{{ consumption.food.icon }} {{ consumption.food.name }}</td>
+                <td>{{ consumption.quantity }}</td>
+                <td>{{ consumption.total_calories|floatformat:0 }}</td>
+                <td>{{ consumption.consumed_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No consumption logged yet. Start tracking above!</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -33,5 +33,6 @@ urlpatterns = [
     path("sms/", include("sms.urls")),
     path("daily_goals/", include("daily_goals.urls")),
     path("prayer/", include("prayer.urls")),
+    path("food/", include("food_tracking.urls")),
     path("admin/", admin.site.urls),
 ]

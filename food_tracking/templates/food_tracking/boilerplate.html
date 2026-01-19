@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block all %}
+<div>
+    <div class="toolbar">
+        {% if user.is_authenticated %}
+        <span class="hide-on-small-screens" style="padding-right: 10px;">
+            Welcome {{ user.username }}!
+        </span>
+        {% endif %}
+        <span style="padding-right: 10px;">
+            {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            {% endif %}
+        </span>
+        <span style="padding-right: 10px;">
+            <a href="{% url 'food_tracking:home' %}">Track Food</a>
+        </span>
+        <span style="padding-right: 10px;">
+            <a href="{% url 'food_tracking:reports' %}">Reports</a>
+        </span>
+        <span style="padding-right: 10px;">
+            <a href="{% url 'music:home' %}">Music</a>
+        </span>
+
+        <span style="float: right;">
+            <span class="hide-on-small-screens">
+                <a href="https://github.com/paul-cobalt/personal/tree/master/food_tracking" style="padding-right: 30px;">Source code</a>
+            </span>
+        </span>
+    </div>
+    {% block content %}{% endblock %}
+</div>
+{% endblock %}

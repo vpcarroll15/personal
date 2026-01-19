@@ -1,0 +1,78 @@
+{% extends "food_tracking/boilerplate.html" %}
+{% load static %}
+
+{% block extraheaders %}
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style="padding: 20px;">
+    <h1>Calorie Reports</h1>
+
+    <form method="get" style="margin-bottom: 30px;">
+        <label for="days">Days back:</label>
+        <select name="days" id="days">
+            <option value="7" {% if days == 7 %}selected{% endif %}>7 days</option>
+            <option value="14" {% if days == 14 %}selected{% endif %}>14 days</option>
+            <option value="30" {% if days == 30 %}selected{% endif %}>30 days</option>
+        </select>
+
+        <label for="period" style="margin-left: 20px;">Group by:</label>
+        <select name="period" id="period">
+            <option value="day" {% if period == "day" %}selected{% endif %}>Day</option>
+            <option value="week" {% if period == "week" %}selected{% endif %}>Week</option>
+            <option value="month" {% if period == "month" %}selected{% endif %}>Month</option>
+        </select>
+
+        <button type="submit" style="margin-left: 20px;">Update Report</button>
+    </form>
+
+    <h2>Totals by {{ period|title }}</h2>
+    {% if totals %}
+    <table class="checkered-blue" style="max-width: 500px;">
+        <thead>
+            <tr>
+                <th>Period</th>
+                <th>Total Calories</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for total in totals %}
+            <tr>
+                <td>{{ total.period }}</td>
+                <td>{{ total.total_calories|floatformat:0 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No consumption data for this period.</p>
+    {% endif %}
+
+    <h2 style="margin-top: 40px;">Detailed Consumption</h2>
+    {% if detailed_consumption %}
+    <table class="checkered-blue">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Food</th>
+                <th>Quantity</th>
+                <th>Calories</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for consumption in detailed_consumption %}
+            <tr>
+                <td>{{ consumption.consumed_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ consumption.food.icon }} {{ consumption.food.name }}</td>
+                <td>{{ consumption.quantity }}</td>
+                <td>{{ consumption.total_calories|floatformat:0 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No consumption data for this period.</p>
+    {% endif %}
+</div>
+{% endblock %}
