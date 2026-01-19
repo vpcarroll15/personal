@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=3">
-<script src="{% static 'food_tracking/js/tracking.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=4">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=4"></script>
 {% endblock %}
 
 {% block content %}
@@ -12,7 +12,12 @@
 
     <div class="food-grid">
         {% for food in foods %}
-        <div class="food-item">
+        <div class="food-item" id="food-{{ food.id }}">
+            {% if food.today_count > 0 %}
+            <div class="today-counter" id="counter-{{ food.id }}">{{ food.today_count }}</div>
+            {% else %}
+            <div class="today-counter" id="counter-{{ food.id }}" style="display: none;">0</div>
+            {% endif %}
             <div class="food-icon">{{ food.icon }}</div>
             <div class="food-name">{{ food.name }}</div>
             <div class="food-serving">{{ food.serving_size }}</div>

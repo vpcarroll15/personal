@@ -76,10 +76,23 @@ def calculate_totals_by_period(
 @login_required
 def home(request: HttpRequest) -> HttpResponse:
     """Display food tracking grid and recent consumption."""
+    from collections import Counter
+
     foods = get_active_foods()
     recent_consumption = Consumption.objects.filter(user=request.user).select_related(
         "food"
     )[:DEFAULT_RECENT_CONSUMPTION_LIMIT]
+
+    # Calculate today's consumption counts per food
+    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_consumption = Consumption.objects.filter(
+        user=request.user, consumed_at__gte=today_start
+    ).values_list("food_id", flat=True)
+    today_counts = Counter(today_consumption)
+
+    # Add today's count to each food object
+    for food in foods:
+        food.today_count = today_counts.get(food.id, 0)
 
     context = {
         "foods": foods,

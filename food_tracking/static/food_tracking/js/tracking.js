@@ -45,9 +45,24 @@ function logFood(foodId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Food logged successfully!');
-            // Reload page to show updated recent consumption
-            location.reload();
+            // Update the counter
+            const counter = document.getElementById('counter-' + foodId);
+            const currentCount = parseInt(counter.textContent) || 0;
+            const newCount = currentCount + 1;
+
+            counter.textContent = newCount;
+            counter.style.display = 'flex';
+
+            // Add pulse animation
+            counter.classList.add('pulse');
+            setTimeout(() => {
+                counter.classList.remove('pulse');
+            }, 500);
+
+            // Reload page after a short delay to update recent consumption table
+            setTimeout(() => {
+                location.reload();
+            }, 800);
         } else {
             alert('Error: ' + (data.error || 'Unknown error'));
         }
