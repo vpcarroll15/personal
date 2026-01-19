@@ -133,4 +133,33 @@
     }
 }
 
+/* Delete button in Recent Consumption table */
+.delete-button {
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+}
+
+.delete-button:hover {
+    background: #d32f2f;
+    transform: scale(1.1);
+}
+
+.delete-button:active {
+    background: #c62828;
+    transform: scale(0.95);
+}
+
 /* Existing checkered-blue table styles should be inherited from music/css/styles.css */

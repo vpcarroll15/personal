@@ -13,7 +13,7 @@ class FoodAdmin(admin.ModelAdmin):
         "display_order",
         "active",
     ]
-    list_editable = ["display_order", "active"]
+    list_editable = ["serving_size", "calories_per_serving", "display_order", "active"]
     ordering = ["display_order", "name"]
     search_fields = ["name"]
 

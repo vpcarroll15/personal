@@ -281,6 +281,74 @@ class FoodTrackingViewTests(TestCase):
         self.assertFalse(data["success"])
         self.assertIn("Test error", data["error"])
 
+    def test_delete_consumption_requires_login(self):
+        """Test that delete_consumption requires login."""
+        consumption = Consumption.objects.create(
+            user=self.user, food=self.food1, quantity=Decimal("1.0")
+        )
+        self.client.logout()
+        response = self.client.post(
+            reverse("food_tracking:delete_consumption"),
+            {"consumption_id": consumption.id},
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_delete_consumption_rejects_get(self):
+        """Test that delete_consumption rejects GET requests."""
+        response = self.client.get(reverse("food_tracking:delete_consumption"))
+        self.assertEqual(response.status_code, 405)
+
+    def test_delete_consumption_deletes_record(self):
+        """Test that delete_consumption deletes a consumption record."""
+        consumption = Consumption.objects.create(
+            user=self.user, food=self.food1, quantity=Decimal("1.0")
+        )
+        response = self.client.post(
+            reverse("food_tracking:delete_consumption"),
+            {"consumption_id": consumption.id},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["success"])
+
+        # Verify consumption was deleted
+        self.assertFalse(Consumption.objects.filter(id=consumption.id).exists())
+
+    def test_delete_consumption_missing_id(self):
+        """Test that delete_consumption handles missing consumption_id."""
+        response = self.client.post(reverse("food_tracking:delete_consumption"), {})
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertFalse(data["success"])
+        self.assertIn("Missing consumption_id", data["error"])
+
+    def test_delete_consumption_invalid_id(self):
+        """Test that delete_consumption handles invalid consumption_id."""
+        response = self.client.post(
+            reverse("food_tracking:delete_consumption"), {"consumption_id": 99999}
+        )
+        self.assertEqual(response.status_code, 404)
+        data = response.json()
+        self.assertFalse(data["success"])
+        self.assertIn("Consumption not found", data["error"])
+
+    def test_delete_consumption_only_own_records(self):
+        """Test that users can only delete their own consumption records."""
+        other_user = User.objects.create_user(username="otheruser", password="testpass")
+        other_consumption = Consumption.objects.create(
+            user=other_user, food=self.food1, quantity=Decimal("1.0")
+        )
+
+        # Try to delete another user's consumption
+        response = self.client.post(
+            reverse("food_tracking:delete_consumption"),
+            {"consumption_id": other_consumption.id},
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Verify it wasn't deleted
+        self.assertTrue(Consumption.objects.filter(id=other_consumption.id).exists())
+
     def test_reports_requires_login(self):
         """Test that reports view requires login."""
         self.client.logout()

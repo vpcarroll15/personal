@@ -103,6 +103,31 @@ def home(request: HttpRequest) -> HttpResponse:
 
 @login_required
 @require_http_methods(["POST"])
+def delete_consumption(request: HttpRequest) -> JsonResponse:
+    """Delete a consumption record via AJAX POST."""
+    try:
+        consumption_id = request.POST.get("consumption_id")
+
+        if not consumption_id:
+            return JsonResponse(
+                {"success": False, "error": "Missing consumption_id"}, status=400
+            )
+
+        # Get consumption and verify it belongs to the current user
+        consumption = Consumption.objects.get(id=consumption_id, user=request.user)
+        consumption.delete()
+
+        return JsonResponse({"success": True})
+    except Consumption.DoesNotExist:
+        return JsonResponse(
+            {"success": False, "error": "Consumption not found"}, status=404
+        )
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
 def log_consumption(request: HttpRequest) -> JsonResponse:
     """Log a food consumption via AJAX POST."""
     try:

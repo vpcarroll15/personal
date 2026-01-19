@@ -23,6 +23,53 @@ function getCookie(name) {
 }
 
 /**
+ * Delete a consumption record via AJAX
+ * @param {number} consumptionId - Consumption ID to delete
+ */
+function deleteConsumption(consumptionId) {
+    if (!confirm('Delete this entry?')) {
+        return;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    // Create form data
+    const formData = new FormData();
+    formData.append('consumption_id', consumptionId);
+
+    // Send AJAX request
+    fetch('/food/delete/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+        },
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the row from the table
+            const row = document.getElementById('consumption-' + consumptionId);
+            if (row) {
+                row.style.opacity = '0';
+                row.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    row.remove();
+                    // Reload page to update counter badges
+                    location.reload();
+                }, 300);
+            }
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to delete. Please try again.');
+    });
+}
+
+/**
  * Log a food consumption via AJAX
  * @param {number} foodId - Food ID to log
  */

@@ -4,8 +4,8 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=4">
-<script src="{% static 'food_tracking/js/tracking.js' %}?v=4"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=5">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=5"></script>
 {% endblock %}
 
 {% block content %}
@@ -38,15 +38,19 @@
                 <th>Quantity</th>
                 <th>Calories</th>
                 <th>Time</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
             {% for consumption in recent_consumption %}
-            <tr>
+            <tr id="consumption-{{ consumption.id }}">
                 <td>{{ consumption.food.icon }} {{ consumption.food.name }}</td>
                 <td>{{ consumption.quantity }}</td>
                 <td>{{ consumption.total_calories|floatformat:0 }}</td>
                 <td>{{ consumption.consumed_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <button class="delete-button" onclick="deleteConsumption({{ consumption.id }})" title="Delete">✕</button>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
