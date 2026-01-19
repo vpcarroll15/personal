@@ -2,8 +2,8 @@
 
 .food-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
     margin: 20px 0;
 }
 
@@ -72,24 +72,19 @@
     transform: scale(0.98);
 }
 
-/* Mobile responsive - 2 columns on small screens */
-@media (max-width: 600px) {
+/* Tablet and larger - 3 columns */
+@media (min-width: 600px) {
     .food-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
     }
+}
 
-    .food-icon {
-        font-size: 36px;
-    }
-
-    .food-name {
-        font-size: 14px;
-    }
-
-    .food-serving,
-    .food-calories {
-        font-size: 12px;
+/* Desktop - 4 columns */
+@media (min-width: 900px) {
+    .food-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
     }
 }
 
