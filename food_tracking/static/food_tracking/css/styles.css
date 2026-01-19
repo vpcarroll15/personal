@@ -134,22 +134,29 @@
 }
 
 /* Delete button in Recent Consumption table */
+.checkered-blue td:last-child {
+    text-align: center;
+    padding: 8px 12px;
+    width: 50px;
+}
+
 .delete-button {
     background: #f44336;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     line-height: 1;
+    margin: 0 auto;
 }
 
 .delete-button:hover {
