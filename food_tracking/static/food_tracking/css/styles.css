@@ -1,5 +1,21 @@
 /* Food Tracking Styles */
 
+.today-total {
+    background: #e3f2fd;
+    border: 2px solid #2196F3;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin: 20px 0;
+    text-align: center;
+    font-size: 18px;
+    color: #1976D2;
+}
+
+.today-total strong {
+    font-size: 24px;
+    color: #0D47A1;
+}
+
 .food-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -79,30 +95,35 @@
     margin-bottom: 10px;
 }
 
-.log-button {
+.quantity-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.qty-button {
     background-color: #4CAF50;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 10px 5px;
     text-align: center;
-    text-decoration: none;
-    display: inline-block;
     font-size: 16px;
-    margin: 4px 2px;
+    font-weight: bold;
     cursor: pointer;
     border-radius: 5px;
-    width: 100%;
     min-height: 44px;
-    transition: background-color 0.3s ease;
+    transition: all 0.2s ease;
 }
 
-.log-button:hover {
+.qty-button:hover {
     background-color: #45a049;
+    transform: translateY(-2px);
 }
 
-.log-button:active {
+.qty-button:active {
     background-color: #3d8b40;
-    transform: scale(0.98);
+    transform: scale(0.95);
 }
 
 /* Tablet and larger - 3 columns */

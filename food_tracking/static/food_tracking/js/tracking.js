@@ -72,14 +72,15 @@ function deleteConsumption(consumptionId) {
 /**
  * Log a food consumption via AJAX
  * @param {number} foodId - Food ID to log
+ * @param {number} quantity - Quantity to log (default 1.0)
  */
-function logFood(foodId) {
+function logFood(foodId, quantity = 1.0) {
     const csrftoken = getCookie('csrftoken');
 
     // Create form data
     const formData = new FormData();
     formData.append('food_id', foodId);
-    formData.append('quantity', '1.0');
+    formData.append('quantity', quantity.toString());
 
     // Send AJAX request
     fetch('/food/log/', {

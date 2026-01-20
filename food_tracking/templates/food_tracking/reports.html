@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=3">
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=8">
 {% endblock %}
 
 {% block content %}
@@ -26,6 +26,10 @@
 
         <button type="submit" style="margin-left: 20px;">Update Report</button>
     </form>
+
+    {% if totals %}
+    <div id="chart_div" style="width: 100%; max-width: 800px; height: 400px; margin: 30px auto;"></div>
+    {% endif %}
 
     <h2>Totals by {{ period|title }}</h2>
     {% if totals %}
@@ -75,4 +79,38 @@
     <p>No consumption data for this period.</p>
     {% endif %}
 </div>
+
+{% if totals %}
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Period', 'Calories'],
+            {% for total in totals %}
+            ['{{ total.period }}', {{ total.total_calories }}]{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]);
+
+        var options = {
+            title: 'Calories by {{ period|title }}',
+            chartArea: {width: '70%', height: '70%'},
+            hAxis: {
+                title: '{{ period|title }}',
+                minValue: 0
+            },
+            vAxis: {
+                title: 'Calories'
+            },
+            colors: ['#4CAF50'],
+            bar: {groupWidth: '75%'},
+            legend: { position: 'none' }
+        };
+
+        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+    }
+</script>
+{% endif %}
 {% endblock %}

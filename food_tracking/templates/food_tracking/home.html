@@ -4,19 +4,23 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=7">
-<script src="{% static 'food_tracking/js/tracking.js' %}?v=5"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=8">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=6"></script>
 {% endblock %}
 
 {% block content %}
 <div style="padding: 20px;">
     <h1>Food Tracking</h1>
 
+    <div class="today-total">
+        Today's Total: <strong>{{ today_total_calories|floatformat:0 }} calories</strong>
+    </div>
+
     <div class="food-grid">
         {% for food in foods %}
         <div class="food-item" id="food-{{ food.id }}">
             {% if food.today_count > 0 %}
-            <div class="today-counter" id="counter-{{ food.id }}">{{ food.today_count }}</div>
+            <div class="today-counter" id="counter-{{ food.id }}">{{ food.today_count|floatformat:"-1" }}</div>
             {% else %}
             <div class="today-counter" id="counter-{{ food.id }}" style="display: none;">0</div>
             {% endif %}
@@ -24,7 +28,12 @@
             <div class="food-name">{{ food.name }}</div>
             <div class="food-serving">{{ food.serving_size }}</div>
             <div class="food-calories">{{ food.calories_per_serving|floatformat:0 }} cal</div>
-            <button class="log-button" onclick="logFood({{ food.id }})">Log</button>
+            <div class="quantity-buttons">
+                <button class="qty-button" onclick="logFood({{ food.id }}, 0.5)">½</button>
+                <button class="qty-button" onclick="logFood({{ food.id }}, 1)">1</button>
+                <button class="qty-button" onclick="logFood({{ food.id }}, 1.5)">1½</button>
+                <button class="qty-button" onclick="logFood({{ food.id }}, 2)">2</button>
+            </div>
         </div>
         {% endfor %}
     </div>

@@ -94,22 +94,33 @@ def home(request: HttpRequest) -> HttpResponse:
 
     foods = get_active_foods()
 
-    # Get all consumption from today (Pacific timezone)
+    # Get all consumption from today (Pacific timezone), most recent first
     today_start = get_pacific_today_start()
-    today_consumption = Consumption.objects.filter(
-        user=request.user, consumed_at__gte=today_start
-    ).select_related("food")
+    today_consumption = (
+        Consumption.objects.filter(user=request.user, consumed_at__gte=today_start)
+        .select_related("food")
+        .order_by("-consumed_at")
+    )
 
-    # Calculate today's consumption counts per food for badges
-    today_counts = Counter(today_consumption.values_list("food_id", flat=True))
+    # Calculate today's total quantity per food for badges
+    today_quantities: dict[int, Decimal] = {}
+    for consumption in today_consumption:
+        food_id = consumption.food_id
+        today_quantities[food_id] = (
+            today_quantities.get(food_id, Decimal("0")) + consumption.quantity
+        )
 
-    # Add today's count to each food object
+    # Add today's total quantity to each food object
     for food in foods:
-        food.today_count = today_counts.get(food.id, 0)
+        food.today_count = today_quantities.get(food.id, Decimal("0"))
+
+    # Calculate total calories for today
+    today_total_calories = sum(c.total_calories() for c in today_consumption)
 
     context = {
         "foods": foods,
         "today_consumption": today_consumption,
+        "today_total_calories": today_total_calories,
     }
     return render(request, "food_tracking/home.html", context)
 
