@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from decimal import Decimal
 
+import pytz
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -14,6 +15,16 @@ from food_tracking.constants import (
     DEFAULT_REPORT_DAYS,
 )
 from food_tracking.models import Consumption, Food
+
+# Use Pacific timezone for all date calculations
+PACIFIC_TZ = pytz.timezone("America/Los_Angeles")
+
+
+def get_pacific_today_start() -> datetime:
+    """Get the start of today (midnight) in Pacific timezone."""
+    now_pacific = timezone.now().astimezone(PACIFIC_TZ)
+    today_start_pacific = now_pacific.replace(hour=0, minute=0, second=0, microsecond=0)
+    return today_start_pacific
 
 
 def get_active_foods() -> list[Food]:
@@ -40,16 +51,19 @@ def calculate_totals_by_period(
         user_id=user_id, consumed_at__gte=start_date
     ).select_related("food")
 
-    # Define period key functions
+    # Define period key functions (convert to Pacific time first)
     def get_day_key(dt: datetime) -> str:
-        return dt.strftime("%Y-%m-%d")
+        dt_pacific = dt.astimezone(PACIFIC_TZ)
+        return dt_pacific.strftime("%Y-%m-%d")
 
     def get_week_key(dt: datetime) -> str:
-        year, week, _ = dt.isocalendar()
+        dt_pacific = dt.astimezone(PACIFIC_TZ)
+        year, week, _ = dt_pacific.isocalendar()
         return f"{year}-W{week:02d}"
 
     def get_month_key(dt: datetime) -> str:
-        return dt.strftime("%Y-%m")
+        dt_pacific = dt.astimezone(PACIFIC_TZ)
+        return dt_pacific.strftime("%Y-%m")
 
     period_key_functions = {
         "day": get_day_key,
@@ -75,20 +89,19 @@ def calculate_totals_by_period(
 
 @login_required
 def home(request: HttpRequest) -> HttpResponse:
-    """Display food tracking grid and recent consumption."""
+    """Display food tracking grid and today's consumption."""
     from collections import Counter
 
     foods = get_active_foods()
-    recent_consumption = Consumption.objects.filter(user=request.user).select_related(
-        "food"
-    )[:DEFAULT_RECENT_CONSUMPTION_LIMIT]
 
-    # Calculate today's consumption counts per food
-    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    # Get all consumption from today (Pacific timezone)
+    today_start = get_pacific_today_start()
     today_consumption = Consumption.objects.filter(
         user=request.user, consumed_at__gte=today_start
-    ).values_list("food_id", flat=True)
-    today_counts = Counter(today_consumption)
+    ).select_related("food")
+
+    # Calculate today's consumption counts per food for badges
+    today_counts = Counter(today_consumption.values_list("food_id", flat=True))
 
     # Add today's count to each food object
     for food in foods:
@@ -96,7 +109,7 @@ def home(request: HttpRequest) -> HttpResponse:
 
     context = {
         "foods": foods,
-        "recent_consumption": recent_consumption,
+        "today_consumption": today_consumption,
     }
     return render(request, "food_tracking/home.html", context)
 

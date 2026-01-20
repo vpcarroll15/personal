@@ -136,8 +136,12 @@
 /* Delete button in Recent Consumption table */
 .checkered-blue td:last-child {
     text-align: center;
-    padding: 8px 12px;
-    width: 50px;
+    padding: 10px;
+    width: 70px;
+    min-width: 70px;
+    max-width: 70px;
+    overflow: hidden;
+    white-space: normal;
 }
 
 .delete-button {
@@ -145,9 +149,9 @@
     color: white;
     border: none;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    font-size: 18px;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -157,6 +161,7 @@
     padding: 0;
     line-height: 1;
     margin: 0 auto;
+    flex-shrink: 0;
 }
 
 .delete-button:hover {

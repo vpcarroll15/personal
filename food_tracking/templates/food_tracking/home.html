@@ -4,7 +4,7 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=6">
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=7">
 <script src="{% static 'food_tracking/js/tracking.js' %}?v=5"></script>
 {% endblock %}
 
@@ -29,25 +29,23 @@
         {% endfor %}
     </div>
 
-    <h2 style="margin-top: 40px;">Recent Consumption</h2>
-    {% if recent_consumption %}
+    <h2 style="margin-top: 40px;">Today's Consumption</h2>
+    {% if today_consumption %}
     <table class="checkered-blue">
         <thead>
             <tr>
                 <th>Food</th>
                 <th>Quantity</th>
                 <th>Calories</th>
-                <th>Time</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            {% for consumption in recent_consumption %}
+            {% for consumption in today_consumption %}
             <tr id="consumption-{{ consumption.id }}">
                 <td>{{ consumption.food.icon }} {{ consumption.food.name }}</td>
                 <td>{{ consumption.quantity }}</td>
                 <td>{{ consumption.total_calories|floatformat:0 }}</td>
-                <td>{{ consumption.consumed_at|date:"Y-m-d H:i" }}</td>
                 <td>
                     <button class="delete-button" onclick="deleteConsumption({{ consumption.id }})" title="Delete">✕</button>
                 </td>
@@ -56,7 +54,7 @@
         </tbody>
     </table>
     {% else %}
-    <p>No consumption logged yet. Start tracking above!</p>
+    <p>No consumption logged today. Start tracking above!</p>
     {% endif %}
 </div>
 {% endblock %}

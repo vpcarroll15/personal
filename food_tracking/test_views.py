@@ -188,8 +188,8 @@ class FoodTrackingViewTests(TestCase):
         self.assertContains(response, "Test Food H")
         self.assertNotContains(response, "Test Food I")
 
-    def test_home_shows_recent_consumption(self):
-        """Test that home view shows recent consumption."""
+    def test_home_shows_today_consumption(self):
+        """Test that home view shows today's consumption."""
         consumption = Consumption.objects.create(
             user=self.user, food=self.food1, quantity=Decimal("2.0")
         )
@@ -198,18 +198,66 @@ class FoodTrackingViewTests(TestCase):
         self.assertContains(response, "Test Food H")
         self.assertContains(response, "2.0")
 
-    def test_home_limits_recent_consumption(self):
-        """Test that home view limits recent consumption to 10 items."""
-        # Create 15 consumptions
-        for _ in range(15):
-            Consumption.objects.create(
-                user=self.user, food=self.food1, quantity=Decimal("1.0")
-            )
+    @freeze_time("2024-01-15 10:00:00")
+    def test_home_shows_only_today_consumption(self):
+        """Test that home view shows only today's consumption, not older items."""
+        # Create consumption from yesterday
+        yesterday = timezone.now() - timezone.timedelta(days=1)
+        Consumption.objects.create(
+            user=self.user,
+            food=self.food1,
+            quantity=Decimal("1.0"),
+            consumed_at=yesterday,
+        )
+
+        # Create consumption from today
+        Consumption.objects.create(
+            user=self.user, food=self.food2, quantity=Decimal("2.0")
+        )
 
         response = self.client.get(reverse("food_tracking:home"))
         self.assertEqual(response.status_code, 200)
-        # Should only show 10
-        self.assertEqual(len(response.context["recent_consumption"]), 10)
+        # Should only show today's consumption (1 item)
+        self.assertEqual(len(response.context["today_consumption"]), 1)
+        self.assertEqual(response.context["today_consumption"][0].food, self.food2)
+
+    @freeze_time("2024-01-15 07:30:00")
+    def test_home_uses_pacific_timezone(self):
+        """Test that today's consumption uses Pacific timezone, not UTC."""
+        # At 7:30 AM UTC on Jan 15, it's 11:30 PM Pacific on Jan 14
+        # "Today" in Pacific time is Jan 14, so this SHOULD be counted
+        consumption_at_frozen_time = Consumption.objects.create(
+            user=self.user, food=self.food1, quantity=Decimal("1.0")
+        )
+
+        response = self.client.get(reverse("food_tracking:home"))
+        self.assertEqual(response.status_code, 200)
+        # Should show 1 item because "today" is Jan 14 in Pacific time
+        self.assertEqual(len(response.context["today_consumption"]), 1)
+
+        # Now create a consumption from Jan 13 (more than 24 hours ago)
+        jan_13 = timezone.now() - timezone.timedelta(hours=25)
+        Consumption.objects.create(
+            user=self.user, food=self.food2, quantity=Decimal("2.0"), consumed_at=jan_13
+        )
+
+        response = self.client.get(reverse("food_tracking:home"))
+        # Should still only show 1 item (Jan 14), not the Jan 13 one
+        self.assertEqual(len(response.context["today_consumption"]), 1)
+
+    @freeze_time("2024-01-15 08:00:00")
+    def test_home_pacific_midnight_boundary(self):
+        """Test that Pacific midnight (8 AM UTC) is the boundary for 'today'."""
+        # At 8:00 AM UTC on Jan 15, it's exactly midnight Pacific on Jan 15
+        # This should be counted as "today"
+        consumption_at_pacific_midnight = Consumption.objects.create(
+            user=self.user, food=self.food1, quantity=Decimal("1.0")
+        )
+
+        response = self.client.get(reverse("food_tracking:home"))
+        self.assertEqual(response.status_code, 200)
+        # Should show 1 item because it's now Jan 15 in Pacific time
+        self.assertEqual(len(response.context["today_consumption"]), 1)
 
     def test_log_consumption_requires_login(self):
         """Test that log_consumption requires login."""
