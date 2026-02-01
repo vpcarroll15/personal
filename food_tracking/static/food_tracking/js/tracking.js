@@ -95,10 +95,11 @@ function logFood(foodId, quantity = 1.0) {
         if (data.success) {
             // Update the counter
             const counter = document.getElementById('counter-' + foodId);
-            const currentCount = parseInt(counter.textContent) || 0;
-            const newCount = currentCount + 1;
+            const currentCount = parseFloat(counter.textContent) || 0;
+            const newCount = currentCount + quantity;
 
-            counter.textContent = newCount;
+            // Format to remove unnecessary decimals (1.0 -> 1, 1.5 -> 1.5)
+            counter.textContent = newCount % 1 === 0 ? newCount.toFixed(0) : newCount.toFixed(1);
             counter.style.display = 'flex';
 
             // Add pulse animation
