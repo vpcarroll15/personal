@@ -6,6 +6,7 @@
   vars:
     username: ubuntu
     code_branch: master
+    django_settings_module: website.settings.prod
   tasks:
     # Basics.
     - name: Change hostname
@@ -66,11 +67,19 @@
       tags: django
 
     - name: Collect static files
-      command: /home/{{ username }}/venv/bin/python /home/{{ username }}/source/manage.py collectstatic --noinput
+      shell: |
+        source /home/{{ username }}/environment.env
+        /home/{{ username }}/venv/bin/python /home/{{ username }}/source/manage.py collectstatic --noinput
+      environment:
+        DJANGO_SETTINGS_MODULE: '{{ django_settings_module }}'
       tags: django
 
     - name: Run Django migrations
-      command: /home/{{ username }}/venv/bin/python /home/{{ username }}/source/manage.py migrate
+      shell: |
+        source /home/{{ username }}/environment.env
+        /home/{{ username }}/venv/bin/python /home/{{ username }}/source/manage.py migrate
+      environment:
+        DJANGO_SETTINGS_MODULE: '{{ django_settings_module }}'
       tags: django
 
     # Getting gunicorn working.
