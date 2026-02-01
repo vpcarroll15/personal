@@ -25,18 +25,10 @@ In order to deploy a change, run:
 
 ```
 cd ansible
-ansible-playbook -i web_servers bringup_web_server.yaml --extra-vars "code_branch=master" --tags django
-
-# If you need to migrate the database or update static files...
-ssh ubuntu@hostname
-...
-./migrate_environment
-exit
-...
-
-# Restart everything.
-ansible-playbook -i web_servers bringup_web_server.yaml --extra-vars "code_branch=master" --skip-tags django,vault
+ansible-playbook -i web_servers bringup_web_server.yaml --extra-vars "code_branch=master" --skip-tags vault
 ```
+
+This will deploy the code, run migrations, collect static files, and restart all services.
 
 The current requirements.txt assumes you want Python 3.12. To install this on MacOS:
 

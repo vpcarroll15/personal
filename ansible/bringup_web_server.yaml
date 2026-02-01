@@ -65,6 +65,14 @@
         mode: '0755'
       tags: django
 
+    - name: Collect static files
+      command: /home/{{ username }}/venv/bin/python /home/{{ username }}/source/manage.py collectstatic --noinput
+      tags: django
+
+    - name: Run Django migrations
+      command: /home/{{ username }}/venv/bin/python /home/{{ username }}/source/manage.py migrate
+      tags: django
+
     # Getting gunicorn working.
     - name: Install gunicorn socket file
       become: yes
