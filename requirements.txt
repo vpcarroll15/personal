@@ -157,7 +157,7 @@ tokenizers==0.21.1
 toml==0.10.2
 tomli==2.2.1
 tomlkit==0.13.2
-tornado==6.5.1
+tornado==6.5.5
 tqdm==4.67.1
 traitlets==5.14.3
 twilio==9.6.1
