@@ -18,7 +18,7 @@ from twilio_managers.daily_goals_app_types import DailyCheckin, User
 from twilio_managers.platform_info import install_environment_variables
 
 # Constants
-AI_MODEL_TO_USE = "claude-3-opus-20240229"
+AI_MODEL_TO_USE = "claude-sonnet-4-6"
 AI_MAX_TOKENS = 1024
 AI_TEMPERATURE = 1
 RECENT_GOALS_LOOKBACK_DAYS = 7

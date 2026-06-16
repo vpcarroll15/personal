@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 
-from food_tracking.models import Consumption, Food
+from food_tracking.models import CalorieTarget, Consumption, Food
 
 
 class FoodModelTests(TestCase):
@@ -178,3 +178,90 @@ class ConsumptionModelTests(TestCase):
             quantity=Decimal("1.0"),
         )
         self.assertEqual(consumption.notes, "")
+
+
+class CalorieTargetModelTests(TestCase):
+    """Tests for the CalorieTarget model."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="targetuser", password="x")
+        cls.target = CalorieTarget.objects.create(
+            user=cls.user, daily_calorie_target=1800
+        )
+
+    def test_str(self):
+        self.assertEqual(str(self.target), "targetuser: 1800 cal/day")
+
+    def test_default_target(self):
+        other = User.objects.create_user(username="defaultuser", password="x")
+        target = CalorieTarget.objects.create(user=other)
+        self.assertEqual(target.daily_calorie_target, 2000)
+
+    def test_to_dict_for_api(self):
+        data = self.target.to_dict_for_api()
+        self.assertEqual(data["user"], "targetuser")
+        self.assertEqual(data["daily_calorie_target"], 1800)
+
+
+class AdHocConsumptionModelTests(TestCase):
+    """Tests for AI/recipe (food-less) Consumption entries."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="adhocuser", password="x")
+        cls.food = Food.objects.create(
+            name="Test Pecans",
+            icon="🌰",
+            serving_size="1 oz",
+            calories_per_serving=Decimal("189.00"),
+            display_order=1,
+            active=True,
+        )
+
+    def test_ad_hoc_total_calories_uses_stored_value(self):
+        consumption = Consumption.objects.create(
+            user=self.user,
+            food=None,
+            description="Burrito bowl",
+            calories=Decimal("650.00"),
+        )
+        self.assertEqual(consumption.total_calories(), Decimal("650.00"))
+
+    def test_ad_hoc_total_calories_defaults_to_zero(self):
+        consumption = Consumption.objects.create(
+            user=self.user, food=None, description="Mystery"
+        )
+        self.assertEqual(consumption.total_calories(), Decimal("0"))
+
+    def test_ad_hoc_display_name_and_icon(self):
+        consumption = Consumption.objects.create(
+            user=self.user, food=None, description="Pad thai", calories=Decimal("700")
+        )
+        self.assertEqual(consumption.display_name(), "Pad thai")
+        self.assertEqual(consumption.display_icon(), "🍽️")
+
+    def test_food_display_name_and_icon(self):
+        consumption = Consumption.objects.create(
+            user=self.user, food=self.food, quantity=Decimal("1.0")
+        )
+        self.assertEqual(consumption.display_name(), "Test Pecans")
+        self.assertEqual(consumption.display_icon(), "🌰")
+
+    def test_ad_hoc_to_dict_for_api(self):
+        consumption = Consumption.objects.create(
+            user=self.user,
+            food=None,
+            description="Sushi",
+            calories=Decimal("500.00"),
+        )
+        data = consumption.to_dict_for_api()
+        self.assertEqual(data["food"], "Sushi")
+        self.assertEqual(data["food_icon"], "🍽️")
+        self.assertEqual(data["total_calories"], 500.0)
+
+    def test_ad_hoc_str_without_food(self):
+        consumption = Consumption.objects.create(
+            user=self.user, food=None, description="Tacos", calories=Decimal("400")
+        )
+        self.assertIn("Tacos", str(consumption))

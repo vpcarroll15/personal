@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+from typing import Any
 
 import pytz
 from django.contrib.auth.decorators import login_required
@@ -10,11 +11,12 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
+from food_tracking import estimation
 from food_tracking.constants import (
     DEFAULT_RECENT_CONSUMPTION_LIMIT,
     DEFAULT_REPORT_DAYS,
 )
-from food_tracking.models import Consumption, Food
+from food_tracking.models import CalorieTarget, Consumption, Food
 
 # Use Pacific timezone for all date calculations
 PACIFIC_TZ = pytz.timezone("America/Los_Angeles")
@@ -117,12 +119,23 @@ def home(request: HttpRequest) -> HttpResponse:
     # Calculate total calories for today
     today_total_calories = sum(c.total_calories() for c in today_consumption)
 
+    target = get_or_create_target(request.user)
+    remaining_calories = target.daily_calorie_target - today_total_calories
+
     context = {
         "foods": foods,
         "today_consumption": today_consumption,
         "today_total_calories": today_total_calories,
+        "daily_target": target.daily_calorie_target,
+        "remaining_calories": remaining_calories,
     }
     return render(request, "food_tracking/home.html", context)
+
+
+def get_or_create_target(user: Any) -> CalorieTarget:
+    """Return the user's calorie target, creating a default if absent."""
+    target, _ = CalorieTarget.objects.get_or_create(user=user)
+    return target
 
 
 @login_required
@@ -208,3 +221,135 @@ def reports(request: HttpRequest) -> HttpResponse:
         "detailed_consumption": detailed_consumption,
     }
     return render(request, "food_tracking/reports.html", context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def estimate(request: HttpRequest) -> JsonResponse:
+    """Estimate calories from an uploaded photo or a text description.
+
+    Returns the estimate WITHOUT saving it; the client confirms/edits before
+    calling log_estimate.
+    """
+    try:
+        image = request.FILES.get("image")
+        text = request.POST.get("text", "").strip()
+        note = request.POST.get("note", "").strip()
+
+        if image is not None:
+            result = estimation.estimate_from_image(
+                image.read(), image.content_type or "", note
+            )
+        elif text:
+            result = estimation.estimate_from_text(text)
+        else:
+            return JsonResponse(
+                {"success": False, "error": "Provide an image or text."}, status=400
+            )
+
+        return JsonResponse({"success": True, "estimate": result.to_dict()})
+    except ValueError as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def estimate_recipe(request: HttpRequest) -> JsonResponse:
+    """Estimate calories for the eaten fraction of a pasted recipe (unsaved)."""
+    try:
+        recipe_text = request.POST.get("recipe_text", "").strip()
+        fraction_raw = request.POST.get("fraction", "")
+
+        if not recipe_text:
+            return JsonResponse(
+                {"success": False, "error": "Missing recipe text."}, status=400
+            )
+
+        try:
+            fraction = float(fraction_raw)
+        except (TypeError, ValueError):
+            return JsonResponse(
+                {"success": False, "error": "Invalid fraction."}, status=400
+            )
+
+        if not 0 < fraction <= 1:
+            return JsonResponse(
+                {"success": False, "error": "Fraction must be between 0 and 1."},
+                status=400,
+            )
+
+        result = estimation.estimate_recipe(recipe_text, fraction)
+        return JsonResponse({"success": True, "estimate": result.to_dict()})
+    except ValueError as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def log_estimate(request: HttpRequest) -> JsonResponse:
+    """Save a confirmed ad-hoc estimate as a Consumption (no Food reference)."""
+    try:
+        description = request.POST.get("description", "").strip()
+        calories_raw = request.POST.get("calories", "")
+
+        if not description:
+            return JsonResponse(
+                {"success": False, "error": "Missing description."}, status=400
+            )
+
+        try:
+            calories = Decimal(calories_raw)
+        except (InvalidOperation, TypeError):
+            return JsonResponse(
+                {"success": False, "error": "Invalid calories."}, status=400
+            )
+
+        if calories < 0:
+            return JsonResponse(
+                {"success": False, "error": "Calories must be non-negative."},
+                status=400,
+            )
+
+        consumption = Consumption.objects.create(
+            user=request.user,
+            food=None,
+            description=description,
+            calories=calories,
+            notes=request.POST.get("notes", ""),
+        )
+        return JsonResponse(
+            {"success": True, "consumption": consumption.to_dict_for_api()}
+        )
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def set_target(request: HttpRequest) -> JsonResponse:
+    """Set the user's single fixed daily calorie target."""
+    try:
+        target_raw = request.POST.get("daily_calorie_target", "")
+        try:
+            daily_target = int(target_raw)
+        except (TypeError, ValueError):
+            return JsonResponse(
+                {"success": False, "error": "Invalid target."}, status=400
+            )
+
+        if daily_target <= 0:
+            return JsonResponse(
+                {"success": False, "error": "Target must be positive."}, status=400
+            )
+
+        target, _ = CalorieTarget.objects.update_or_create(
+            user=request.user,
+            defaults={"daily_calorie_target": daily_target},
+        )
+        return JsonResponse({"success": True, "target": target.to_dict_for_api()})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
