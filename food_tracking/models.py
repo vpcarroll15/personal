@@ -119,6 +119,8 @@ class Consumption(models.Model):
         """Icon for the entry; ad-hoc estimates use a generic icon."""
         if self.food is not None:
             return self.food.icon
+        if self.calories is not None and self.calories < 0:
+            return "🔥"
         return "🍽️"
 
     def __str__(self) -> str:
