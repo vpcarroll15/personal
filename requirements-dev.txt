@@ -1,0 +1,25 @@
+# Local development, test, and ops tooling — NOT installed on the server.
+# Includes everything in requirements.txt plus the extras below.
+-r requirements.txt
+
+# Testing
+coverage==7.13.0
+freezegun==1.5.2
+
+# Linting / formatting (also run in isolation by pre-commit)
+black==26.3.1
+isort==6.0.1
+pylint==3.3.7
+mdformat==0.7.22
+pre-commit==4.2.0
+
+# Deployment — ansible runs from the control machine, not the server
+ansible==12.2.0
+
+# Interactive shell / debugging
+ipython==9.2.0
+debugpy==1.8.14
+
+# Heavy deps used only by sms/scripts/extract_data_for_jake.py
+pandas==2.2.3
+SQLAlchemy==2.0.41
