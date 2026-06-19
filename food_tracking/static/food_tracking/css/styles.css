@@ -390,3 +390,41 @@
 }
 
 /* Existing checkered-blue table styles should be inherited from music/css/styles.css */
+
+/* ---------------------------------------------------------------- */
+/* Log exercise (calories burned)                                  */
+/* ---------------------------------------------------------------- */
+.exercise-details {
+    margin-top: 12px;
+}
+
+.exercise-details summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #1976D2;
+    margin-bottom: 8px;
+}
+
+.exercise-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.exercise-row input[type="text"] {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.exercise-row input[type="number"] {
+    width: 130px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
