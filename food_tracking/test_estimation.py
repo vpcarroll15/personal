@@ -37,6 +37,7 @@ def _make_tool_use_response(
     }
     response = Mock()
     response.content = [block]
+    response.stop_reason = "tool_use"
     return response
 
 
@@ -126,3 +127,65 @@ class EstimateRecipeTests(TestCase):
         prompt = kwargs["messages"][0]["content"][0]["text"]
         self.assertIn("25%", prompt)
         self.assertIn("Big lasagna recipe", prompt)
+
+
+class MalformedEstimateTests(TestCase):
+    """Tests for defensive handling of malformed/truncated tool calls."""
+
+    @patch("food_tracking.estimation._get_client")
+    def test_missing_field_raises_value_error(self, mock_get_client):
+        block = Mock()
+        block.type = "tool_use"
+        block.name = estimation.ESTIMATE_TOOL_NAME
+        block.input = {"description": "Soup"}  # no total_calories
+        response = Mock()
+        response.content = [block]
+        response.stop_reason = "tool_use"
+        client = Mock()
+        client.messages.create.return_value = response
+        mock_get_client.return_value = client
+
+        with self.assertRaises(ValueError):
+            estimation.estimate_from_text("soup")
+
+    @patch("food_tracking.estimation._get_client")
+    def test_non_numeric_calories_raises_value_error(self, mock_get_client):
+        block = Mock()
+        block.type = "tool_use"
+        block.name = estimation.ESTIMATE_TOOL_NAME
+        block.input = {
+            "description": "Soup",
+            "total_calories": "lots",
+            "confidence": "low",
+        }
+        response = Mock()
+        response.content = [block]
+        response.stop_reason = "tool_use"
+        client = Mock()
+        client.messages.create.return_value = response
+        mock_get_client.return_value = client
+
+        with self.assertRaises(ValueError):
+            estimation.estimate_from_text("soup")
+
+    @patch("food_tracking.estimation._get_client")
+    def test_truncated_response_raises_value_error(self, mock_get_client):
+        response = Mock()
+        response.stop_reason = "max_tokens"
+        response.content = []
+        client = Mock()
+        client.messages.create.return_value = response
+        mock_get_client.return_value = client
+
+        with self.assertRaises(ValueError):
+            estimation.estimate_from_text("huge meal")
+
+    def test_parse_estimate_rejects_non_dict(self):
+        with self.assertRaises(ValueError):
+            estimation._parse_estimate("not a dict")
+
+    def test_parse_estimate_defaults_confidence(self):
+        result = estimation._parse_estimate(
+            {"description": "Apple", "total_calories": 95}
+        )
+        self.assertEqual(result.confidence, "low")

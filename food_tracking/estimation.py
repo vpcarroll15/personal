@@ -14,7 +14,9 @@ from typing import Any
 from anthropic import Anthropic
 
 # Constants
-ESTIMATION_MODEL = "claude-sonnet-4-6"
+# Defaults to the current Sonnet generation; override (e.g. to bump to a newer
+# model) via the FOOD_ESTIMATION_MODEL environment variable, no code change.
+ESTIMATION_MODEL = os.environ.get("FOOD_ESTIMATION_MODEL", "claude-sonnet-4-6")
 MAX_TOKENS = 1024
 ESTIMATE_TOOL_NAME = "record_estimate"
 
@@ -93,6 +95,27 @@ def _get_client() -> Anthropic:
     return Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 
+def _parse_estimate(data: Any) -> EstimateResult:
+    """Build an EstimateResult from a tool_use input, validating shape.
+
+    The forced tool call means the SDK hands us a parsed dict (not raw JSON),
+    but the model can still omit a field or return a non-numeric calorie value
+    (e.g. if the response is truncated). Treat any such shape as a clean,
+    user-facing error rather than letting a KeyError/TypeError become a 500.
+    """
+    if not isinstance(data, dict):
+        raise ValueError("Could not read the calorie estimate from the model.")
+    try:
+        return EstimateResult(
+            description=str(data["description"]),
+            calories=int(data["total_calories"]),
+            confidence=str(data.get("confidence", "low")),
+            items=list(data.get("items", [])),
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("Could not read the calorie estimate from the model.") from exc
+
+
 def _run_estimate(content: list[dict[str, Any]]) -> EstimateResult:
     """Send a user content payload to Claude and parse the forced tool call."""
     client = _get_client()
@@ -105,15 +128,12 @@ def _run_estimate(content: list[dict[str, Any]]) -> EstimateResult:
         messages=[{"role": "user", "content": content}],
     )
 
+    if response.stop_reason == "max_tokens":
+        raise ValueError("The estimate was cut off — please try again.")
+
     for block in response.content:
         if block.type == "tool_use" and block.name == ESTIMATE_TOOL_NAME:
-            data = block.input
-            return EstimateResult(
-                description=str(data["description"]),
-                calories=int(data["total_calories"]),
-                confidence=str(data["confidence"]),
-                items=list(data.get("items", [])),
-            )
+            return _parse_estimate(block.input)
 
     raise ValueError("Claude did not return a calorie estimate.")
 
