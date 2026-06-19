@@ -36,8 +36,8 @@
     <div class="estimate-panel">
         <h2>Quick log</h2>
         <div class="estimate-actions">
-            <label class="estimate-button">
-                📷 Photo
+            <label class="estimate-button" title="Take a photo" aria-label="Take a photo">
+                📷
                 <input type="file" accept="image/*" capture="environment"
                        id="photo-input" onchange="estimateFromPhoto(this)" hidden>
             </label>
@@ -45,14 +45,14 @@
 
         <div class="estimate-field">
             <textarea id="text-input" rows="2"
-                      placeholder="Describe what you ate (or tap the mic on your keyboard to dictate)…"></textarea>
+                      placeholder="Describe what you ate."></textarea>
             <button class="estimate-button" onclick="estimateFromText()">Estimate</button>
         </div>
 
         <details class="recipe-details">
             <summary>Paste a recipe</summary>
             <textarea id="recipe-input" rows="4"
-                      placeholder="Paste the full recipe text from Recipe Keeper…"></textarea>
+                      placeholder="Paste the full recipe text."></textarea>
             <div class="recipe-row">
                 <label>Fraction you ate:
                     <input type="number" id="fraction-input" min="0.01" max="1" step="0.05" value="0.25">
