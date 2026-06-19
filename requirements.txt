@@ -26,7 +26,7 @@ bs4==0.0.2
 cached-property==2.0.1
 cement==3.0.14
 certifi==2025.4.26
-cffi==1.17.1
+cffi==2.0.0
 cfgv==3.4.0
 chardet==5.2.0
 charset-normalizer==3.4.2
@@ -52,6 +52,7 @@ docker==7.1.0
 docker-pycreds==0.4.0
 dockerpty==0.4.1
 docopt==0.6.2
+docstring-parser==0.18.0
 docutils==0.21.2
 executing==2.2.0
 feedgen==1.0.0
@@ -109,7 +110,7 @@ packaging==25.0
 pandas==2.2.3
 paramiko==3.5.1
 parso==0.8.4
-pathspec==0.12.1
+pathspec==1.1.1
 pexpect==4.9.0
 phonenumbers==9.0.5
 pickleshare==0.7.5
@@ -164,7 +165,7 @@ twilio==9.6.1
 typed-ast==1.5.5
 types-python-dateutil==2.9.0.20250516
 typing-inspection==0.4.1
-typing_extensions==4.13.2
+typing_extensions==4.15.0
 tzdata==2025.2
 urllib3==2.6.3
 virtualenv==20.36.1
