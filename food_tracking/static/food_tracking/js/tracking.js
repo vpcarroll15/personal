@@ -121,3 +121,185 @@ function logFood(foodId, quantity = 1.0) {
         alert('Failed to log food. Please try again.');
     });
 }
+
+/* ------------------------------------------------------------------ */
+/* AI calorie estimation                                              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * POST a FormData payload with CSRF protection and return the parsed JSON.
+ * @param {string} url
+ * @param {FormData} formData
+ * @returns {Promise<Object>}
+ */
+function postForm(url, formData) {
+    return fetch(url, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        body: formData,
+    }).then(response => response.json());
+}
+
+/**
+ * Show or hide the small status line in the estimate panel.
+ * @param {string} message - Empty string hides it.
+ */
+function setEstimateStatus(message) {
+    const el = document.getElementById('estimate-status');
+    if (!el) {
+        return;
+    }
+    el.textContent = message;
+    el.style.display = message ? 'block' : 'none';
+}
+
+/**
+ * Populate the confirm/edit card with an estimate and reveal it.
+ * @param {Object} estimate - { description, calories, confidence, items }
+ */
+function showEstimate(estimate) {
+    document.getElementById('confirm-description').value = estimate.description || '';
+    document.getElementById('confirm-calories').value = estimate.calories || 0;
+
+    const breakdown = document.getElementById('estimate-breakdown');
+    let html = '';
+    if (estimate.confidence) {
+        html += '<div class="confidence">Confidence: ' + estimate.confidence + '</div>';
+    }
+    if (estimate.items && estimate.items.length > 0) {
+        html += '<ul>';
+        estimate.items.forEach(item => {
+            html += '<li>' + item.name + ': ' + item.calories + ' cal</li>';
+        });
+        html += '</ul>';
+    }
+    breakdown.innerHTML = html;
+
+    document.getElementById('estimate-card').style.display = 'block';
+}
+
+/**
+ * Handle the result of an estimate request (image/text/recipe).
+ * @param {Object} data - JSON response from an estimate endpoint.
+ */
+function handleEstimateResponse(data) {
+    setEstimateStatus('');
+    if (data.success) {
+        showEstimate(data.estimate);
+    } else {
+        alert('Error: ' + (data.error || 'Could not estimate.'));
+    }
+}
+
+/**
+ * Estimate calories from a selected photo.
+ * @param {HTMLInputElement} input - The file input.
+ */
+function estimateFromPhoto(input) {
+    if (!input.files || input.files.length === 0) {
+        return;
+    }
+    const formData = new FormData();
+    formData.append('image', input.files[0]);
+    formData.append('note', document.getElementById('text-input').value.trim());
+
+    setEstimateStatus('Estimating from photo…');
+    postForm('/food/estimate/', formData)
+        .then(handleEstimateResponse)
+        .catch(() => setEstimateStatus('Failed to estimate. Try again.'));
+    input.value = '';
+}
+
+/**
+ * Estimate calories from the free-text description.
+ */
+function estimateFromText() {
+    const text = document.getElementById('text-input').value.trim();
+    if (!text) {
+        alert('Describe what you ate first.');
+        return;
+    }
+    const formData = new FormData();
+    formData.append('text', text);
+
+    setEstimateStatus('Estimating…');
+    postForm('/food/estimate/', formData)
+        .then(handleEstimateResponse)
+        .catch(() => setEstimateStatus('Failed to estimate. Try again.'));
+}
+
+/**
+ * Estimate calories for the eaten fraction of a pasted recipe.
+ */
+function estimateFromRecipe() {
+    const recipe = document.getElementById('recipe-input').value.trim();
+    const fraction = document.getElementById('fraction-input').value;
+    if (!recipe) {
+        alert('Paste a recipe first.');
+        return;
+    }
+    const formData = new FormData();
+    formData.append('recipe_text', recipe);
+    formData.append('fraction', fraction);
+
+    setEstimateStatus('Estimating recipe…');
+    postForm('/food/estimate-recipe/', formData)
+        .then(handleEstimateResponse)
+        .catch(() => setEstimateStatus('Failed to estimate. Try again.'));
+}
+
+/**
+ * Save the confirmed/edited estimate as a consumption.
+ */
+function confirmEstimate() {
+    const description = document.getElementById('confirm-description').value.trim();
+    const calories = document.getElementById('confirm-calories').value;
+    if (!description) {
+        alert('Add a description.');
+        return;
+    }
+    const formData = new FormData();
+    formData.append('description', description);
+    formData.append('calories', calories);
+
+    postForm('/food/log-estimate/', formData)
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Could not log.'));
+            }
+        })
+        .catch(() => alert('Failed to log. Please try again.'));
+}
+
+/**
+ * Hide the confirm/edit card without saving.
+ */
+function cancelEstimate() {
+    document.getElementById('estimate-card').style.display = 'none';
+    setEstimateStatus('');
+}
+
+/**
+ * Prompt for and save a new daily calorie target.
+ */
+function editTarget() {
+    const current = document.getElementById('target-value').textContent.trim();
+    const value = prompt('Daily calorie target:', current);
+    if (value === null) {
+        return;
+    }
+    const formData = new FormData();
+    formData.append('daily_calorie_target', value);
+
+    postForm('/food/target/', formData)
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Could not update target.'));
+            }
+        })
+        .catch(() => alert('Failed to update target. Please try again.'));
+}

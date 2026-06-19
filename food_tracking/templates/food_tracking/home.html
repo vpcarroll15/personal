@@ -4,18 +4,84 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=8">
-<script src="{% static 'food_tracking/js/tracking.js' %}?v=7"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=9">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=8"></script>
 {% endblock %}
 
 {% block content %}
 <div style="padding: 20px;">
     <h1>Food Tracking</h1>
 
-    <div class="today-total">
-        Today's Total: <strong>{{ today_total_calories|floatformat:0 }} calories</strong>
+    <!-- Daily budget -->
+    <div class="budget-banner">
+        <div class="budget-cell">
+            <div class="budget-value">{{ today_total_calories|floatformat:0 }}</div>
+            <div class="budget-label">eaten</div>
+        </div>
+        <div class="budget-cell">
+            <div class="budget-value {% if remaining_calories < 0 %}over-budget{% endif %}"
+                 id="remaining-value">{{ remaining_calories|floatformat:0 }}</div>
+            <div class="budget-label">remaining</div>
+        </div>
+        <div class="budget-cell">
+            <div class="budget-value">
+                <span id="target-value">{{ daily_target }}</span>
+                <button class="link-button" onclick="editTarget()" title="Edit target">✎</button>
+            </div>
+            <div class="budget-label">daily target</div>
+        </div>
     </div>
 
+    <!-- AI estimate -->
+    <div class="estimate-panel">
+        <h2>Quick log</h2>
+        <div class="estimate-actions">
+            <label class="estimate-button" title="Take a photo" aria-label="Take a photo">
+                📷
+                <input type="file" accept="image/*" capture="environment"
+                       id="photo-input" onchange="estimateFromPhoto(this)" hidden>
+            </label>
+        </div>
+
+        <div class="estimate-field">
+            <textarea id="text-input" rows="2"
+                      placeholder="Describe what you ate."></textarea>
+            <button class="estimate-button" onclick="estimateFromText()">Estimate</button>
+        </div>
+
+        <details class="recipe-details">
+            <summary>Paste a recipe</summary>
+            <textarea id="recipe-input" rows="4"
+                      placeholder="Paste the full recipe text."></textarea>
+            <div class="recipe-row">
+                <label>Fraction you ate:
+                    <input type="number" id="fraction-input" min="0.01" max="1" step="0.05" value="0.25">
+                </label>
+                <button class="estimate-button" onclick="estimateFromRecipe()">Estimate</button>
+            </div>
+        </details>
+
+        <div id="estimate-status" class="estimate-status" style="display: none;"></div>
+
+        <!-- Confirm / edit card -->
+        <div id="estimate-card" class="estimate-card" style="display: none;">
+            <div class="estimate-card-row">
+                <label>Food</label>
+                <input type="text" id="confirm-description">
+            </div>
+            <div class="estimate-card-row">
+                <label>Calories</label>
+                <input type="number" id="confirm-calories" min="0" step="1">
+            </div>
+            <div id="estimate-breakdown" class="estimate-breakdown"></div>
+            <div class="estimate-card-buttons">
+                <button class="estimate-button confirm" onclick="confirmEstimate()">Log it</button>
+                <button class="estimate-button cancel" onclick="cancelEstimate()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <h2>Common foods</h2>
     <div class="food-grid">
         {% for food in foods %}
         <div class="food-item" id="food-{{ food.id }}">
@@ -52,7 +118,7 @@
         <tbody>
             {% for consumption in today_consumption %}
             <tr id="consumption-{{ consumption.id }}">
-                <td>{{ consumption.food.icon }} {{ consumption.food.name }}</td>
+                <td>{{ consumption.display_icon }} {{ consumption.display_name }}</td>
                 <td>{{ consumption.quantity }}</td>
                 <td>{{ consumption.total_calories|floatformat:0 }}</td>
                 <td>

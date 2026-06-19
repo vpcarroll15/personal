@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from food_tracking.models import Consumption, Food
+from food_tracking.models import CalorieTarget, Consumption, Food
+
+
+@admin.register(CalorieTarget)
+class CalorieTargetAdmin(admin.ModelAdmin):
+    list_display = ["user", "daily_calorie_target", "updated_at"]
+    search_fields = ["user__username"]
 
 
 @admin.register(Food)
@@ -20,9 +26,16 @@ class FoodAdmin(admin.ModelAdmin):
 
 @admin.register(Consumption)
 class ConsumptionAdmin(admin.ModelAdmin):
-    list_display = ["user", "food", "quantity", "consumed_at", "total_calories"]
+    list_display = [
+        "user",
+        "food",
+        "description",
+        "quantity",
+        "consumed_at",
+        "total_calories",
+    ]
     list_filter = ["user", "food", "consumed_at"]
-    search_fields = ["user__username", "food__name", "notes"]
+    search_fields = ["user__username", "food__name", "description", "notes"]
     date_hierarchy = "consumed_at"
     readonly_fields = ["total_calories"]
 

@@ -4,12 +4,14 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 from freezegun import freeze_time
 
-from food_tracking.models import Consumption, Food
+from food_tracking.estimation import EstimateResult
+from food_tracking.models import CalorieTarget, Consumption, Food
 from food_tracking.views import calculate_totals_by_period, get_active_foods
 
 
@@ -478,3 +480,229 @@ class FoodTrackingViewTests(TestCase):
         detailed = response.context["detailed_consumption"]
         self.assertEqual(len(detailed), 1)
         self.assertEqual(detailed[0].user, self.user)
+
+
+class EstimateViewTests(TestCase):
+    """Tests for the AI estimate, recipe, log-estimate, and target views."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="estuser", password="testpass")
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username="estuser", password="testpass")
+
+    def test_estimate_requires_login(self):
+        self.client.logout()
+        response = self.client.post(reverse("food_tracking:estimate"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+    def test_estimate_requires_post(self):
+        response = self.client.get(reverse("food_tracking:estimate"))
+        self.assertEqual(response.status_code, 405)
+
+    @patch("food_tracking.views.estimation.estimate_from_text")
+    def test_estimate_from_text_success(self, mock_estimate):
+        mock_estimate.return_value = EstimateResult(
+            description="Apple", calories=95, confidence="high", items=[]
+        )
+        response = self.client.post(
+            reverse("food_tracking:estimate"), {"text": "one apple"}
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["estimate"]["calories"], 95)
+        mock_estimate.assert_called_once_with("one apple")
+
+    @patch("food_tracking.views.estimation.estimate_from_image")
+    def test_estimate_from_image_success(self, mock_estimate):
+        mock_estimate.return_value = EstimateResult(
+            description="Pizza", calories=400, confidence="medium", items=[]
+        )
+        upload = SimpleUploadedFile("meal.jpg", b"fakebytes", content_type="image/jpeg")
+        response = self.client.post(
+            reverse("food_tracking:estimate"), {"image": upload, "note": "big slice"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        args, _ = mock_estimate.call_args
+        self.assertEqual(args[1], "image/jpeg")
+        self.assertEqual(args[2], "big slice")
+
+    def test_estimate_without_input_returns_400(self):
+        response = self.client.post(reverse("food_tracking:estimate"))
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+
+    @patch("food_tracking.views.estimation.estimate_from_text")
+    def test_estimate_value_error_returns_400(self, mock_estimate):
+        mock_estimate.side_effect = ValueError("bad")
+        response = self.client.post(
+            reverse("food_tracking:estimate"), {"text": "weird"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    @patch("food_tracking.views.estimation.estimate_recipe")
+    def test_estimate_recipe_success(self, mock_estimate):
+        mock_estimate.return_value = EstimateResult(
+            description="Lasagna portion", calories=500, confidence="medium", items=[]
+        )
+        response = self.client.post(
+            reverse("food_tracking:estimate_recipe"),
+            {"recipe_text": "big recipe", "fraction": "0.25"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        mock_estimate.assert_called_once_with("big recipe", 0.25)
+
+    def test_estimate_recipe_missing_text_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:estimate_recipe"), {"fraction": "0.5"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_estimate_recipe_invalid_fraction_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:estimate_recipe"),
+            {"recipe_text": "x", "fraction": "abc"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_estimate_recipe_out_of_range_fraction_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:estimate_recipe"),
+            {"recipe_text": "x", "fraction": "2"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_log_estimate_creates_ad_hoc_consumption(self):
+        response = self.client.post(
+            reverse("food_tracking:log_estimate"),
+            {"description": "Burrito", "calories": "650"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        consumption = Consumption.objects.get(user=self.user, description="Burrito")
+        self.assertIsNone(consumption.food)
+        self.assertEqual(consumption.calories, Decimal("650"))
+        self.assertEqual(consumption.total_calories(), Decimal("650"))
+
+    def test_log_estimate_missing_description_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:log_estimate"), {"calories": "100"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_log_estimate_invalid_calories_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:log_estimate"),
+            {"description": "x", "calories": "abc"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_log_estimate_negative_calories_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:log_estimate"),
+            {"description": "x", "calories": "-5"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_set_target_creates_target(self):
+        response = self.client.post(
+            reverse("food_tracking:set_target"), {"daily_calorie_target": "1800"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        target = CalorieTarget.objects.get(user=self.user)
+        self.assertEqual(target.daily_calorie_target, 1800)
+
+    def test_set_target_updates_existing(self):
+        CalorieTarget.objects.create(user=self.user, daily_calorie_target=2000)
+        self.client.post(
+            reverse("food_tracking:set_target"), {"daily_calorie_target": "2500"}
+        )
+        target = CalorieTarget.objects.get(user=self.user)
+        self.assertEqual(target.daily_calorie_target, 2500)
+
+    def test_set_target_invalid_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:set_target"), {"daily_calorie_target": "abc"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_set_target_non_positive_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:set_target"), {"daily_calorie_target": "0"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_home_includes_target_and_remaining(self):
+        CalorieTarget.objects.create(user=self.user, daily_calorie_target=2000)
+        Consumption.objects.create(
+            user=self.user, food=None, description="Snack", calories=Decimal("300")
+        )
+        response = self.client.get(reverse("food_tracking:home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["daily_target"], 2000)
+        self.assertEqual(response.context["remaining_calories"], Decimal("1700"))
+
+    def test_home_creates_default_target(self):
+        response = self.client.get(reverse("food_tracking:home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(CalorieTarget.objects.filter(user=self.user).exists())
+
+
+class EstimateViewErrorPathTests(TestCase):
+    """Tests for the defensive 500 handlers on the new views."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="erruser", password="testpass")
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username="erruser", password="testpass")
+
+    @patch("food_tracking.views.estimation.estimate_from_text")
+    def test_estimate_unexpected_error_returns_500(self, mock_estimate):
+        mock_estimate.side_effect = RuntimeError("boom")
+        response = self.client.post(reverse("food_tracking:estimate"), {"text": "food"})
+        self.assertEqual(response.status_code, 500)
+
+    @patch("food_tracking.views.estimation.estimate_recipe")
+    def test_estimate_recipe_unexpected_error_returns_500(self, mock_estimate):
+        mock_estimate.side_effect = RuntimeError("boom")
+        response = self.client.post(
+            reverse("food_tracking:estimate_recipe"),
+            {"recipe_text": "r", "fraction": "0.5"},
+        )
+        self.assertEqual(response.status_code, 500)
+
+    @patch("food_tracking.views.estimation.estimate_recipe")
+    def test_estimate_recipe_value_error_returns_400(self, mock_estimate):
+        mock_estimate.side_effect = ValueError("bad")
+        response = self.client.post(
+            reverse("food_tracking:estimate_recipe"),
+            {"recipe_text": "r", "fraction": "0.5"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    @patch("food_tracking.views.Consumption.objects.create")
+    def test_log_estimate_unexpected_error_returns_500(self, mock_create):
+        mock_create.side_effect = RuntimeError("boom")
+        response = self.client.post(
+            reverse("food_tracking:log_estimate"),
+            {"description": "x", "calories": "100"},
+        )
+        self.assertEqual(response.status_code, 500)
+
+    @patch("food_tracking.views.CalorieTarget.objects.update_or_create")
+    def test_set_target_unexpected_error_returns_500(self, mock_update):
+        mock_update.side_effect = RuntimeError("boom")
+        response = self.client.post(
+            reverse("food_tracking:set_target"), {"daily_calorie_target": "1800"}
+        )
+        self.assertEqual(response.status_code, 500)
