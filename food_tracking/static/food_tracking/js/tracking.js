@@ -127,17 +127,49 @@ function logFood(foodId, quantity = 1.0) {
 /* ------------------------------------------------------------------ */
 
 /**
- * POST a FormData payload with CSRF protection and return the parsed JSON.
+ * POST a FormData payload with CSRF protection. Resolves to parsed JSON on
+ * success; otherwise rejects with an Error carrying a specific message (server
+ * error text, a 413 "too large" hint, or a network message) so the UI can tell
+ * the user what actually went wrong instead of a generic failure.
  * @param {string} url
  * @param {FormData} formData
  * @returns {Promise<Object>}
  */
-function postForm(url, formData) {
-    return fetch(url, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': getCookie('csrftoken') },
-        body: formData,
-    }).then(response => response.json());
+async function postForm(url, formData) {
+    let response;
+    try {
+        response = await fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData,
+        });
+    } catch (e) {
+        throw new Error('Network error — check your connection.');
+    }
+
+    // Read as text first: error responses (413, 500 pages) are often HTML.
+    const bodyText = await response.text();
+    let data = null;
+    try {
+        data = JSON.parse(bodyText);
+    } catch (e) {
+        data = null;
+    }
+
+    if (!response.ok) {
+        if (data && data.error) {
+            throw new Error(data.error);
+        }
+        if (response.status === 413) {
+            throw new Error('The photo is too large for the server to accept.');
+        }
+        throw new Error('Server error (HTTP ' + response.status + ').');
+    }
+
+    if (!data) {
+        throw new Error('Unexpected response from the server.');
+    }
+    return data;
 }
 
 /**
@@ -191,23 +223,75 @@ function handleEstimateResponse(data) {
     }
 }
 
+// Photos are downscaled to this longest-edge size before upload. Full iPhone
+// photos are 2-5 MB (rejected by the server's upload limit) and far larger than
+// the model needs; ~1024px keeps the file small and the food clearly legible.
+const MAX_IMAGE_DIMENSION = 1024;
+const IMAGE_JPEG_QUALITY = 0.8;
+
 /**
- * Estimate calories from a selected photo.
+ * Downscale/re-encode an image file to a compact JPEG Blob via canvas. Also
+ * normalizes formats (e.g. HEIC that slips through) to JPEG, which the backend
+ * accepts.
+ * @param {File} file
+ * @returns {Promise<Blob>}
+ */
+function resizeImageFile(file) {
+    return new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            let { width, height } = img;
+            if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+                if (width >= height) {
+                    height = Math.round((height * MAX_IMAGE_DIMENSION) / width);
+                    width = MAX_IMAGE_DIMENSION;
+                } else {
+                    width = Math.round((width * MAX_IMAGE_DIMENSION) / height);
+                    height = MAX_IMAGE_DIMENSION;
+                }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            canvas.toBlob(
+                blob => (blob ? resolve(blob) : reject(new Error('Could not process the photo.'))),
+                'image/jpeg',
+                IMAGE_JPEG_QUALITY
+            );
+        };
+        img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error('Could not read that photo. Try a JPEG or PNG.'));
+        };
+        img.src = objectUrl;
+    });
+}
+
+/**
+ * Estimate calories from a selected photo (downscaled before upload).
  * @param {HTMLInputElement} input - The file input.
  */
 function estimateFromPhoto(input) {
     if (!input.files || input.files.length === 0) {
         return;
     }
-    const formData = new FormData();
-    formData.append('image', input.files[0]);
-    formData.append('note', document.getElementById('text-input').value.trim());
-
-    setEstimateStatus('Estimating from photo…');
-    postForm('/food/estimate/', formData)
-        .then(handleEstimateResponse)
-        .catch(() => setEstimateStatus('Failed to estimate. Try again.'));
+    const file = input.files[0];
     input.value = '';
+
+    setEstimateStatus('Processing photo…');
+    resizeImageFile(file)
+        .then(blob => {
+            const formData = new FormData();
+            formData.append('image', blob, 'photo.jpg');
+            formData.append('note', document.getElementById('text-input').value.trim());
+            setEstimateStatus('Estimating from photo…');
+            return postForm('/food/estimate/', formData);
+        })
+        .then(handleEstimateResponse)
+        .catch(err => setEstimateStatus('Estimate failed: ' + err.message));
 }
 
 /**
@@ -225,7 +309,7 @@ function estimateFromText() {
     setEstimateStatus('Estimating…');
     postForm('/food/estimate/', formData)
         .then(handleEstimateResponse)
-        .catch(() => setEstimateStatus('Failed to estimate. Try again.'));
+        .catch(err => setEstimateStatus('Estimate failed: ' + err.message));
 }
 
 /**
@@ -245,7 +329,7 @@ function estimateFromRecipe() {
     setEstimateStatus('Estimating recipe…');
     postForm('/food/estimate-recipe/', formData)
         .then(handleEstimateResponse)
-        .catch(() => setEstimateStatus('Failed to estimate. Try again.'));
+        .catch(err => setEstimateStatus('Estimate failed: ' + err.message));
 }
 
 /**

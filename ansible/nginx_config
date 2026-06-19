@@ -1,6 +1,8 @@
 server {
     listen 80;
     server_name paulcarroll.site www.paulcarroll.site 44.230.244.94;
+    # Allow food-photo uploads; the client downscales to ~150KB, but give margin.
+    client_max_body_size 10M;
     location /static/ {
         root /home/{{ username }}/source;
     }
