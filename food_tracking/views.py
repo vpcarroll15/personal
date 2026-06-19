@@ -1,10 +1,10 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
-from typing import Any
 
 import pytz
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.db.models import Sum
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
@@ -132,7 +132,7 @@ def home(request: HttpRequest) -> HttpResponse:
     return render(request, "food_tracking/home.html", context)
 
 
-def get_or_create_target(user: Any) -> CalorieTarget:
+def get_or_create_target(user: User) -> CalorieTarget:
     """Return the user's calorie target, creating a default if absent."""
     target, _ = CalorieTarget.objects.get_or_create(user=user)
     return target
