@@ -706,3 +706,80 @@ class EstimateViewErrorPathTests(TestCase):
             reverse("food_tracking:set_target"), {"daily_calorie_target": "1800"}
         )
         self.assertEqual(response.status_code, 500)
+
+
+class LogExerciseViewTests(TestCase):
+    """Tests for logging exercise as negative-calorie consumptions."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="exuser", password="testpass")
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username="exuser", password="testpass")
+
+    def test_requires_login(self):
+        self.client.logout()
+        response = self.client.post(reverse("food_tracking:log_exercise"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+    def test_requires_post(self):
+        response = self.client.get(reverse("food_tracking:log_exercise"))
+        self.assertEqual(response.status_code, 405)
+
+    def test_logs_negative_consumption(self):
+        response = self.client.post(
+            reverse("food_tracking:log_exercise"),
+            {"description": "30 min run", "calories_burned": "300"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        consumption = Consumption.objects.get(user=self.user, description="30 min run")
+        self.assertIsNone(consumption.food)
+        self.assertEqual(consumption.calories, Decimal("-300"))
+        self.assertEqual(consumption.total_calories(), Decimal("-300"))
+
+    def test_missing_description_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:log_exercise"), {"calories_burned": "200"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_invalid_calories_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:log_exercise"),
+            {"description": "run", "calories_burned": "abc"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_non_positive_calories_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:log_exercise"),
+            {"description": "run", "calories_burned": "0"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    @patch("food_tracking.views.Consumption.objects.create")
+    def test_unexpected_error_returns_500(self, mock_create):
+        mock_create.side_effect = RuntimeError("boom")
+        response = self.client.post(
+            reverse("food_tracking:log_exercise"),
+            {"description": "run", "calories_burned": "200"},
+        )
+        self.assertEqual(response.status_code, 500)
+
+    def test_exercise_increases_remaining(self):
+        CalorieTarget.objects.create(user=self.user, daily_calorie_target=2000)
+        Consumption.objects.create(
+            user=self.user, food=None, description="Lunch", calories=Decimal("800")
+        )
+        self.client.post(
+            reverse("food_tracking:log_exercise"),
+            {"description": "run", "calories_burned": "300"},
+        )
+        response = self.client.get(reverse("food_tracking:home"))
+        # net = 800 - 300 = 500; remaining = 2000 - 500 = 1500
+        self.assertEqual(response.context["today_total_calories"], Decimal("500"))
+        self.assertEqual(response.context["remaining_calories"], Decimal("1500"))

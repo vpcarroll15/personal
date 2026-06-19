@@ -4,8 +4,8 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=9">
-<script src="{% static 'food_tracking/js/tracking.js' %}?v=8"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=10">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=9"></script>
 {% endblock %}
 
 {% block content %}
@@ -16,7 +16,7 @@
     <div class="budget-banner">
         <div class="budget-cell">
             <div class="budget-value">{{ today_total_calories|floatformat:0 }}</div>
-            <div class="budget-label">eaten</div>
+            <div class="budget-label">net</div>
         </div>
         <div class="budget-cell">
             <div class="budget-value {% if remaining_calories < 0 %}over-budget{% endif %}"
@@ -58,6 +58,15 @@
                     <input type="number" id="fraction-input" min="0.01" max="1" step="0.05" value="0.25">
                 </label>
                 <button class="estimate-button" onclick="estimateFromRecipe()">Estimate</button>
+            </div>
+        </details>
+
+        <details class="exercise-details">
+            <summary>🔥 Log exercise</summary>
+            <div class="exercise-row">
+                <input type="text" id="exercise-input" placeholder="e.g. 30 min run">
+                <input type="number" id="exercise-calories" min="1" step="1" placeholder="Calories burned">
+                <button class="estimate-button" onclick="logExercise()">Log</button>
             </div>
         </details>
 

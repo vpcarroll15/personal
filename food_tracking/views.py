@@ -353,3 +353,47 @@ def set_target(request: HttpRequest) -> JsonResponse:
         return JsonResponse({"success": True, "target": target.to_dict_for_api()})
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def log_exercise(request: HttpRequest) -> JsonResponse:
+    """Log exercise as a negative-calorie Consumption.
+
+    The user enters calories *burned* as a positive number; we store it negated
+    so it subtracts from the day's net total.
+    """
+    try:
+        description = request.POST.get("description", "").strip()
+        burned_raw = request.POST.get("calories_burned", "")
+
+        if not description:
+            return JsonResponse(
+                {"success": False, "error": "Missing description."}, status=400
+            )
+
+        try:
+            burned = Decimal(burned_raw)
+        except (InvalidOperation, TypeError):
+            return JsonResponse(
+                {"success": False, "error": "Invalid calories."}, status=400
+            )
+
+        if burned <= 0:
+            return JsonResponse(
+                {"success": False, "error": "Calories burned must be positive."},
+                status=400,
+            )
+
+        consumption = Consumption.objects.create(
+            user=request.user,
+            food=None,
+            description=description,
+            calories=-burned,
+            notes=request.POST.get("notes", ""),
+        )
+        return JsonResponse(
+            {"success": True, "consumption": consumption.to_dict_for_api()}
+        )
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)

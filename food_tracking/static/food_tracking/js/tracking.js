@@ -303,3 +303,32 @@ function editTarget() {
         })
         .catch(() => alert('Failed to update target. Please try again.'));
 }
+
+/**
+ * Log exercise as calories burned (stored as a negative consumption).
+ */
+function logExercise() {
+    const description = document.getElementById('exercise-input').value.trim();
+    const burned = document.getElementById('exercise-calories').value;
+    if (!description) {
+        alert('Describe the exercise.');
+        return;
+    }
+    if (!burned || parseFloat(burned) <= 0) {
+        alert('Enter calories burned.');
+        return;
+    }
+    const formData = new FormData();
+    formData.append('description', description);
+    formData.append('calories_burned', burned);
+
+    postForm('/food/log-exercise/', formData)
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Could not log exercise.'));
+            }
+        })
+        .catch(() => alert('Failed to log exercise. Please try again.'));
+}

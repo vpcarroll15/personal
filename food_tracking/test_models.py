@@ -265,3 +265,22 @@ class AdHocConsumptionModelTests(TestCase):
             user=self.user, food=None, description="Tacos", calories=Decimal("400")
         )
         self.assertIn("Tacos", str(consumption))
+
+
+class ExerciseConsumptionModelTests(TestCase):
+    """Tests for negative-calorie (exercise) consumptions."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="exmodeluser", password="x")
+
+    def test_negative_consumption_uses_fire_icon(self):
+        consumption = Consumption.objects.create(
+            user=self.user,
+            food=None,
+            description="30 min run",
+            calories=Decimal("-300"),
+        )
+        self.assertEqual(consumption.display_icon(), "🔥")
+        self.assertEqual(consumption.display_name(), "30 min run")
+        self.assertEqual(consumption.total_calories(), Decimal("-300"))
