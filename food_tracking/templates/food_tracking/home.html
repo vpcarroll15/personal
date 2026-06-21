@@ -49,11 +49,16 @@
     <!-- AI estimate -->
     <div class="estimate-panel">
         <h2>Quick log</h2>
-        <div class="estimate-actions">
+        <div class="estimate-actions" style="display: flex; gap: 10px;">
             <label class="estimate-button" title="Take a photo" aria-label="Take a photo">
                 📷
                 <input type="file" accept="image/*" capture="environment"
                        id="photo-input" onchange="estimateFromPhoto(this)" hidden>
+            </label>
+            <label class="estimate-button" title="Choose an existing photo" aria-label="Choose an existing photo">
+                🖼️
+                <input type="file" accept="image/*"
+                       id="photo-library-input" onchange="estimateFromPhoto(this)" hidden>
             </label>
         </div>
 
