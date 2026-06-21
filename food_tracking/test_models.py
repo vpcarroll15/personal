@@ -189,21 +189,29 @@ class CalorieTargetModelTests(TestCase):
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="targetuser", password="x")
         cls.target = CalorieTarget.objects.create(
-            user=cls.user, daily_calorie_target=1800
+            user=cls.user, daily_calorie_target=1800, goal_deficit=500
         )
 
     def test_str(self):
-        self.assertEqual(str(self.target), "targetuser: 1800 cal/day")
+        self.assertEqual(
+            str(self.target), "targetuser: 1800 base cal/day (-500 deficit)"
+        )
 
     def test_default_target(self):
         other = User.objects.create_user(username="defaultuser", password="x")
         target = CalorieTarget.objects.create(user=other)
         self.assertEqual(target.daily_calorie_target, 2000)
 
+    def test_default_goal_deficit(self):
+        other = User.objects.create_user(username="deficituser", password="x")
+        target = CalorieTarget.objects.create(user=other)
+        self.assertEqual(target.goal_deficit, 500)
+
     def test_to_dict_for_api(self):
         data = self.target.to_dict_for_api()
         self.assertEqual(data["user"], "targetuser")
         self.assertEqual(data["daily_calorie_target"], 1800)
+        self.assertEqual(data["goal_deficit"], 500)
 
 
 class DailyActiveCaloriesModelTests(TestCase):

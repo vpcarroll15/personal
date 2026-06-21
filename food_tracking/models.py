@@ -7,15 +7,24 @@ from django.utils import timezone
 
 # Constants
 DEFAULT_DAILY_CALORIE_TARGET = 2000
+DEFAULT_GOAL_DEFICIT = 500
 
 
 class CalorieTarget(models.Model):
-    """Stores a user's single fixed daily calorie target."""
+    """Stores a user's base rate and goal deficit for the daily budget.
+
+    The day's eating budget is base_rate + active_calories - goal_deficit, where
+    daily_calorie_target is the resting base rate (e.g. DEXA/BodySpec RMR).
+    """
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     daily_calorie_target = models.PositiveIntegerField(
         default=DEFAULT_DAILY_CALORIE_TARGET,
-        help_text="Calories the user aims to stay within each day.",
+        help_text="Resting base rate (e.g. RMR) the budget is built on top of.",
+    )
+    goal_deficit = models.PositiveIntegerField(
+        default=DEFAULT_GOAL_DEFICIT,
+        help_text="Daily calorie deficit to aim for, subtracted from the budget.",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -26,7 +35,10 @@ class CalorieTarget(models.Model):
         verbose_name_plural = "Calorie Targets"
 
     def __str__(self) -> str:
-        return f"{self.user.username}: {self.daily_calorie_target} cal/day"
+        return (
+            f"{self.user.username}: {self.daily_calorie_target} base cal/day "
+            f"(-{self.goal_deficit} deficit)"
+        )
 
     def to_dict_for_api(self) -> dict[str, Any]:
         """Serialize target for API responses."""
@@ -34,6 +46,7 @@ class CalorieTarget(models.Model):
             "id": self.id,
             "user": self.user.username,
             "daily_calorie_target": self.daily_calorie_target,
+            "goal_deficit": self.goal_deficit,
         }
 
 

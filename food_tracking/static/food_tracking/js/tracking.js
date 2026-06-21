@@ -389,6 +389,29 @@ function editTarget() {
 }
 
 /**
+ * Prompt for and save the daily goal deficit.
+ */
+function editGoalDeficit() {
+    const current = document.getElementById('deficit-value').textContent.trim();
+    const value = prompt('Goal deficit (calories/day):', current);
+    if (value === null) {
+        return;
+    }
+    const formData = new FormData();
+    formData.append('goal_deficit', value);
+
+    postForm('/food/deficit/', formData)
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Could not update deficit.'));
+            }
+        })
+        .catch(() => alert('Failed to update deficit. Please try again.'));
+}
+
+/**
  * Prompt for and save today's Apple Watch active (Move ring) calories.
  */
 function editActiveCalories() {

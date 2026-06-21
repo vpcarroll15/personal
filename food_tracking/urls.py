@@ -13,4 +13,5 @@ urlpatterns = [
     path("log-estimate/", views.log_estimate, name="log_estimate"),
     path("active/", views.set_active_calories, name="set_active_calories"),
     path("target/", views.set_target, name="set_target"),
+    path("deficit/", views.set_goal_deficit, name="set_goal_deficit"),
 ]

@@ -645,15 +645,17 @@ class EstimateViewTests(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_home_includes_target_and_remaining(self):
-        CalorieTarget.objects.create(user=self.user, daily_calorie_target=2000)
+        CalorieTarget.objects.create(
+            user=self.user, daily_calorie_target=2000, goal_deficit=0
+        )
         Consumption.objects.create(
             user=self.user, food=None, description="Snack", calories=Decimal("300")
         )
         response = self.client.get(reverse("food_tracking:home"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["base_rate"], 2000)
-        # No active-calories history: budget = 2000 base + 500 default estimate.
-        # remaining = 2500 - 300 = 2200.
+        # No active-calories history: budget = 2000 base + 500 default estimate
+        # - 0 deficit. remaining = 2500 - 300 = 2200.
         self.assertEqual(response.context["remaining_calories"], Decimal("2200"))
 
     def test_home_creates_default_target(self):
@@ -711,6 +713,75 @@ class EstimateViewErrorPathTests(TestCase):
         mock_update.side_effect = RuntimeError("boom")
         response = self.client.post(
             reverse("food_tracking:set_target"), {"daily_calorie_target": "1800"}
+        )
+        self.assertEqual(response.status_code, 500)
+
+
+class SetGoalDeficitViewTests(TestCase):
+    """Tests for setting the per-user goal deficit."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="defuser", password="testpass")
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username="defuser", password="testpass")
+
+    def test_requires_login(self):
+        self.client.logout()
+        response = self.client.post(reverse("food_tracking:set_goal_deficit"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+    def test_requires_post(self):
+        response = self.client.get(reverse("food_tracking:set_goal_deficit"))
+        self.assertEqual(response.status_code, 405)
+
+    def test_creates_target_with_deficit(self):
+        response = self.client.post(
+            reverse("food_tracking:set_goal_deficit"), {"goal_deficit": "750"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        self.assertEqual(CalorieTarget.objects.get(user=self.user).goal_deficit, 750)
+
+    def test_updates_existing_deficit(self):
+        CalorieTarget.objects.create(
+            user=self.user, daily_calorie_target=1800, goal_deficit=500
+        )
+        self.client.post(
+            reverse("food_tracking:set_goal_deficit"), {"goal_deficit": "300"}
+        )
+        target = CalorieTarget.objects.get(user=self.user)
+        self.assertEqual(target.goal_deficit, 300)
+        # Base rate is preserved when only the deficit changes.
+        self.assertEqual(target.daily_calorie_target, 1800)
+
+    def test_zero_deficit_allowed(self):
+        response = self.client.post(
+            reverse("food_tracking:set_goal_deficit"), {"goal_deficit": "0"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(CalorieTarget.objects.get(user=self.user).goal_deficit, 0)
+
+    def test_invalid_value_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:set_goal_deficit"), {"goal_deficit": "abc"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_negative_value_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:set_goal_deficit"), {"goal_deficit": "-100"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    @patch("food_tracking.views.CalorieTarget.objects.update_or_create")
+    def test_unexpected_error_returns_500(self, mock_update):
+        mock_update.side_effect = RuntimeError("boom")
+        response = self.client.post(
+            reverse("food_tracking:set_goal_deficit"), {"goal_deficit": "500"}
         )
         self.assertEqual(response.status_code, 500)
 
@@ -847,7 +918,9 @@ class SetActiveCaloriesViewTests(TestCase):
         self.assertEqual(response.status_code, 500)
 
     def test_active_calories_add_to_budget(self):
-        CalorieTarget.objects.create(user=self.user, daily_calorie_target=1800)
+        CalorieTarget.objects.create(
+            user=self.user, daily_calorie_target=1800, goal_deficit=300
+        )
         Consumption.objects.create(
             user=self.user, food=None, description="Lunch", calories=Decimal("800")
         )
@@ -855,18 +928,22 @@ class SetActiveCaloriesViewTests(TestCase):
             reverse("food_tracking:set_active_calories"), {"active_calories": "500"}
         )
         response = self.client.get(reverse("food_tracking:home"))
-        # budget = 1800 + 500 = 2300; remaining = 2300 - 800 = 1500
+        # budget = 1800 base + 500 active - 300 deficit = 2000; rem = 2000 - 800
         self.assertEqual(response.context["today_total_calories"], Decimal("800"))
         self.assertEqual(response.context["base_rate"], 1800)
         self.assertEqual(response.context["active_calories"], 500)
         self.assertFalse(response.context["active_is_estimate"])
-        self.assertEqual(response.context["effective_budget"], 2300)
-        self.assertEqual(response.context["remaining_calories"], Decimal("1500"))
+        self.assertEqual(response.context["goal_deficit"], 300)
+        self.assertEqual(response.context["effective_budget"], 2000)
+        self.assertEqual(response.context["remaining_calories"], Decimal("1200"))
 
     def test_home_uses_estimate_when_unlogged(self):
-        CalorieTarget.objects.create(user=self.user, daily_calorie_target=1800)
+        CalorieTarget.objects.create(
+            user=self.user, daily_calorie_target=1800, goal_deficit=500
+        )
         response = self.client.get(reverse("food_tracking:home"))
         # No history yet: falls back to the default estimate, flagged as estimate.
+        # budget = 1800 base + 500 estimate - 500 deficit = 1800.
         self.assertEqual(response.context["active_calories"], 500)
         self.assertTrue(response.context["active_is_estimate"])
-        self.assertEqual(response.context["effective_budget"], 2300)
+        self.assertEqual(response.context["effective_budget"], 1800)

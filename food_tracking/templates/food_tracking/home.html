@@ -4,8 +4,8 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=11">
-<script src="{% static 'food_tracking/js/tracking.js' %}?v=11"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=12">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=12"></script>
 {% endblock %}
 
 {% block content %}
@@ -31,6 +31,13 @@
                 <button class="link-button" onclick="editTarget()" title="Edit base rate">✎</button>
             </div>
             <div class="budget-label">base rate</div>
+        </div>
+        <div class="budget-cell">
+            <div class="budget-value">
+                <span id="deficit-value">{{ goal_deficit }}</span>
+                <button class="link-button" onclick="editGoalDeficit()" title="Edit goal deficit">✎</button>
+            </div>
+            <div class="budget-label">goal deficit</div>
         </div>
         <div class="budget-cell">
             <div class="budget-value {% if remaining_calories < 0 %}over-budget{% endif %}"

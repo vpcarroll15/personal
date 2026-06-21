@@ -150,12 +150,14 @@ def home(request: HttpRequest) -> HttpResponse:
 
     target = get_or_create_target(request.user)
     base_rate = target.daily_calorie_target
+    goal_deficit = target.goal_deficit
 
-    # Active calories (Apple Watch Move ring) layered on top of the base rate.
+    # Active calories (Apple Watch Move ring) layered on top of the base rate,
+    # less the goal deficit the user is aiming for.
     active_calories, active_is_estimate = get_active_calories_for_date(
         request.user, today_start.date()
     )
-    effective_budget = base_rate + active_calories
+    effective_budget = base_rate + active_calories - goal_deficit
     remaining_calories = effective_budget - today_total_calories
 
     context = {
@@ -165,6 +167,7 @@ def home(request: HttpRequest) -> HttpResponse:
         "base_rate": base_rate,
         "active_calories": active_calories,
         "active_is_estimate": active_is_estimate,
+        "goal_deficit": goal_deficit,
         "effective_budget": effective_budget,
         "remaining_calories": remaining_calories,
     }
@@ -388,6 +391,34 @@ def set_target(request: HttpRequest) -> JsonResponse:
         target, _ = CalorieTarget.objects.update_or_create(
             user=request.user,
             defaults={"daily_calorie_target": daily_target},
+        )
+        return JsonResponse({"success": True, "target": target.to_dict_for_api()})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def set_goal_deficit(request: HttpRequest) -> JsonResponse:
+    """Set the daily calorie deficit the user is aiming for."""
+    try:
+        deficit_raw = request.POST.get("goal_deficit", "")
+        try:
+            goal_deficit = int(deficit_raw)
+        except (TypeError, ValueError):
+            return JsonResponse(
+                {"success": False, "error": "Invalid deficit."}, status=400
+            )
+
+        if goal_deficit < 0:
+            return JsonResponse(
+                {"success": False, "error": "Deficit must be non-negative."},
+                status=400,
+            )
+
+        target, _ = CalorieTarget.objects.update_or_create(
+            user=request.user,
+            defaults={"goal_deficit": goal_deficit},
         )
         return JsonResponse({"success": True, "target": target.to_dict_for_api()})
     except Exception as e:
