@@ -4,45 +4,50 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=13">
-<script src="{% static 'food_tracking/js/tracking.js' %}?v=13"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=14">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=14"></script>
 {% endblock %}
 
 {% block content %}
 <div style="padding: 20px;">
     <h1>Food Tracking</h1>
 
-    <!-- Daily budget -->
-    <div class="budget-banner">
-        <div class="budget-cell">
-            <div class="budget-value">{{ today_total_calories|floatformat:0 }}</div>
-            <div class="budget-label">net</div>
-        </div>
-        <div class="budget-cell">
-            <div class="budget-value">
-                <span id="active-value">{% if active_is_estimate %}~{% endif %}{{ active_calories }}</span>
-                <button class="link-button" onclick="editActiveCalories()" title="Log active calories">✎</button>
-            </div>
-            <div class="budget-label">active{% if active_is_estimate %} (est.){% endif %}</div>
-        </div>
-        <div class="budget-cell">
+    <!-- Daily budget, read as an equation:
+         base rate + active - eaten - target deficit = net -->
+    <div class="budget-banner equation">
+        <div class="budget-cell group-expend">
             <div class="budget-value">
                 <span id="target-value">{{ base_rate }}</span>
                 <button class="link-button" onclick="editTarget()" title="Edit base rate">✎</button>
             </div>
             <div class="budget-label">base rate</div>
         </div>
-        <div class="budget-cell">
+        <div class="budget-op">+</div>
+        <div class="budget-cell group-expend">
+            <div class="budget-value">
+                <span id="active-value">{% if active_is_estimate %}~{% endif %}{{ active_calories }}</span>
+                <button class="link-button" onclick="editActiveCalories()" title="Log active calories">✎</button>
+            </div>
+            <div class="budget-label">active{% if active_is_estimate %} (est.){% endif %}</div>
+        </div>
+        <div class="budget-op">−</div>
+        <div class="budget-cell group-intake">
+            <div class="budget-value">{{ today_total_calories|floatformat:0 }}</div>
+            <div class="budget-label">eaten</div>
+        </div>
+        <div class="budget-op">−</div>
+        <div class="budget-cell group-intake">
             <div class="budget-value">
                 <span id="deficit-value">{{ goal_deficit }}</span>
                 <button class="link-button" onclick="editGoalDeficit()" title="Edit goal deficit">✎</button>
             </div>
-            <div class="budget-label">goal deficit</div>
+            <div class="budget-label">target deficit</div>
         </div>
+        <div class="budget-op">=</div>
         <div class="budget-cell">
-            <div class="budget-value {% if remaining_calories < 0 %}over-budget{% endif %}"
+            <div class="budget-value {% if remaining_calories < 0 %}result-neg{% else %}result-pos{% endif %}"
                  id="remaining-value">{{ remaining_calories|floatformat:0 }}</div>
-            <div class="budget-label">remaining</div>
+            <div class="budget-label result-label">net</div>
         </div>
     </div>
 
