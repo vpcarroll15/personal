@@ -5,7 +5,7 @@ from food_tracking.models import CalorieTarget, Consumption, DailyActiveCalories
 
 @admin.register(CalorieTarget)
 class CalorieTargetAdmin(admin.ModelAdmin):
-    list_display = ["user", "daily_calorie_target", "updated_at"]
+    list_display = ["user", "daily_calorie_target", "goal_deficit", "updated_at"]
     search_fields = ["user__username"]
 
 
