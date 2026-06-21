@@ -4,8 +4,8 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=12">
-<script src="{% static 'food_tracking/js/tracking.js' %}?v=12"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=13">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=13"></script>
 {% endblock %}
 
 {% block content %}
@@ -120,7 +120,7 @@
 
     <h2 style="margin-top: 40px;">Today's Consumption</h2>
     {% if today_consumption %}
-    <table class="checkered-blue">
+    <table class="checkered-blue consumption-table">
         <thead>
             <tr>
                 <th>Food</th>
