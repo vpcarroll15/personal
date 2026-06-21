@@ -272,6 +272,21 @@
     color: #999;
 }
 
+/* Forced line breaks: on a phone, split the equation into its natural groups —
+   expenditure (purple) / intake (blue) / net — one per line. No effect on wider
+   screens, where the whole equation fits on one line. */
+.budget-break {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .budget-break {
+        display: block;
+        flex-basis: 100%;
+        height: 0;
+    }
+}
+
 /* Expenditure group (purple) */
 .group-expend .budget-value {
     color: #6a1b9a;

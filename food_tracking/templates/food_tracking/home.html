@@ -4,8 +4,8 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=14">
-<script src="{% static 'food_tracking/js/tracking.js' %}?v=14"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=15">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=15"></script>
 {% endblock %}
 
 {% block content %}
@@ -30,6 +30,7 @@
             </div>
             <div class="budget-label">active{% if active_is_estimate %} (est.){% endif %}</div>
         </div>
+        <div class="budget-break"></div>
         <div class="budget-op">−</div>
         <div class="budget-cell group-intake">
             <div class="budget-value">{{ today_total_calories|floatformat:0 }}</div>
@@ -43,6 +44,7 @@
             </div>
             <div class="budget-label">target deficit</div>
         </div>
+        <div class="budget-break"></div>
         <div class="budget-op">=</div>
         <div class="budget-cell">
             <div class="budget-value {% if remaining_calories < 0 %}result-neg{% else %}result-pos{% endif %}"
