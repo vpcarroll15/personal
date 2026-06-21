@@ -56,10 +56,9 @@ class DailyActiveCalories(models.Model):
         ordering = ["-date"]
         verbose_name = "Daily Active Calories"
         verbose_name_plural = "Daily Active Calories"
+        # The unique (user, date) index also serves exact-day lookups, the
+        # 14-day range scan, and the -date ordering, so no extra index is needed.
         unique_together = ("user", "date")
-        indexes = [
-            models.Index(fields=["user", "-date"]),
-        ]
 
     def __str__(self) -> str:
         return f"{self.user.username}: {self.active_calories} active cal on {self.date}"
