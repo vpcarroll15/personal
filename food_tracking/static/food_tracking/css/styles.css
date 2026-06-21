@@ -196,6 +196,36 @@
 }
 
 /* ---------------------------------------------------------------- */
+/* Today's Consumption table                                        */
+/* ---------------------------------------------------------------- */
+/* The shared .checkered-blue rules force every cell to nowrap/ellipsis with
+   max-width:1px, which truncates the food name with "…". Let the food-name
+   column wrap fully at all widths instead of truncating. */
+.consumption-table td:first-child {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    max-width: none;
+    word-break: break-word;
+}
+
+/* On a phone there isn't room for everything: drop the Quantity column and
+   keep Calories + delete compact so the food name gets the space. */
+@media (max-width: 600px) {
+    .consumption-table th:nth-child(2),
+    .consumption-table td:nth-child(2) {
+        display: none;
+    }
+
+    .consumption-table th:nth-child(3),
+    .consumption-table td:nth-child(3) {
+        width: 1%;
+        white-space: nowrap;
+        text-align: right;
+    }
+}
+
+/* ---------------------------------------------------------------- */
 /* Daily budget banner                                              */
 /* ---------------------------------------------------------------- */
 .budget-banner {
