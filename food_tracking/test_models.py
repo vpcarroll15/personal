@@ -1,13 +1,15 @@
 """Unit tests for food_tracking app models."""
 
+from datetime import date
 from decimal import Decimal
 
 from django.contrib.auth.models import User
+from django.db import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 
-from food_tracking.models import CalorieTarget, Consumption, Food
+from food_tracking.models import CalorieTarget, Consumption, DailyActiveCalories, Food
 
 
 class FoodModelTests(TestCase):
@@ -202,6 +204,32 @@ class CalorieTargetModelTests(TestCase):
         data = self.target.to_dict_for_api()
         self.assertEqual(data["user"], "targetuser")
         self.assertEqual(data["daily_calorie_target"], 1800)
+
+
+class DailyActiveCaloriesModelTests(TestCase):
+    """Tests for the DailyActiveCalories model."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="activeuser", password="x")
+        cls.entry = DailyActiveCalories.objects.create(
+            user=cls.user, date=date(2026, 6, 20), active_calories=520
+        )
+
+    def test_str(self):
+        self.assertEqual(str(self.entry), "activeuser: 520 active cal on 2026-06-20")
+
+    def test_to_dict_for_api(self):
+        data = self.entry.to_dict_for_api()
+        self.assertEqual(data["user"], "activeuser")
+        self.assertEqual(data["date"], "2026-06-20")
+        self.assertEqual(data["active_calories"], 520)
+
+    def test_unique_per_user_per_day(self):
+        with self.assertRaises(IntegrityError):
+            DailyActiveCalories.objects.create(
+                user=self.user, date=date(2026, 6, 20), active_calories=600
+            )
 
 
 class AdHocConsumptionModelTests(TestCase):

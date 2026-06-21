@@ -370,7 +370,7 @@ function cancelEstimate() {
  */
 function editTarget() {
     const current = document.getElementById('target-value').textContent.trim();
-    const value = prompt('Daily calorie target:', current);
+    const value = prompt('Base rate (resting calories):', current);
     if (value === null) {
         return;
     }
@@ -389,30 +389,24 @@ function editTarget() {
 }
 
 /**
- * Log exercise as calories burned (stored as a negative consumption).
+ * Prompt for and save today's Apple Watch active (Move ring) calories.
  */
-function logExercise() {
-    const description = document.getElementById('exercise-input').value.trim();
-    const burned = document.getElementById('exercise-calories').value;
-    if (!description) {
-        alert('Describe the exercise.');
-        return;
-    }
-    if (!burned || parseFloat(burned) <= 0) {
-        alert('Enter calories burned.');
+function editActiveCalories() {
+    const current = document.getElementById('active-value').textContent.trim().replace('~', '');
+    const value = prompt('Active Calories:', current);
+    if (value === null) {
         return;
     }
     const formData = new FormData();
-    formData.append('description', description);
-    formData.append('calories_burned', burned);
+    formData.append('active_calories', value);
 
-    postForm('/food/log-exercise/', formData)
+    postForm('/food/active/', formData)
         .then(data => {
             if (data.success) {
                 location.reload();
             } else {
-                alert('Error: ' + (data.error || 'Could not log exercise.'));
+                alert('Error: ' + (data.error || 'Could not update active calories.'));
             }
         })
-        .catch(() => alert('Failed to log exercise. Please try again.'));
+        .catch(() => alert('Failed to update active calories. Please try again.'));
 }

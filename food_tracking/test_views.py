@@ -1,5 +1,6 @@
 """Unit tests for food_tracking app views."""
 
+from datetime import date, timedelta
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -11,8 +12,12 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from food_tracking.estimation import EstimateResult
-from food_tracking.models import CalorieTarget, Consumption, Food
-from food_tracking.views import calculate_totals_by_period, get_active_foods
+from food_tracking.models import CalorieTarget, Consumption, DailyActiveCalories, Food
+from food_tracking.views import (
+    calculate_totals_by_period,
+    get_active_calories_for_date,
+    get_active_foods,
+)
 
 
 class HelperFunctionTests(TestCase):
@@ -646,8 +651,10 @@ class EstimateViewTests(TestCase):
         )
         response = self.client.get(reverse("food_tracking:home"))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["daily_target"], 2000)
-        self.assertEqual(response.context["remaining_calories"], Decimal("1700"))
+        self.assertEqual(response.context["base_rate"], 2000)
+        # No active-calories history: budget = 2000 base + 500 default estimate.
+        # remaining = 2500 - 300 = 2200.
+        self.assertEqual(response.context["remaining_calories"], Decimal("2200"))
 
     def test_home_creates_default_target(self):
         response = self.client.get(reverse("food_tracking:home"))
@@ -708,78 +715,158 @@ class EstimateViewErrorPathTests(TestCase):
         self.assertEqual(response.status_code, 500)
 
 
-class LogExerciseViewTests(TestCase):
-    """Tests for logging exercise as negative-calorie consumptions."""
+class GetActiveCaloriesForDateTests(TestCase):
+    """Tests for the active-calories estimation helper."""
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(username="exuser", password="testpass")
+        cls.user = User.objects.create_user(username="acuser", password="testpass")
+
+    def test_logged_day_returns_value_not_estimate(self):
+        day = date(2026, 6, 20)
+        DailyActiveCalories.objects.create(
+            user=self.user, date=day, active_calories=512
+        )
+        value, is_estimate = get_active_calories_for_date(self.user, day)
+        self.assertEqual(value, 512)
+        self.assertFalse(is_estimate)
+
+    def test_no_history_returns_default_estimate(self):
+        value, is_estimate = get_active_calories_for_date(self.user, date(2026, 6, 20))
+        self.assertEqual(value, 500)
+        self.assertTrue(is_estimate)
+
+    def test_too_few_logged_days_returns_default_estimate(self):
+        day = date(2026, 6, 20)
+        # Only two logged days — below the minimum, so fall back to the default.
+        for offset, cals in [(1, 900), (3, 1000)]:
+            DailyActiveCalories.objects.create(
+                user=self.user,
+                date=day - timedelta(days=offset),
+                active_calories=cals,
+            )
+        value, is_estimate = get_active_calories_for_date(self.user, day)
+        self.assertEqual(value, 500)
+        self.assertTrue(is_estimate)
+
+    def test_estimate_averages_logged_days_only(self):
+        day = date(2026, 6, 20)
+        # Three logged days within the prior 14; unlogged days are ignored.
+        for offset, cals in [(1, 480), (3, 520), (5, 620)]:
+            DailyActiveCalories.objects.create(
+                user=self.user,
+                date=day - timedelta(days=offset),
+                active_calories=cals,
+            )
+        value, is_estimate = get_active_calories_for_date(self.user, day)
+        # round((480 + 520 + 620) / 3) = 540
+        self.assertEqual(value, 540)
+        self.assertTrue(is_estimate)
+
+    def test_estimate_excludes_days_outside_window(self):
+        day = date(2026, 6, 20)
+        # Three logged days in-window (enough to trust the average).
+        for offset, cals in [(1, 400), (2, 500), (4, 600)]:
+            DailyActiveCalories.objects.create(
+                user=self.user,
+                date=day - timedelta(days=offset),
+                active_calories=cals,
+            )
+        # Outside the 14-day window — must be excluded from the average.
+        DailyActiveCalories.objects.create(
+            user=self.user, date=day - timedelta(days=20), active_calories=2000
+        )
+        value, _ = get_active_calories_for_date(self.user, day)
+        # round((400 + 500 + 600) / 3) = 500; the 2000 outside the window is ignored.
+        self.assertEqual(value, 500)
+
+
+class SetActiveCaloriesViewTests(TestCase):
+    """Tests for setting today's Apple Watch active calories."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="acuser", password="testpass")
 
     def setUp(self):
         self.client = Client()
-        self.client.login(username="exuser", password="testpass")
+        self.client.login(username="acuser", password="testpass")
 
     def test_requires_login(self):
         self.client.logout()
-        response = self.client.post(reverse("food_tracking:log_exercise"))
+        response = self.client.post(reverse("food_tracking:set_active_calories"))
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response.url)
 
     def test_requires_post(self):
-        response = self.client.get(reverse("food_tracking:log_exercise"))
+        response = self.client.get(reverse("food_tracking:set_active_calories"))
         self.assertEqual(response.status_code, 405)
 
-    def test_logs_negative_consumption(self):
+    def test_creates_entry(self):
         response = self.client.post(
-            reverse("food_tracking:log_exercise"),
-            {"description": "30 min run", "calories_burned": "300"},
+            reverse("food_tracking:set_active_calories"), {"active_calories": "450"}
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"])
-        consumption = Consumption.objects.get(user=self.user, description="30 min run")
-        self.assertIsNone(consumption.food)
-        self.assertEqual(consumption.calories, Decimal("-300"))
-        self.assertEqual(consumption.total_calories(), Decimal("-300"))
+        self.assertEqual(DailyActiveCalories.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(
+            DailyActiveCalories.objects.get(user=self.user).active_calories, 450
+        )
 
-    def test_missing_description_returns_400(self):
+    def test_updates_existing_entry(self):
+        self.client.post(
+            reverse("food_tracking:set_active_calories"), {"active_calories": "450"}
+        )
+        self.client.post(
+            reverse("food_tracking:set_active_calories"), {"active_calories": "600"}
+        )
+        # Upsert: still one row, updated value.
+        self.assertEqual(DailyActiveCalories.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(
+            DailyActiveCalories.objects.get(user=self.user).active_calories, 600
+        )
+
+    def test_invalid_value_returns_400(self):
         response = self.client.post(
-            reverse("food_tracking:log_exercise"), {"calories_burned": "200"}
+            reverse("food_tracking:set_active_calories"), {"active_calories": "abc"}
         )
         self.assertEqual(response.status_code, 400)
 
-    def test_invalid_calories_returns_400(self):
+    def test_negative_value_returns_400(self):
         response = self.client.post(
-            reverse("food_tracking:log_exercise"),
-            {"description": "run", "calories_burned": "abc"},
+            reverse("food_tracking:set_active_calories"), {"active_calories": "-5"}
         )
         self.assertEqual(response.status_code, 400)
 
-    def test_non_positive_calories_returns_400(self):
+    @patch("food_tracking.views.DailyActiveCalories.objects.update_or_create")
+    def test_unexpected_error_returns_500(self, mock_upsert):
+        mock_upsert.side_effect = RuntimeError("boom")
         response = self.client.post(
-            reverse("food_tracking:log_exercise"),
-            {"description": "run", "calories_burned": "0"},
-        )
-        self.assertEqual(response.status_code, 400)
-
-    @patch("food_tracking.views.Consumption.objects.create")
-    def test_unexpected_error_returns_500(self, mock_create):
-        mock_create.side_effect = RuntimeError("boom")
-        response = self.client.post(
-            reverse("food_tracking:log_exercise"),
-            {"description": "run", "calories_burned": "200"},
+            reverse("food_tracking:set_active_calories"), {"active_calories": "450"}
         )
         self.assertEqual(response.status_code, 500)
 
-    def test_exercise_increases_remaining(self):
-        CalorieTarget.objects.create(user=self.user, daily_calorie_target=2000)
+    def test_active_calories_add_to_budget(self):
+        CalorieTarget.objects.create(user=self.user, daily_calorie_target=1800)
         Consumption.objects.create(
             user=self.user, food=None, description="Lunch", calories=Decimal("800")
         )
         self.client.post(
-            reverse("food_tracking:log_exercise"),
-            {"description": "run", "calories_burned": "300"},
+            reverse("food_tracking:set_active_calories"), {"active_calories": "500"}
         )
         response = self.client.get(reverse("food_tracking:home"))
-        # net = 800 - 300 = 500; remaining = 2000 - 500 = 1500
-        self.assertEqual(response.context["today_total_calories"], Decimal("500"))
+        # budget = 1800 + 500 = 2300; remaining = 2300 - 800 = 1500
+        self.assertEqual(response.context["today_total_calories"], Decimal("800"))
+        self.assertEqual(response.context["base_rate"], 1800)
+        self.assertEqual(response.context["active_calories"], 500)
+        self.assertFalse(response.context["active_is_estimate"])
+        self.assertEqual(response.context["effective_budget"], 2300)
         self.assertEqual(response.context["remaining_calories"], Decimal("1500"))
+
+    def test_home_uses_estimate_when_unlogged(self):
+        CalorieTarget.objects.create(user=self.user, daily_calorie_target=1800)
+        response = self.client.get(reverse("food_tracking:home"))
+        # No history yet: falls back to the default estimate, flagged as estimate.
+        self.assertEqual(response.context["active_calories"], 500)
+        self.assertTrue(response.context["active_is_estimate"])
+        self.assertEqual(response.context["effective_budget"], 2300)

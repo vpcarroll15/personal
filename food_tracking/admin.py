@@ -1,12 +1,20 @@
 from django.contrib import admin
 
-from food_tracking.models import CalorieTarget, Consumption, Food
+from food_tracking.models import CalorieTarget, Consumption, DailyActiveCalories, Food
 
 
 @admin.register(CalorieTarget)
 class CalorieTargetAdmin(admin.ModelAdmin):
     list_display = ["user", "daily_calorie_target", "updated_at"]
     search_fields = ["user__username"]
+
+
+@admin.register(DailyActiveCalories)
+class DailyActiveCaloriesAdmin(admin.ModelAdmin):
+    list_display = ["user", "date", "active_calories", "updated_at"]
+    list_filter = ["user"]
+    search_fields = ["user__username"]
+    date_hierarchy = "date"
 
 
 @admin.register(Food)
