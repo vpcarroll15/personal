@@ -1,11 +1,12 @@
 from collections import defaultdict
+from datetime import date as date_cls
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 import pytz
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Sum
+from django.db.models import Avg, Count
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -13,10 +14,13 @@ from django.views.decorators.http import require_http_methods
 
 from food_tracking import estimation
 from food_tracking.constants import (
+    ACTIVE_CALORIES_WINDOW_DAYS,
+    DEFAULT_ACTIVE_CALORIES_ESTIMATE,
     DEFAULT_RECENT_CONSUMPTION_LIMIT,
     DEFAULT_REPORT_DAYS,
+    MIN_LOGGED_DAYS_FOR_ESTIMATE,
 )
-from food_tracking.models import CalorieTarget, Consumption, Food
+from food_tracking.models import CalorieTarget, Consumption, DailyActiveCalories, Food
 
 # Use Pacific timezone for all date calculations
 PACIFIC_TZ = pytz.timezone("America/Los_Angeles")
@@ -32,6 +36,31 @@ def get_pacific_today_start() -> datetime:
 def get_active_foods() -> list[Food]:
     """Return all active foods ordered for display."""
     return list(Food.objects.filter(active=True))
+
+
+def get_active_calories_for_date(user: User, day: date_cls) -> tuple[int, bool]:
+    """Return the user's active (Move ring) calories for a day.
+
+    If the day has a logged entry, return it. Otherwise estimate from the
+    average of logged days in the prior ACTIVE_CALORIES_WINDOW_DAYS (logged days
+    only — unlogged days are ignored rather than counted as zero). Until there
+    are at least MIN_LOGGED_DAYS_FOR_ESTIMATE logged days the sample is too thin
+    to trust, so we fall back to DEFAULT_ACTIVE_CALORIES_ESTIMATE.
+
+    Returns a (value, is_estimate) tuple.
+    """
+    logged = DailyActiveCalories.objects.filter(user=user, date=day).first()
+    if logged is not None:
+        return logged.active_calories, False
+
+    window_start = day - timedelta(days=ACTIVE_CALORIES_WINDOW_DAYS)
+    stats = DailyActiveCalories.objects.filter(
+        user=user, date__gte=window_start, date__lt=day
+    ).aggregate(avg=Avg("active_calories"), n=Count("id"))
+
+    if stats["n"] < MIN_LOGGED_DAYS_FOR_ESTIMATE:
+        return DEFAULT_ACTIVE_CALORIES_ESTIMATE, True
+    return round(stats["avg"]), True
 
 
 def calculate_totals_by_period(
@@ -116,17 +145,27 @@ def home(request: HttpRequest) -> HttpResponse:
     for food in foods:
         food.today_count = today_quantities.get(food.id, Decimal("0"))
 
-    # Calculate total calories for today
+    # Calculate total calories consumed today (food only)
     today_total_calories = sum(c.total_calories() for c in today_consumption)
 
     target = get_or_create_target(request.user)
-    remaining_calories = target.daily_calorie_target - today_total_calories
+    base_rate = target.daily_calorie_target
+
+    # Active calories (Apple Watch Move ring) layered on top of the base rate.
+    active_calories, active_is_estimate = get_active_calories_for_date(
+        request.user, today_start.date()
+    )
+    effective_budget = base_rate + active_calories
+    remaining_calories = effective_budget - today_total_calories
 
     context = {
         "foods": foods,
         "today_consumption": today_consumption,
         "today_total_calories": today_total_calories,
-        "daily_target": target.daily_calorie_target,
+        "base_rate": base_rate,
+        "active_calories": active_calories,
+        "active_is_estimate": active_is_estimate,
+        "effective_budget": effective_budget,
         "remaining_calories": remaining_calories,
     }
     return render(request, "food_tracking/home.html", context)
@@ -357,43 +396,33 @@ def set_target(request: HttpRequest) -> JsonResponse:
 
 @login_required
 @require_http_methods(["POST"])
-def log_exercise(request: HttpRequest) -> JsonResponse:
-    """Log exercise as a negative-calorie Consumption.
+def set_active_calories(request: HttpRequest) -> JsonResponse:
+    """Set today's Apple Watch active (Move ring) calories.
 
-    The user enters calories *burned* as a positive number; we store it negated
-    so it subtracts from the day's net total.
+    Upserts a single DailyActiveCalories row for the current Pacific day so the
+    user can log it once at the end of the day (and correct it if needed).
     """
     try:
-        description = request.POST.get("description", "").strip()
-        burned_raw = request.POST.get("calories_burned", "")
-
-        if not description:
-            return JsonResponse(
-                {"success": False, "error": "Missing description."}, status=400
-            )
-
+        active_raw = request.POST.get("active_calories", "")
         try:
-            burned = Decimal(burned_raw)
-        except (InvalidOperation, TypeError):
+            active_calories = int(active_raw)
+        except (TypeError, ValueError):
             return JsonResponse(
-                {"success": False, "error": "Invalid calories."}, status=400
+                {"success": False, "error": "Invalid active calories."}, status=400
             )
 
-        if burned <= 0:
+        if active_calories < 0:
             return JsonResponse(
-                {"success": False, "error": "Calories burned must be positive."},
+                {"success": False, "error": "Active calories must be non-negative."},
                 status=400,
             )
 
-        consumption = Consumption.objects.create(
+        today = get_pacific_today_start().date()
+        entry, _ = DailyActiveCalories.objects.update_or_create(
             user=request.user,
-            food=None,
-            description=description,
-            calories=-burned,
-            notes=request.POST.get("notes", ""),
+            date=today,
+            defaults={"active_calories": active_calories},
         )
-        return JsonResponse(
-            {"success": True, "consumption": consumption.to_dict_for_api()}
-        )
+        return JsonResponse({"success": True, "active": entry.to_dict_for_api()})
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)

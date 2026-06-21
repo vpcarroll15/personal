@@ -2,6 +2,13 @@
 DEFAULT_RECENT_CONSUMPTION_LIMIT = 10
 DEFAULT_REPORT_DAYS = 7
 
+# Number of prior days averaged to estimate active calories on an unlogged day
+ACTIVE_CALORIES_WINDOW_DAYS = 14
+# Minimum logged days in the window required before trusting the average;
+# below this we fall back to DEFAULT_ACTIVE_CALORIES_ESTIMATE.
+MIN_LOGGED_DAYS_FOR_ESTIMATE = 3
+DEFAULT_ACTIVE_CALORIES_ESTIMATE = 500
+
 # Calorie aggregation periods
 PERIOD_DAY = "day"
 PERIOD_WEEK = "week"

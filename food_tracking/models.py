@@ -37,6 +37,43 @@ class CalorieTarget(models.Model):
         }
 
 
+class DailyActiveCalories(models.Model):
+    """Stores the user's Apple Watch active calories (Move ring) for a single day.
+
+    This is layered on top of the base rate (CalorieTarget) to form the day's
+    effective budget: budget = base_rate + active_calories.
+    """
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    date = models.DateField(help_text="The day these active calories were burned.")
+    active_calories = models.PositiveIntegerField(
+        help_text="Apple Watch active (Move ring) calories for the day."
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-date"]
+        verbose_name = "Daily Active Calories"
+        verbose_name_plural = "Daily Active Calories"
+        unique_together = ("user", "date")
+        indexes = [
+            models.Index(fields=["user", "-date"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user.username}: {self.active_calories} active cal on {self.date}"
+
+    def to_dict_for_api(self) -> dict[str, Any]:
+        """Serialize active calories for API responses."""
+        return {
+            "id": self.id,
+            "user": self.user.username,
+            "date": self.date.isoformat(),
+            "active_calories": self.active_calories,
+        }
+
+
 class Food(models.Model):
     """Represents a trackable food item with nutritional information."""
 
