@@ -17,6 +17,7 @@ from food_tracking.views import (
     calculate_totals_by_period,
     get_active_calories_for_date,
     get_active_foods,
+    get_pacific_day_bounds,
 )
 
 
@@ -947,3 +948,213 @@ class SetActiveCaloriesViewTests(TestCase):
         self.assertEqual(response.context["active_calories"], 500)
         self.assertTrue(response.context["active_is_estimate"])
         self.assertEqual(response.context["effective_budget"], 1800)
+
+
+class PastDayViewTests(TestCase):
+    """Tests for viewing and logging against a past day via ?date= / POST date."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="pastday", password="testpass")
+        cls.food = Food.objects.create(
+            name="Past Day Food",
+            icon="🍕",
+            serving_size="1 slice",
+            calories_per_serving=Decimal("285.00"),
+            active=True,
+        )
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username="pastday", password="testpass")
+
+    # -- home view -------------------------------------------------------
+
+    @freeze_time("2024-01-15 20:00:00")  # noon Pacific on Jan 15
+    def test_home_with_past_date_shows_that_days_consumption(self):
+        # Noon Pacific on Jan 14 is 20:00 UTC
+        Consumption.objects.create(
+            user=self.user,
+            food=self.food,
+            quantity=Decimal("1.0"),
+            consumed_at=timezone.now() - timedelta(days=1),
+        )
+        Consumption.objects.create(
+            user=self.user, food=self.food, quantity=Decimal("2.0")
+        )
+
+        response = self.client.get(
+            reverse("food_tracking:home"), {"date": "2024-01-14"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["today_consumption"]), 1)
+        self.assertEqual(
+            response.context["today_consumption"][0].quantity, Decimal("1.0")
+        )
+        self.assertFalse(response.context["is_today"])
+        self.assertEqual(response.context["view_date"], date(2024, 1, 14))
+        self.assertEqual(response.context["prev_date"], "2024-01-13")
+        self.assertEqual(response.context["next_date"], "2024-01-15")
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_home_default_is_today(self):
+        response = self.client.get(reverse("food_tracking:home"))
+        self.assertTrue(response.context["is_today"])
+        self.assertEqual(response.context["view_date"], date(2024, 1, 15))
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_home_future_date_falls_back_to_today(self):
+        response = self.client.get(
+            reverse("food_tracking:home"), {"date": "2024-01-16"}
+        )
+        self.assertTrue(response.context["is_today"])
+        self.assertEqual(response.context["view_date"], date(2024, 1, 15))
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_home_malformed_date_falls_back_to_today(self):
+        response = self.client.get(
+            reverse("food_tracking:home"), {"date": "not-a-date"}
+        )
+        self.assertTrue(response.context["is_today"])
+        self.assertEqual(response.context["view_date"], date(2024, 1, 15))
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_home_past_day_shows_banner(self):
+        response = self.client.get(
+            reverse("food_tracking:home"), {"date": "2024-01-14"}
+        )
+        self.assertContains(response, "Viewing a past day")
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_home_past_day_uses_that_days_active_calories(self):
+        DailyActiveCalories.objects.create(
+            user=self.user, date=date(2024, 1, 14), active_calories=650
+        )
+        response = self.client.get(
+            reverse("food_tracking:home"), {"date": "2024-01-14"}
+        )
+        self.assertEqual(response.context["active_calories"], 650)
+        self.assertFalse(response.context["active_is_estimate"])
+
+    # -- log_consumption -------------------------------------------------
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_log_consumption_backdates_to_noon_pacific(self):
+        response = self.client.post(
+            reverse("food_tracking:log_consumption"),
+            {"food_id": self.food.id, "quantity": "1.0", "date": "2024-01-10"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        consumption = Consumption.objects.get(user=self.user)
+        consumed_pacific = consumption.consumed_at.astimezone(
+            timezone.get_fixed_timezone(-480)  # PST (UTC-8) in January
+        )
+        self.assertEqual(consumed_pacific.date(), date(2024, 1, 10))
+        self.assertEqual(consumed_pacific.hour, 12)
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_log_consumption_today_date_uses_current_time(self):
+        response = self.client.post(
+            reverse("food_tracking:log_consumption"),
+            {"food_id": self.food.id, "quantity": "1.0", "date": "2024-01-15"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        consumption = Consumption.objects.get(user=self.user)
+        self.assertEqual(consumption.consumed_at, timezone.now())
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_log_consumption_rejects_future_date(self):
+        response = self.client.post(
+            reverse("food_tracking:log_consumption"),
+            {"food_id": self.food.id, "date": "2024-01-16"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid date", response.json()["error"])
+        self.assertEqual(Consumption.objects.count(), 0)
+
+    def test_log_consumption_rejects_malformed_date(self):
+        response = self.client.post(
+            reverse("food_tracking:log_consumption"),
+            {"food_id": self.food.id, "date": "yesterday"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Consumption.objects.count(), 0)
+
+    # -- log_estimate ------------------------------------------------------
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_log_estimate_backdates_to_noon_pacific(self):
+        response = self.client.post(
+            reverse("food_tracking:log_estimate"),
+            {"description": "Forgotten pizza", "calories": "600", "date": "2024-01-14"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        consumption = Consumption.objects.get(user=self.user)
+        consumed_pacific = consumption.consumed_at.astimezone(
+            timezone.get_fixed_timezone(-480)
+        )
+        self.assertEqual(consumed_pacific.date(), date(2024, 1, 14))
+        self.assertEqual(consumed_pacific.hour, 12)
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_log_estimate_rejects_future_date(self):
+        response = self.client.post(
+            reverse("food_tracking:log_estimate"),
+            {
+                "description": "Time-travel snack",
+                "calories": "100",
+                "date": "2024-02-01",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Consumption.objects.count(), 0)
+
+    # -- set_active_calories ----------------------------------------------
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_set_active_calories_for_past_day(self):
+        response = self.client.post(
+            reverse("food_tracking:set_active_calories"),
+            {"active_calories": "700", "date": "2024-01-14"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        entry = DailyActiveCalories.objects.get(user=self.user)
+        self.assertEqual(entry.date, date(2024, 1, 14))
+        self.assertEqual(entry.active_calories, 700)
+        # Today has no entry
+        self.assertFalse(
+            DailyActiveCalories.objects.filter(
+                user=self.user, date=date(2024, 1, 15)
+            ).exists()
+        )
+
+    @freeze_time("2024-01-15 20:00:00")
+    def test_set_active_calories_rejects_future_date(self):
+        response = self.client.post(
+            reverse("food_tracking:set_active_calories"),
+            {"active_calories": "700", "date": "2024-01-16"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(DailyActiveCalories.objects.count(), 0)
+
+
+class DayBoundsTests(TestCase):
+    """Tests for Pacific day boundary computation, including DST days."""
+
+    def test_normal_day_is_24_hours(self):
+        start, end = get_pacific_day_bounds(date(2024, 1, 15))
+        self.assertEqual(end - start, timedelta(hours=24))
+
+    def test_spring_forward_day_is_23_hours(self):
+        # 2024-03-10: Pacific clocks jump 2am -> 3am
+        start, end = get_pacific_day_bounds(date(2024, 3, 10))
+        self.assertEqual(end - start, timedelta(hours=23))
+
+    def test_fall_back_day_is_25_hours(self):
+        # 2024-11-03: Pacific clocks fall back 2am -> 1am
+        start, end = get_pacific_day_bounds(date(2024, 11, 3))
+        self.assertEqual(end - start, timedelta(hours=25))

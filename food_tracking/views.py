@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import date as date_cls
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from decimal import Decimal, InvalidOperation
 
 import pytz
@@ -25,12 +25,57 @@ from food_tracking.models import CalorieTarget, Consumption, DailyActiveCalories
 # Use Pacific timezone for all date calculations
 PACIFIC_TZ = pytz.timezone("America/Los_Angeles")
 
+# Backdated entries (logged against a past day) get this hour, Pacific time.
+# Noon sits safely inside the day regardless of DST or UTC conversion, unlike
+# midnight which lands exactly on the day boundary.
+BACKDATE_HOUR = 12
+
+DATE_PARAM_FORMAT = "%Y-%m-%d"
+
 
 def get_pacific_today_start() -> datetime:
     """Get the start of today (midnight) in Pacific timezone."""
     now_pacific = timezone.now().astimezone(PACIFIC_TZ)
     today_start_pacific = now_pacific.replace(hour=0, minute=0, second=0, microsecond=0)
     return today_start_pacific
+
+
+def get_pacific_day_bounds(day: date_cls) -> tuple[datetime, datetime]:
+    """Return the [start, end) datetimes of a Pacific calendar day.
+
+    Both bounds are localized midnights rather than start + 24h, so days that
+    contain a DST transition (23 or 25 hours long) keep correct boundaries.
+    """
+    start = PACIFIC_TZ.localize(datetime.combine(day, time.min))
+    end = PACIFIC_TZ.localize(datetime.combine(day + timedelta(days=1), time.min))
+    return start, end
+
+
+def get_requested_day(request: HttpRequest) -> date_cls:
+    """Return the Pacific day a write request applies to (default: today).
+
+    Raises ValueError for malformed dates or dates in the future, so callers
+    can turn either into a 400.
+    """
+    raw = request.POST.get("date", "").strip()
+    today = get_pacific_today_start().date()
+    if not raw:
+        return today
+    day = datetime.strptime(raw, DATE_PARAM_FORMAT).date()
+    if day > today:
+        raise ValueError("Date cannot be in the future.")
+    return day
+
+
+def resolve_consumed_at(day: date_cls) -> datetime:
+    """Timestamp to store for a consumption logged against `day`.
+
+    Entries for today keep the real time so ordering within the day is
+    preserved; backdated entries get noon Pacific on that day.
+    """
+    if day == get_pacific_today_start().date():
+        return timezone.now()
+    return PACIFIC_TZ.localize(datetime.combine(day, time(hour=BACKDATE_HOUR)))
 
 
 def get_active_foods() -> list[Food]:
@@ -120,20 +165,37 @@ def calculate_totals_by_period(
 
 @login_required
 def home(request: HttpRequest) -> HttpResponse:
-    """Display food tracking grid and today's consumption."""
-    from collections import Counter
+    """Display the food tracking grid and consumption for one Pacific day.
 
+    Defaults to today; ?date=YYYY-MM-DD shows a past day so forgotten entries
+    can be logged retroactively. Malformed or future dates fall back to today
+    rather than erroring, since they only arrive via hand-edited URLs.
+    """
     foods = get_active_foods()
 
-    # Get all consumption from today (Pacific timezone), most recent first
-    today_start = get_pacific_today_start()
+    today = get_pacific_today_start().date()
+    try:
+        view_date = datetime.strptime(
+            request.GET.get("date", ""), DATE_PARAM_FORMAT
+        ).date()
+    except ValueError:
+        view_date = today
+    view_date = min(view_date, today)
+    is_today = view_date == today
+
+    # All consumption for the viewed day (Pacific), most recent first. The
+    # "today_*" names are kept for template compatibility; they mean "the
+    # viewed day" throughout.
+    day_start, day_end = get_pacific_day_bounds(view_date)
     today_consumption = (
-        Consumption.objects.filter(user=request.user, consumed_at__gte=today_start)
+        Consumption.objects.filter(
+            user=request.user, consumed_at__gte=day_start, consumed_at__lt=day_end
+        )
         .select_related("food")
         .order_by("-consumed_at")
     )
 
-    # Calculate today's total quantity per food for badges
+    # Calculate the day's total quantity per food for badges
     today_quantities: dict[int, Decimal] = {}
     for consumption in today_consumption:
         food_id = consumption.food_id
@@ -141,11 +203,11 @@ def home(request: HttpRequest) -> HttpResponse:
             today_quantities.get(food_id, Decimal("0")) + consumption.quantity
         )
 
-    # Add today's total quantity to each food object
+    # Add the day's total quantity to each food object
     for food in foods:
         food.today_count = today_quantities.get(food.id, Decimal("0"))
 
-    # Calculate total calories consumed today (food only)
+    # Calculate total calories consumed on the viewed day (food only)
     today_total_calories = sum(c.total_calories() for c in today_consumption)
 
     target = get_or_create_target(request.user)
@@ -155,7 +217,7 @@ def home(request: HttpRequest) -> HttpResponse:
     # Active calories (Apple Watch Move ring) layered on top of the base rate,
     # less the goal deficit the user is aiming for.
     active_calories, active_is_estimate = get_active_calories_for_date(
-        request.user, today_start.date()
+        request.user, view_date
     )
     effective_budget = base_rate + active_calories - goal_deficit
     remaining_calories = effective_budget - today_total_calories
@@ -170,6 +232,10 @@ def home(request: HttpRequest) -> HttpResponse:
         "goal_deficit": goal_deficit,
         "effective_budget": effective_budget,
         "remaining_calories": remaining_calories,
+        "view_date": view_date,
+        "is_today": is_today,
+        "prev_date": (view_date - timedelta(days=1)).isoformat(),
+        "next_date": (view_date + timedelta(days=1)).isoformat(),
     }
     return render(request, "food_tracking/home.html", context)
 
@@ -218,11 +284,17 @@ def log_consumption(request: HttpRequest) -> JsonResponse:
                 {"success": False, "error": "Missing food_id"}, status=400
             )
 
+        try:
+            day = get_requested_day(request)
+        except ValueError:
+            return JsonResponse({"success": False, "error": "Invalid date"}, status=400)
+
         food = Food.objects.get(id=food_id)
         consumption = Consumption.objects.create(
             user=request.user,
             food=food,
             quantity=Decimal(quantity),
+            consumed_at=resolve_consumed_at(day),
         )
 
         return JsonResponse(
@@ -356,12 +428,18 @@ def log_estimate(request: HttpRequest) -> JsonResponse:
                 status=400,
             )
 
+        try:
+            day = get_requested_day(request)
+        except ValueError:
+            return JsonResponse({"success": False, "error": "Invalid date"}, status=400)
+
         consumption = Consumption.objects.create(
             user=request.user,
             food=None,
             description=description,
             calories=calories,
             notes=request.POST.get("notes", ""),
+            consumed_at=resolve_consumed_at(day),
         )
         return JsonResponse(
             {"success": True, "consumption": consumption.to_dict_for_api()}
@@ -428,10 +506,11 @@ def set_goal_deficit(request: HttpRequest) -> JsonResponse:
 @login_required
 @require_http_methods(["POST"])
 def set_active_calories(request: HttpRequest) -> JsonResponse:
-    """Set today's Apple Watch active (Move ring) calories.
+    """Set a day's Apple Watch active (Move ring) calories.
 
-    Upserts a single DailyActiveCalories row for the current Pacific day so the
-    user can log it once at the end of the day (and correct it if needed).
+    Upserts a single DailyActiveCalories row for the requested Pacific day
+    (default: today) so the user can log it once at the end of the day, correct
+    it later, or fill in a day they forgot.
     """
     try:
         active_raw = request.POST.get("active_calories", "")
@@ -448,10 +527,14 @@ def set_active_calories(request: HttpRequest) -> JsonResponse:
                 status=400,
             )
 
-        today = get_pacific_today_start().date()
+        try:
+            day = get_requested_day(request)
+        except ValueError:
+            return JsonResponse({"success": False, "error": "Invalid date"}, status=400)
+
         entry, _ = DailyActiveCalories.objects.update_or_create(
             user=request.user,
-            date=today,
+            date=day,
             defaults={"active_calories": active_calories},
         )
         return JsonResponse({"success": True, "active": entry.to_dict_for_api()})

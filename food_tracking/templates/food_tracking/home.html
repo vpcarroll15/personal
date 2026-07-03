@@ -4,13 +4,36 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=15">
-<script src="{% static 'food_tracking/js/tracking.js' %}?v=15"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=16">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=16"></script>
 {% endblock %}
 
 {% block content %}
+<script>
+    // The Pacific day this page is showing; sent with every write so entries
+    // land on the day being viewed, not the current day.
+    const VIEW_DATE = "{{ view_date|date:'Y-m-d' }}";
+</script>
 <div style="padding: 20px;">
     <h1>Food Tracking</h1>
+
+    <!-- Day navigation: step back to fill in a forgotten day -->
+    <div class="day-nav">
+        <a class="day-nav-arrow" href="?date={{ prev_date }}" title="Previous day">←</a>
+        <span class="day-nav-label">{% if is_today %}Today{% else %}{{ view_date|date:"D, N j" }}{% endif %}</span>
+        {% if is_today %}
+        <span class="day-nav-arrow disabled">→</span>
+        {% else %}
+        <a class="day-nav-arrow" href="?date={{ next_date }}" title="Next day">→</a>
+        <a class="day-nav-today" href="{% url 'food_tracking:home' %}">Today</a>
+        {% endif %}
+    </div>
+
+    {% if not is_today %}
+    <div class="past-day-banner">
+        Viewing a past day — anything you log here lands on {{ view_date|date:"l, N j" }}.
+    </div>
+    {% endif %}
 
     <!-- Daily budget, read as an equation:
          base rate + active - eaten - target deficit = net -->
@@ -125,7 +148,7 @@
         {% endfor %}
     </div>
 
-    <h2 style="margin-top: 40px;">Today's Consumption</h2>
+    <h2 style="margin-top: 40px;">{% if is_today %}Today's{% else %}{{ view_date|date:"D, N j" }}{% endif %} Consumption</h2>
     {% if today_consumption %}
     <table class="checkered-blue consumption-table">
         <thead>
@@ -150,7 +173,7 @@
         </tbody>
     </table>
     {% else %}
-    <p>No consumption logged today. Start tracking above!</p>
+    <p>No consumption logged {% if is_today %}today. Start tracking above!{% else %}on this day.{% endif %}</p>
     {% endif %}
 </div>
 {% endblock %}

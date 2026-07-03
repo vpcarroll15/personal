@@ -7,6 +7,18 @@
  * @param {string} name - Cookie name
  * @returns {string|null} - Cookie value or null
  */
+/**
+ * Append the page's viewed day (set by the home template as VIEW_DATE) to a
+ * write payload, so entries land on the day being viewed rather than today.
+ * No-op on pages that don't set VIEW_DATE (e.g. reports).
+ * @param {FormData} formData
+ */
+function appendViewDate(formData) {
+    if (typeof VIEW_DATE !== 'undefined' && VIEW_DATE) {
+        formData.append('date', VIEW_DATE);
+    }
+}
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -81,6 +93,7 @@ function logFood(foodId, quantity = 1.0) {
     const formData = new FormData();
     formData.append('food_id', foodId);
     formData.append('quantity', quantity.toString());
+    appendViewDate(formData);
 
     // Send AJAX request
     fetch('/food/log/', {
@@ -345,6 +358,7 @@ function confirmEstimate() {
     const formData = new FormData();
     formData.append('description', description);
     formData.append('calories', calories);
+    appendViewDate(formData);
 
     postForm('/food/log-estimate/', formData)
         .then(data => {
@@ -412,7 +426,7 @@ function editGoalDeficit() {
 }
 
 /**
- * Prompt for and save today's Apple Watch active (Move ring) calories.
+ * Prompt for and save the viewed day's Apple Watch active (Move ring) calories.
  */
 function editActiveCalories() {
     const current = document.getElementById('active-value').textContent.trim().replace('~', '');
@@ -422,6 +436,7 @@ function editActiveCalories() {
     }
     const formData = new FormData();
     formData.append('active_calories', value);
+    appendViewDate(formData);
 
     postForm('/food/active/', formData)
         .then(data => {
