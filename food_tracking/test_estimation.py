@@ -73,7 +73,9 @@ class RunEstimateTests(TestCase):
             estimation.estimate_from_text("mystery food")
 
     @patch("food_tracking.estimation._get_client")
-    def test_estimate_from_text_sends_forced_tool(self, mock_get_client):
+    def test_estimate_from_text_enables_thinking_with_auto_tool_choice(
+        self, mock_get_client
+    ):
         client = Mock()
         client.messages.create.return_value = _make_tool_use_response()
         mock_get_client.return_value = client
@@ -82,10 +84,31 @@ class RunEstimateTests(TestCase):
 
         _, kwargs = client.messages.create.call_args
         self.assertEqual(kwargs["model"], estimation.ESTIMATION_MODEL)
-        self.assertEqual(
-            kwargs["tool_choice"],
-            {"type": "tool", "name": estimation.ESTIMATE_TOOL_NAME},
+        # Thinking is incompatible with a forced tool choice, so the call must
+        # use adaptive thinking + auto tool choice together.
+        self.assertEqual(kwargs["thinking"], {"type": "adaptive"})
+        self.assertEqual(kwargs["tool_choice"], {"type": "auto"})
+
+    @patch("food_tracking.estimation._get_client")
+    def test_run_estimate_skips_non_tool_blocks(self, mock_get_client):
+        # With auto tool choice the model may emit thinking/text blocks before
+        # the tool call; parsing must find the tool_use block among them.
+        thinking_block = Mock()
+        thinking_block.type = "thinking"
+        text_block = Mock()
+        text_block.type = "text"
+        tool_response = _make_tool_use_response(
+            description="Plantains, beans, rice, and pizza", total_calories=1250
         )
+        tool_response.content = [thinking_block, text_block] + tool_response.content
+
+        client = Mock()
+        client.messages.create.return_value = tool_response
+        mock_get_client.return_value = client
+
+        result = estimation.estimate_from_text("plantains, beans, rice, pizza")
+
+        self.assertEqual(result.calories, 1250)
 
 
 class EstimateFromImageTests(TestCase):

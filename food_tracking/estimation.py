@@ -17,7 +17,9 @@ from anthropic import Anthropic
 # Defaults to the current Sonnet generation; override (e.g. to bump to a newer
 # model) via the FOOD_ESTIMATION_MODEL environment variable, no code change.
 ESTIMATION_MODEL = os.environ.get("FOOD_ESTIMATION_MODEL", "claude-sonnet-4-6")
-MAX_TOKENS = 1024
+# Thinking tokens count against max_tokens, so leave room for the model to
+# reason through multi-item meals before it calls the tool.
+MAX_TOKENS = 4096
 ESTIMATE_TOOL_NAME = "record_estimate"
 
 SUPPORTED_IMAGE_MEDIA_TYPES = frozenset(
@@ -26,11 +28,14 @@ SUPPORTED_IMAGE_MEDIA_TYPES = frozenset(
 
 SYSTEM_PROMPT = (
     "You are a nutrition assistant that estimates the calorie content of food. "
-    "Estimate the total calories for the food described, accounting for typical "
-    "portion sizes and preparation. Be realistic, not conservative. Always call "
-    "the record_estimate tool with your best single-number estimate. If the "
-    "portion is ambiguous, assume a typical serving and reflect the uncertainty "
-    "in the confidence field."
+    "The user may describe a single food or a whole meal with several distinct "
+    "foods. Include EVERY food mentioned as its own entry in the items list, "
+    "estimate each one's calories accounting for typical portion sizes and "
+    "preparation, and set total_calories to the sum of all items. Be realistic, "
+    "not conservative. Think through the items first if that helps, then always "
+    "finish by calling the record_estimate tool with your best single-number "
+    "estimate. If a portion is ambiguous, assume a typical serving and reflect "
+    "the uncertainty in the confidence field."
 )
 
 ESTIMATE_TOOL: dict[str, Any] = {
@@ -117,14 +122,20 @@ def _parse_estimate(data: Any) -> EstimateResult:
 
 
 def _run_estimate(content: list[dict[str, Any]]) -> EstimateResult:
-    """Send a user content payload to Claude and parse the forced tool call."""
+    """Send a user content payload to Claude and parse the tool call.
+
+    Adaptive thinking lets the model enumerate each food in a multi-item meal
+    before committing to numbers; thinking is incompatible with a forced tool
+    choice, so the system prompt (not tool_choice) ensures the tool gets called.
+    """
     client = _get_client()
     response = client.messages.create(
         model=ESTIMATION_MODEL,
         max_tokens=MAX_TOKENS,
         system=SYSTEM_PROMPT,
+        thinking={"type": "adaptive"},
         tools=[ESTIMATE_TOOL],
-        tool_choice={"type": "tool", "name": ESTIMATE_TOOL_NAME},
+        tool_choice={"type": "auto"},
         messages=[{"role": "user", "content": content}],
     )
 
@@ -146,7 +157,7 @@ def estimate_from_image(
         raise ValueError(f"Unsupported image type: {media_type}")
 
     encoded = base64.standard_b64encode(image_bytes).decode("utf-8")
-    prompt = "Estimate the calories in this food."
+    prompt = "Estimate the total calories in all the food shown in this photo."
     if note:
         prompt = f"{prompt} Additional context from the user: {note}"
 
@@ -166,7 +177,10 @@ def estimate_from_image(
 
 def estimate_from_text(text: str) -> EstimateResult:
     """Estimate calories from a free-text food description."""
-    prompt = f"Estimate the calories in this food: {text}"
+    prompt = (
+        "Estimate the total calories in everything the user ate, covering "
+        f"every food mentioned: {text}"
+    )
     return _run_estimate([{"type": "text", "text": prompt}])
 
 
