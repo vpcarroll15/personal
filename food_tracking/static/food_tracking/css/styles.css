@@ -228,6 +228,55 @@
 /* ---------------------------------------------------------------- */
 /* Daily budget banner                                              */
 /* ---------------------------------------------------------------- */
+/* Day navigation: step back to view/fill in a past day               */
+/* ---------------------------------------------------------------- */
+.day-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 10px 0;
+}
+
+.day-nav-arrow {
+    font-size: 22px;
+    font-weight: bold;
+    color: #1976D2;
+    text-decoration: none;
+    padding: 2px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.day-nav-arrow.disabled {
+    color: #ccc;
+    pointer-events: none;
+}
+
+.day-nav-label {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    min-width: 90px;
+    text-align: center;
+}
+
+.day-nav-today {
+    font-size: 14px;
+    color: #1976D2;
+}
+
+/* Make it hard to log to the wrong day by accident */
+.past-day-banner {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 8px;
+    color: #8d6e00;
+    padding: 10px 14px;
+    margin: 10px 0;
+}
+
+/* ---------------------------------------------------------------- */
 /* The banner reads as an equation:
    base rate + active - eaten - target deficit = net
    Expenditure terms (base rate, active) are purple; the terms subtracted from
