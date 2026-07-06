@@ -88,6 +88,11 @@ class RunEstimateTests(TestCase):
         # use adaptive thinking + auto tool choice together.
         self.assertEqual(kwargs["thinking"], {"type": "adaptive"})
         self.assertEqual(kwargs["tool_choice"], {"type": "auto"})
+        # Effort is capped so recipe estimates don't think past the web
+        # server's request timeout.
+        self.assertEqual(
+            kwargs["output_config"], {"effort": estimation.ESTIMATION_EFFORT}
+        )
 
     @patch("food_tracking.estimation._get_client")
     def test_run_estimate_skips_non_tool_blocks(self, mock_get_client):
