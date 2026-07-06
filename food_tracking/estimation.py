@@ -20,6 +20,10 @@ ESTIMATION_MODEL = os.environ.get("FOOD_ESTIMATION_MODEL", "claude-sonnet-4-6")
 # Thinking tokens count against max_tokens, so leave room for the model to
 # reason through multi-item meals before it calls the tool.
 MAX_TOKENS = 4096
+# Caps how deeply the model thinks. "low" keeps enough reasoning to enumerate a
+# multi-item meal but avoids the long thinking runs that made recipe estimates
+# blow past the web server's request timeout (surfacing as 500s).
+ESTIMATION_EFFORT = os.environ.get("FOOD_ESTIMATION_EFFORT", "low")
 ESTIMATE_TOOL_NAME = "record_estimate"
 
 SUPPORTED_IMAGE_MEDIA_TYPES = frozenset(
@@ -134,6 +138,7 @@ def _run_estimate(content: list[dict[str, Any]]) -> EstimateResult:
         max_tokens=MAX_TOKENS,
         system=SYSTEM_PROMPT,
         thinking={"type": "adaptive"},
+        output_config={"effort": ESTIMATION_EFFORT},
         tools=[ESTIMATE_TOOL],
         tool_choice={"type": "auto"},
         messages=[{"role": "user", "content": content}],
