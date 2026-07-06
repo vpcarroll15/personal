@@ -18,8 +18,11 @@ from anthropic import Anthropic
 # model) via the FOOD_ESTIMATION_MODEL environment variable, no code change.
 ESTIMATION_MODEL = os.environ.get("FOOD_ESTIMATION_MODEL", "claude-sonnet-4-6")
 # Thinking tokens count against max_tokens, so leave room for the model to
-# reason through multi-item meals before it calls the tool.
-MAX_TOKENS = 4096
+# reason through multi-item meals before it calls the tool. A worst-case
+# multi-dish recipe measured ~1,700 output tokens at low effort; 8192 leaves
+# ample headroom even if FOOD_ESTIMATION_EFFORT is raised later. Unused
+# headroom costs nothing — only generated tokens are billed.
+MAX_TOKENS = 8192
 # Caps how deeply the model thinks. "low" keeps enough reasoning to enumerate a
 # multi-item meal but avoids the long thinking runs that made recipe estimates
 # blow past the web server's request timeout (surfacing as 500s).
