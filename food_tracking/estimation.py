@@ -7,6 +7,7 @@ typed EstimateResult; callers decide whether to persist it as a Consumption.
 """
 
 import base64
+import json
 import os
 from dataclasses import dataclass, field
 from typing import Any
@@ -128,12 +129,57 @@ def _parse_estimate(data: Any) -> EstimateResult:
         raise ValueError("Could not read the calorie estimate from the model.") from exc
 
 
-def _run_estimate(content: list[dict[str, Any]]) -> EstimateResult:
+def _build_messages(
+    content: list[dict[str, Any]],
+    previous_estimate: dict[str, Any] | None,
+    correction: str,
+) -> list[dict[str, Any]]:
+    """Build the conversation for an estimate request.
+
+    A fresh estimate is a single user turn. A refinement replays the original
+    request as a two-shot conversation: the prior estimate is restated as an
+    assistant turn, then the user's correction asks for a revised tool call.
+    """
+    messages: list[dict[str, Any]] = [{"role": "user", "content": content}]
+    if previous_estimate is None:
+        return messages
+
+    messages.append(
+        {
+            "role": "assistant",
+            "content": (
+                "Here is my current calorie estimate as JSON: "
+                f"{json.dumps(previous_estimate)}"
+            ),
+        }
+    )
+    messages.append(
+        {
+            "role": "user",
+            "content": (
+                "That estimate needs adjusting. Correction / additional context "
+                f"from the user: {correction}\n"
+                "Produce an updated estimate: keep the parts of your previous "
+                "estimate that are unaffected, apply the correction, and call "
+                "record_estimate again with the revised numbers."
+            ),
+        }
+    )
+    return messages
+
+
+def _run_estimate(
+    content: list[dict[str, Any]],
+    previous_estimate: dict[str, Any] | None = None,
+    correction: str = "",
+) -> EstimateResult:
     """Send a user content payload to Claude and parse the tool call.
 
     Adaptive thinking lets the model enumerate each food in a multi-item meal
     before committing to numbers; thinking is incompatible with a forced tool
     choice, so the system prompt (not tool_choice) ensures the tool gets called.
+    When previous_estimate/correction are given, the request becomes a
+    refinement conversation (see _build_messages).
     """
     client = _get_client()
     response = client.messages.create(
@@ -144,7 +190,7 @@ def _run_estimate(content: list[dict[str, Any]]) -> EstimateResult:
         output_config={"effort": ESTIMATION_EFFORT},
         tools=[ESTIMATE_TOOL],
         tool_choice={"type": "auto"},
-        messages=[{"role": "user", "content": content}],
+        messages=_build_messages(content, previous_estimate, correction),
     )
 
     if response.stop_reason == "max_tokens":
@@ -158,7 +204,11 @@ def _run_estimate(content: list[dict[str, Any]]) -> EstimateResult:
 
 
 def estimate_from_image(
-    image_bytes: bytes, media_type: str, note: str = ""
+    image_bytes: bytes,
+    media_type: str,
+    note: str = "",
+    previous_estimate: dict[str, Any] | None = None,
+    correction: str = "",
 ) -> EstimateResult:
     """Estimate calories from a food photo, with an optional text note."""
     if media_type not in SUPPORTED_IMAGE_MEDIA_TYPES:
@@ -180,19 +230,30 @@ def estimate_from_image(
         },
         {"type": "text", "text": prompt},
     ]
-    return _run_estimate(content)
+    return _run_estimate(content, previous_estimate, correction)
 
 
-def estimate_from_text(text: str) -> EstimateResult:
+def estimate_from_text(
+    text: str,
+    previous_estimate: dict[str, Any] | None = None,
+    correction: str = "",
+) -> EstimateResult:
     """Estimate calories from a free-text food description."""
     prompt = (
         "Estimate the total calories in everything the user ate, covering "
         f"every food mentioned: {text}"
     )
-    return _run_estimate([{"type": "text", "text": prompt}])
+    return _run_estimate(
+        [{"type": "text", "text": prompt}], previous_estimate, correction
+    )
 
 
-def estimate_recipe(recipe_text: str, fraction: float) -> EstimateResult:
+def estimate_recipe(
+    recipe_text: str,
+    fraction: float,
+    previous_estimate: dict[str, Any] | None = None,
+    correction: str = "",
+) -> EstimateResult:
     """Estimate calories for the portion of a recipe the user actually ate.
 
     `fraction` is the share of the whole recipe consumed (e.g. 0.25 for a
@@ -206,4 +267,6 @@ def estimate_recipe(recipe_text: str, fraction: float) -> EstimateResult:
         "user ate. Report the eaten portion's calories in total_calories.\n\n"
         f"Recipe:\n{recipe_text}"
     )
-    return _run_estimate([{"type": "text", "text": prompt}])
+    return _run_estimate(
+        [{"type": "text", "text": prompt}], previous_estimate, correction
+    )

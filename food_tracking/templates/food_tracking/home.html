@@ -4,8 +4,8 @@
 {% block title %}Food Tracker{% endblock %}
 
 {% block extraheaders %}
-<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=16">
-<script src="{% static 'food_tracking/js/tracking.js' %}?v=16"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'food_tracking/css/styles.css' %}?v=17">
+<script src="{% static 'food_tracking/js/tracking.js' %}?v=17"></script>
 {% endblock %}
 
 {% block content %}
@@ -118,6 +118,12 @@
                 <input type="number" id="confirm-calories" min="0" step="1">
             </div>
             <div id="estimate-breakdown" class="estimate-breakdown"></div>
+            <!-- Two-shot refinement: correct the estimate before logging it -->
+            <div class="estimate-card-row refine-row">
+                <input type="text" id="refine-input"
+                       placeholder="Wrong or missing something? Add details…">
+                <button class="estimate-button" onclick="refineEstimate()">Update</button>
+            </div>
             <div class="estimate-card-buttons">
                 <button class="estimate-button confirm" onclick="confirmEstimate()">Log it</button>
                 <button class="estimate-button cancel" onclick="cancelEstimate()">Cancel</button>

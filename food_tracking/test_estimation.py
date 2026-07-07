@@ -217,3 +217,81 @@ class MalformedEstimateTests(TestCase):
             {"description": "Apple", "total_calories": 95}
         )
         self.assertEqual(result.confidence, "low")
+
+
+class RefinementTests(TestCase):
+    """Tests for the two-shot refinement conversation."""
+
+    @patch("food_tracking.estimation._get_client")
+    def test_refinement_builds_three_turn_conversation(self, mock_get_client):
+        client = Mock()
+        client.messages.create.return_value = _make_tool_use_response(
+            description="Pizza, 2 slices", total_calories=570
+        )
+        mock_get_client.return_value = client
+
+        previous = {"description": "Pizza", "calories": 285, "items": []}
+        result = estimation.estimate_from_text(
+            "pizza",
+            previous_estimate=previous,
+            correction="it was actually two slices",
+        )
+
+        _, kwargs = client.messages.create.call_args
+        messages = kwargs["messages"]
+        self.assertEqual(len(messages), 3)
+        self.assertEqual(messages[0]["role"], "user")
+        self.assertEqual(messages[1]["role"], "assistant")
+        self.assertIn('"calories": 285', messages[1]["content"])
+        self.assertEqual(messages[2]["role"], "user")
+        self.assertIn("two slices", messages[2]["content"])
+        self.assertEqual(result.calories, 570)
+
+    @patch("food_tracking.estimation._get_client")
+    def test_fresh_estimate_is_single_turn(self, mock_get_client):
+        client = Mock()
+        client.messages.create.return_value = _make_tool_use_response()
+        mock_get_client.return_value = client
+
+        estimation.estimate_from_text("an apple")
+
+        _, kwargs = client.messages.create.call_args
+        self.assertEqual(len(kwargs["messages"]), 1)
+
+    @patch("food_tracking.estimation._get_client")
+    def test_image_refinement_resends_the_image(self, mock_get_client):
+        client = Mock()
+        client.messages.create.return_value = _make_tool_use_response()
+        mock_get_client.return_value = client
+
+        estimation.estimate_from_image(
+            b"fakebytes",
+            "image/jpeg",
+            previous_estimate={"description": "Salad", "calories": 150},
+            correction="there was ranch dressing on it",
+        )
+
+        _, kwargs = client.messages.create.call_args
+        messages = kwargs["messages"]
+        self.assertEqual(len(messages), 3)
+        self.assertEqual(messages[0]["content"][0]["type"], "image")
+        self.assertIn("ranch", messages[2]["content"])
+
+    @patch("food_tracking.estimation._get_client")
+    def test_recipe_refinement_keeps_fraction_context(self, mock_get_client):
+        client = Mock()
+        client.messages.create.return_value = _make_tool_use_response()
+        mock_get_client.return_value = client
+
+        estimation.estimate_recipe(
+            "Big lasagna recipe",
+            0.5,
+            previous_estimate={"description": "Lasagna", "calories": 1700},
+            correction="I used turkey instead of beef",
+        )
+
+        _, kwargs = client.messages.create.call_args
+        messages = kwargs["messages"]
+        self.assertEqual(len(messages), 3)
+        self.assertIn("50%", messages[0]["content"][0]["text"])
+        self.assertIn("turkey", messages[2]["content"])

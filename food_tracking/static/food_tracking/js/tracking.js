@@ -140,6 +140,15 @@ function logFood(foodId, quantity = 1.0) {
 /* ------------------------------------------------------------------ */
 
 /**
+ * The inputs of the most recent estimate request and the estimate it produced.
+ * Kept so a correction can replay the original request (photo included) as a
+ * two-shot conversation via refineEstimate().
+ * lastEstimateRequest: { kind: 'text'|'image'|'recipe', ... } or null.
+ */
+let lastEstimateRequest = null;
+let lastEstimate = null;
+
+/**
  * POST a FormData payload with CSRF protection. Resolves to parsed JSON on
  * success; otherwise rejects with an Error carrying a specific message (server
  * error text, a 413 "too large" hint, or a network message) so the UI can tell
@@ -230,6 +239,7 @@ function showEstimate(estimate) {
 function handleEstimateResponse(data) {
     setEstimateStatus('');
     if (data.success) {
+        lastEstimate = data.estimate;
         showEstimate(data.estimate);
     } else {
         alert('Error: ' + (data.error || 'Could not estimate.'));
@@ -297,9 +307,11 @@ function estimateFromPhoto(input) {
     setEstimateStatus('Processing photo…');
     resizeImageFile(file)
         .then(blob => {
+            const note = document.getElementById('text-input').value.trim();
+            lastEstimateRequest = { kind: 'image', blob: blob, note: note };
             const formData = new FormData();
             formData.append('image', blob, 'photo.jpg');
-            formData.append('note', document.getElementById('text-input').value.trim());
+            formData.append('note', note);
             setEstimateStatus('Estimating from photo…');
             return postForm('/food/estimate/', formData);
         })
@@ -316,6 +328,7 @@ function estimateFromText() {
         alert('Describe what you ate first.');
         return;
     }
+    lastEstimateRequest = { kind: 'text', text: text };
     const formData = new FormData();
     formData.append('text', text);
 
@@ -335,6 +348,7 @@ function estimateFromRecipe() {
         alert('Paste a recipe first.');
         return;
     }
+    lastEstimateRequest = { kind: 'recipe', recipe: recipe, fraction: fraction };
     const formData = new FormData();
     formData.append('recipe_text', recipe);
     formData.append('fraction', fraction);
@@ -372,10 +386,55 @@ function confirmEstimate() {
 }
 
 /**
+ * Re-run the last estimate with a user correction ("that was two slices",
+ * "there was also ranch dressing"). Replays the original request — photo
+ * included — plus the previous estimate so the model can revise it.
+ */
+function refineEstimate() {
+    const correction = document.getElementById('refine-input').value.trim();
+    if (!correction) {
+        alert('Describe what to correct or add first.');
+        return;
+    }
+    if (!lastEstimateRequest || !lastEstimate) {
+        alert('Nothing to refine yet — run an estimate first.');
+        return;
+    }
+
+    const formData = new FormData();
+    let url = '/food/estimate/';
+    if (lastEstimateRequest.kind === 'image') {
+        formData.append('image', lastEstimateRequest.blob, 'photo.jpg');
+        formData.append('note', lastEstimateRequest.note);
+    } else if (lastEstimateRequest.kind === 'recipe') {
+        url = '/food/estimate-recipe/';
+        formData.append('recipe_text', lastEstimateRequest.recipe);
+        formData.append('fraction', lastEstimateRequest.fraction);
+    } else {
+        formData.append('text', lastEstimateRequest.text);
+    }
+    formData.append('correction', correction);
+    formData.append('previous_estimate', JSON.stringify(lastEstimate));
+
+    setEstimateStatus('Updating estimate…');
+    postForm(url, formData)
+        .then(data => {
+            if (data.success) {
+                document.getElementById('refine-input').value = '';
+            }
+            handleEstimateResponse(data);
+        })
+        .catch(err => setEstimateStatus('Update failed: ' + err.message));
+}
+
+/**
  * Hide the confirm/edit card without saving.
  */
 function cancelEstimate() {
     document.getElementById('estimate-card').style.display = 'none';
+    document.getElementById('refine-input').value = '';
+    lastEstimateRequest = null;
+    lastEstimate = null;
     setEstimateStatus('');
 }
 

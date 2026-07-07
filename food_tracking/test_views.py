@@ -521,7 +521,9 @@ class EstimateViewTests(TestCase):
         data = response.json()
         self.assertTrue(data["success"])
         self.assertEqual(data["estimate"]["calories"], 95)
-        mock_estimate.assert_called_once_with("one apple")
+        mock_estimate.assert_called_once_with(
+            "one apple", previous_estimate=None, correction=""
+        )
 
     @patch("food_tracking.views.estimation.estimate_from_image")
     def test_estimate_from_image_success(self, mock_estimate):
@@ -562,7 +564,9 @@ class EstimateViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"])
-        mock_estimate.assert_called_once_with("big recipe", 0.25)
+        mock_estimate.assert_called_once_with(
+            "big recipe", 0.25, previous_estimate=None, correction=""
+        )
 
     def test_estimate_recipe_missing_text_returns_400(self):
         response = self.client.post(
@@ -1158,3 +1162,99 @@ class DayBoundsTests(TestCase):
         # 2024-11-03: Pacific clocks fall back 2am -> 1am
         start, end = get_pacific_day_bounds(date(2024, 11, 3))
         self.assertEqual(end - start, timedelta(hours=25))
+
+
+class EstimateRefinementViewTests(TestCase):
+    """Tests for the correction/previous_estimate fields on estimate views."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username="refiner", password="testpass")
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username="refiner", password="testpass")
+
+    @patch("food_tracking.views.estimation.estimate_from_text")
+    def test_estimate_passes_refinement_to_estimation(self, mock_estimate):
+        mock_estimate.return_value = EstimateResult(
+            description="Pizza, 2 slices", calories=570, confidence="medium"
+        )
+        response = self.client.post(
+            reverse("food_tracking:estimate"),
+            {
+                "text": "pizza",
+                "correction": "two slices actually",
+                "previous_estimate": '{"description": "Pizza", "calories": 285}',
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["estimate"]["calories"], 570)
+        mock_estimate.assert_called_once_with(
+            "pizza",
+            previous_estimate={"description": "Pizza", "calories": 285},
+            correction="two slices actually",
+        )
+
+    @patch("food_tracking.views.estimation.estimate_from_text")
+    def test_estimate_without_refinement_passes_none(self, mock_estimate):
+        mock_estimate.return_value = EstimateResult(
+            description="Apple", calories=95, confidence="high"
+        )
+        response = self.client.post(
+            reverse("food_tracking:estimate"), {"text": "an apple"}
+        )
+        self.assertEqual(response.status_code, 200)
+        mock_estimate.assert_called_once_with(
+            "an apple", previous_estimate=None, correction=""
+        )
+
+    def test_correction_without_previous_estimate_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:estimate"),
+            {"text": "pizza", "correction": "two slices"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_previous_estimate_without_correction_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:estimate"),
+            {"text": "pizza", "previous_estimate": '{"calories": 285}'},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_malformed_previous_estimate_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:estimate"),
+            {"text": "pizza", "correction": "more", "previous_estimate": "not json"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_non_object_previous_estimate_returns_400(self):
+        response = self.client.post(
+            reverse("food_tracking:estimate"),
+            {"text": "pizza", "correction": "more", "previous_estimate": "[1, 2]"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    @patch("food_tracking.views.estimation.estimate_recipe")
+    def test_estimate_recipe_passes_refinement(self, mock_estimate):
+        mock_estimate.return_value = EstimateResult(
+            description="Lasagna", calories=1500, confidence="medium"
+        )
+        response = self.client.post(
+            reverse("food_tracking:estimate_recipe"),
+            {
+                "recipe_text": "Big lasagna recipe",
+                "fraction": "0.5",
+                "correction": "turkey instead of beef",
+                "previous_estimate": '{"description": "Lasagna", "calories": 1700}',
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        mock_estimate.assert_called_once_with(
+            "Big lasagna recipe",
+            0.5,
+            previous_estimate={"description": "Lasagna", "calories": 1700},
+            correction="turkey instead of beef",
+        )

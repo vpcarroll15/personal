@@ -1,7 +1,9 @@
+import json
 from collections import defaultdict
 from datetime import date as date_cls
 from datetime import datetime, time, timedelta
 from decimal import Decimal, InvalidOperation
+from typing import Any
 
 import pytz
 from django.contrib.auth.decorators import login_required
@@ -337,10 +339,40 @@ def reports(request: HttpRequest) -> HttpResponse:
     return render(request, "food_tracking/reports.html", context)
 
 
+def get_refinement_params(request: HttpRequest) -> tuple[dict[str, Any] | None, str]:
+    """Extract optional refinement fields from an estimate request.
+
+    Returns (previous_estimate, correction). Both must be present together —
+    a correction without the prior estimate (or vice versa) raises ValueError,
+    as does a previous_estimate that isn't a JSON object.
+    """
+    correction = request.POST.get("correction", "").strip()
+    previous_raw = request.POST.get("previous_estimate", "").strip()
+
+    if not correction and not previous_raw:
+        return None, ""
+    if not correction or not previous_raw:
+        raise ValueError(
+            "A refinement needs both a correction and the previous estimate."
+        )
+
+    try:
+        previous_estimate = json.loads(previous_raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError("Invalid previous estimate.") from exc
+    if not isinstance(previous_estimate, dict):
+        raise ValueError("Invalid previous estimate.")
+    return previous_estimate, correction
+
+
 @login_required
 @require_http_methods(["POST"])
 def estimate(request: HttpRequest) -> JsonResponse:
     """Estimate calories from an uploaded photo or a text description.
+
+    Optional correction + previous_estimate fields turn the request into a
+    refinement: the original input is resent along with the prior estimate and
+    the user's correction, and the model revises its numbers.
 
     Returns the estimate WITHOUT saving it; the client confirms/edits before
     calling log_estimate.
@@ -349,13 +381,20 @@ def estimate(request: HttpRequest) -> JsonResponse:
         image = request.FILES.get("image")
         text = request.POST.get("text", "").strip()
         note = request.POST.get("note", "").strip()
+        previous_estimate, correction = get_refinement_params(request)
 
         if image is not None:
             result = estimation.estimate_from_image(
-                image.read(), image.content_type or "", note
+                image.read(),
+                image.content_type or "",
+                note,
+                previous_estimate=previous_estimate,
+                correction=correction,
             )
         elif text:
-            result = estimation.estimate_from_text(text)
+            result = estimation.estimate_from_text(
+                text, previous_estimate=previous_estimate, correction=correction
+            )
         else:
             return JsonResponse(
                 {"success": False, "error": "Provide an image or text."}, status=400
@@ -394,7 +433,13 @@ def estimate_recipe(request: HttpRequest) -> JsonResponse:
                 status=400,
             )
 
-        result = estimation.estimate_recipe(recipe_text, fraction)
+        previous_estimate, correction = get_refinement_params(request)
+        result = estimation.estimate_recipe(
+            recipe_text,
+            fraction,
+            previous_estimate=previous_estimate,
+            correction=correction,
+        )
         return JsonResponse({"success": True, "estimate": result.to_dict()})
     except ValueError as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
