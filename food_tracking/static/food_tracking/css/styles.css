@@ -507,6 +507,18 @@
     font-size: 15px;
 }
 
+/* Refinement input sits inline with its Update button */
+.estimate-card-row.refine-row {
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+}
+
+.estimate-card-row.refine-row input {
+    flex: 1;
+    min-width: 0;
+}
+
 .estimate-breakdown {
     font-size: 14px;
     color: #444;
