@@ -6,6 +6,7 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 
 # Application definition
 INSTALLED_APPS = [
+    "bio.apps.BioConfig",
     "music.apps.MusicConfig",
     "scavenger_hunt.apps.ScavengerHuntConfig",
     "sms.apps.SmsConfig",
