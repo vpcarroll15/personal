@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-140792120-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-140792120-1');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paul Carroll</title>
+    <meta name="description" content="Paul Carroll: computer scientist and aspiring author.">
+    <link rel="icon" href="{% static 'favicon.png' %}" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'bio/css/styles.css' %}">
+</head>
+<body>
+  <main class="bio">
+    <h1 class="bio-name">Paul Carroll</h1>
+    <div class="bio-photos">
+      <!--
+        Add images here, e.g.:
+        <img src="{% static 'bio/images/wallace.jpg' %}" alt="Wallace">
+      -->
+    </div>
+    <div class="bio-text">
+      {{ bio_html }}
+    </div>
+  </main>
+</body>
+</html>
