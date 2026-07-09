@@ -1,4 +1,4 @@
-I’m Paul Carroll. I’m a computer scientist and aspiring author living in San Rafael, California.
+Hi! I’m a computer scientist and aspiring author living in San Rafael, California.
 
 I’ve spent much of my career programming robots at companies that mostly don’t exist anymore. I’ve
 written software that pilots [high-altitude balloons](https://en.wikipedia.org/wiki/Loon_LLC),
