@@ -1,4 +1,4 @@
-Hi! I’m a computer scientist and aspiring author living in San Rafael, California.
+Hi! I’m a computer scientist and aspiring author living just north of San Francisco.
 
 I’ve spent much of my career programming robots at companies that mostly don’t exist anymore. I’ve
 written software that pilots [high-altitude balloons](https://en.wikipedia.org/wiki/Loon_LLC),
@@ -14,8 +14,7 @@ the world is going. I hope we can get it right.
 I graduated from Stanford with degrees in computer science and history and a creative writing minor.
 In my free time, I write historically-flavored fantasy novels and stories.
 
-As of August 1, 2025, I also have a son named Wallace who is much cuter and more charismatic than I
-am.
+As of 2025, I also have a son who is much cuter and more charismatic than I am.
 
 - [Music reviews](https://paulcarroll.site/music/)
 - [LinkedIn](https://www.linkedin.com/in/paul-carroll-b38592a6/)
