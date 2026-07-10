@@ -77,7 +77,14 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.bio-text a {
+.bio-contact {
+  margin: 0.5rem 0 0;
+  color: var(--bio-ink-muted);
+  font-size: 1.02rem;
+}
+
+.bio-text a,
+.bio-contact a {
   color: var(--bio-accent);
   text-decoration: underline;
   text-decoration-color: var(--bio-rule);
@@ -85,7 +92,8 @@ body {
   transition: text-decoration-color 0.15s ease;
 }
 
-.bio-text a:hover {
+.bio-text a:hover,
+.bio-contact a:hover {
   text-decoration-color: var(--bio-accent);
 }
 
