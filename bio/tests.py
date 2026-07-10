@@ -24,6 +24,15 @@ class BioViewTests(TestCase):
         self.assertContains(response, "https://github.com/vpcarroll15")
         self.assertContains(response, "https://paulcarroll.site/music/")
 
+    def test_contact_section_present_without_scrapable_email(self) -> None:
+        response = self.client.get("/")
+        self.assertContains(response, "Get in touch")
+        # The address is assembled by JavaScript at load time; the raw address
+        # (and any mailto: link) must never appear in the page source.
+        self.assertNotContains(response, "vpcarroll15+site@gmail.com")
+        self.assertNotContains(response, "vpcarroll15@gmail.com")
+        self.assertNotContains(response, "mailto:v")
+
     def test_bio_markdown_file_missing_returns_404(self) -> None:
         with patch("bio.views.BIO_MARKDOWN_PATH", "bio/does_not_exist.md"):
             response = self.client.get("/")
