@@ -14,8 +14,8 @@ the world is going. I hope we can get it right.
 I graduated from Stanford with degrees in computer science and history and a creative writing minor.
 In my free time, I write historically-flavored fantasy novels and stories.
 
-As of 2025, I also have a son who is much cuter and more charismatic than I am. My wife and I love
-to take him on adventures.
+As of 2025, I have a baby who is much cuter and more charismatic than I am. My wife and I love to
+take him on adventures.
 
 - [Music reviews](https://paulcarroll.site/music/)
 - [LinkedIn](https://www.linkedin.com/in/paul-carroll-b38592a6/)
