@@ -5,7 +5,7 @@
 # Dev, test, and ops tooling lives in requirements-dev.txt.
 
 # Web framework + API
-Django==5.2.14
+Django==5.2.15
 djangorestframework==3.16.0
 django-extensions==4.1
 gunicorn==23.0.0
